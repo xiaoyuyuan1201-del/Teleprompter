@@ -4,6 +4,7 @@ import Foundation
 @MainActor
 final class ScriptStore: ObservableObject {
     @Published private(set) var scripts: [PromptScript] = []
+    @Published private(set) var folders: [ScriptFolder] = []
     @Published var sortOption: ScriptSortOption {
         didSet {
             UserDefaults.standard.set(sortOption.rawValue, forKey: sortKey)
@@ -20,6 +21,7 @@ final class ScriptStore: ObservableObject {
         let storedSort = UserDefaults.standard.string(forKey: sortKey)
         sortOption = ScriptSortOption(rawValue: storedSort ?? "") ?? .updatedNewest
         load()
+        loadFolders()
         if scripts.isEmpty {
             scripts = [
                 PromptScript(
@@ -74,7 +76,8 @@ final class ScriptStore: ObservableObject {
             title: script.displayTitle + " Copy",
             body: script.body,
             isDraft: true,
-            sourceFileName: script.sourceFileName
+            sourceFileName: script.sourceFileName,
+            folderID: script.folderID
         )
         upsert(duplicate)
     }
@@ -100,6 +103,41 @@ final class ScriptStore: ObservableObject {
 
     func canCreateScript(isPro: Bool) -> Bool {
         isPro || scripts.count < freeScriptLimit
+    }
+
+    func move(_ script: PromptScript, toFolder folderID: UUID?) {
+        guard var updated = self.script(with: script.id) else { return }
+        updated.folderID = folderID
+        upsert(updated, touchUpdatedAt: false)
+    }
+
+    func scripts(in folderID: UUID?) -> [PromptScript] {
+        scripts.filter { $0.folderID == folderID }
+    }
+
+    @discardableResult
+    func createFolder(name: String) -> ScriptFolder {
+        let folder = ScriptFolder(name: name.trimmingCharacters(in: .whitespacesAndNewlines))
+        folders.append(folder)
+        folders.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        saveFolders()
+        return folder
+    }
+
+    func renameFolder(_ folder: ScriptFolder, to name: String) {
+        guard let index = folders.firstIndex(where: { $0.id == folder.id }) else { return }
+        folders[index].name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        folders.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        saveFolders()
+    }
+
+    func deleteFolder(_ folder: ScriptFolder) {
+        folders.removeAll { $0.id == folder.id }
+        for index in scripts.indices where scripts[index].folderID == folder.id {
+            scripts[index].folderID = nil
+        }
+        saveFolders()
+        save()
     }
 
     private func sortAndSave() {
@@ -131,6 +169,22 @@ final class ScriptStore: ObservableObject {
         return baseURL
             .appendingPathComponent("Teleprompter", isDirectory: true)
             .appendingPathComponent("scripts.json", isDirectory: false)
+    }
+
+    private var foldersStorageURL: URL {
+        storageURL.deletingLastPathComponent().appendingPathComponent("folders.json", isDirectory: false)
+    }
+
+    private func loadFolders() {
+        guard let data = try? Data(contentsOf: foldersStorageURL) else { return }
+        folders = (try? JSONDecoder().decode([ScriptFolder].self, from: data)) ?? []
+    }
+
+    private func saveFolders() {
+        guard let data = try? JSONEncoder().encode(folders) else { return }
+        let directory = foldersStorageURL.deletingLastPathComponent()
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try? data.write(to: foldersStorageURL, options: .atomic)
     }
 
     private func load() {

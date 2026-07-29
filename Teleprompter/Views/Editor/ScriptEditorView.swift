@@ -11,6 +11,7 @@ struct ScriptEditorView: View {
     private let existingScript: PromptScript?
     private let workingID: UUID
     private let createdAt: Date
+    private let folderID: UUID?
 
     @State private var title: String
     @State private var bodyText: String
@@ -30,10 +31,11 @@ struct ScriptEditorView: View {
         case body
     }
 
-    init(script: PromptScript?) {
+    init(script: PromptScript?, folderID: UUID? = nil) {
         existingScript = script
         workingID = script?.id ?? UUID()
         createdAt = script?.createdAt ?? .now
+        self.folderID = script?.folderID ?? folderID
         _title = State(initialValue: script?.title ?? "")
         _bodyText = State(initialValue: script?.body ?? "")
         _sourceFileName = State(initialValue: script?.sourceFileName)
@@ -275,7 +277,8 @@ struct ScriptEditorView: View {
             updatedAt: .now,
             isFavorite: existingScript?.isFavorite ?? false,
             isDraft: true,
-            sourceFileName: sourceFileName
+            sourceFileName: sourceFileName,
+            folderID: folderID
         )
     }
 

@@ -12,6 +12,12 @@ struct HomeView: View {
     @State private var renameText = ""
     @State private var showsFileImporter = false
     @State private var importError: String?
+    @State private var folderFilter: FolderFilter = .all
+    @State private var showsNewFolderAlert = false
+    @State private var newFolderName = ""
+    @State private var folderRenameTarget: ScriptFolder?
+    @State private var folderRenameText = ""
+    @State private var folderDeleteTarget: ScriptFolder?
 
     private enum EditorMode: Identifiable {
         case new
@@ -27,6 +33,12 @@ struct HomeView: View {
         }
     }
 
+    private enum FolderFilter: Hashable {
+        case all
+        case unfiled
+        case folder(UUID)
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -36,6 +48,7 @@ struct HomeView: View {
                     LazyVStack(alignment: .leading, spacing: 20) {
                         welcomeHeader
                         quickStartCard
+                        foldersSection
                         scriptsSection
                     }
                     .padding(.horizontal, AppLayout.screenHorizontalPadding)
@@ -67,7 +80,7 @@ struct HomeView: View {
             NavigationStack {
                 switch mode {
                 case .new:
-                    ScriptEditorView(script: nil)
+                    ScriptEditorView(script: nil, folderID: currentFolderID)
                 case .edit(let script):
                     ScriptEditorView(script: scriptStore.script(with: script.id) ?? script)
                 }
@@ -100,6 +113,53 @@ struct HomeView: View {
             }
         } message: {
             Text("Choose a clear name so the script is easy to find later.")
+        }
+        .alert("New folder", isPresented: $showsNewFolderAlert) {
+            TextField("Folder name", text: $newFolderName)
+            Button("Cancel", role: .cancel) {
+                newFolderName = ""
+            }
+            Button("Create") {
+                let folder = scriptStore.createFolder(name: newFolderName)
+                newFolderName = ""
+                folderFilter = .folder(folder.id)
+            }
+        } message: {
+            Text("Give your folder a name to help sort your scripts.")
+        }
+        .alert("Rename folder", isPresented: Binding(
+            get: { folderRenameTarget != nil },
+            set: { if !$0 { folderRenameTarget = nil } }
+        )) {
+            TextField("Folder name", text: $folderRenameText)
+            Button("Cancel", role: .cancel) {
+                folderRenameTarget = nil
+            }
+            Button("Rename") {
+                if let folderRenameTarget {
+                    scriptStore.renameFolder(folderRenameTarget, to: folderRenameText)
+                }
+                folderRenameTarget = nil
+            }
+        }
+        .alert("Delete folder?", isPresented: Binding(
+            get: { folderDeleteTarget != nil },
+            set: { if !$0 { folderDeleteTarget = nil } }
+        )) {
+            Button("Cancel", role: .cancel) {
+                folderDeleteTarget = nil
+            }
+            Button("Delete", role: .destructive) {
+                if let folderDeleteTarget {
+                    if folderFilter == .folder(folderDeleteTarget.id) {
+                        folderFilter = .all
+                    }
+                    scriptStore.deleteFolder(folderDeleteTarget)
+                }
+                folderDeleteTarget = nil
+            }
+        } message: {
+            Text("Scripts inside will move back to \"No Folder\". This can't be undone.")
         }
         .fileImporter(
             isPresented: $showsFileImporter,
@@ -201,6 +261,82 @@ struct HomeView: View {
         .shadow(color: Color.creatorViolet.opacity(0.14), radius: 14, y: 8)
     }
 
+    private var foldersSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Folders")
+                .font(.title3.bold())
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    FolderChip(
+                        title: "All scripts",
+                        count: scriptStore.scripts.count,
+                        isSelected: folderFilter == .all
+                    ) {
+                        folderFilter = .all
+                    }
+
+                    FolderChip(
+                        title: "No folder",
+                        count: scriptStore.scripts(in: nil).count,
+                        isSelected: folderFilter == .unfiled
+                    ) {
+                        folderFilter = .unfiled
+                    }
+
+                    ForEach(scriptStore.folders) { folder in
+                        FolderChip(
+                            title: folder.displayName,
+                            count: scriptStore.scripts(in: folder.id).count,
+                            isSelected: folderFilter == .folder(folder.id)
+                        ) {
+                            folderFilter = .folder(folder.id)
+                        }
+                        .contextMenu {
+                            Button {
+                                folderRenameText = folder.displayName
+                                folderRenameTarget = folder
+                            } label: {
+                                Label("Rename", systemImage: "character.cursor.ibeam")
+                            }
+                            Button(role: .destructive) {
+                                folderDeleteTarget = folder
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                    }
+
+                    Button {
+                        newFolderName = ""
+                        showsNewFolderAlert = true
+                    } label: {
+                        Label("New folder", systemImage: "folder.badge.plus")
+                    }
+                    .buttonStyle(ToolSecondaryButtonStyle(height: 32, horizontalPadding: 12))
+                }
+            }
+        }
+    }
+
+    private var currentFolderID: UUID? {
+        if case .folder(let id) = folderFilter {
+            return id
+        }
+        return nil
+    }
+
+    private var filteredScripts: [PromptScript] {
+        switch folderFilter {
+        case .all:
+            scriptStore.scripts
+        case .unfiled:
+            scriptStore.scripts(in: nil)
+        case .folder(let id):
+            scriptStore.scripts(in: id)
+        }
+    }
+
     private var scriptsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center) {
@@ -248,11 +384,14 @@ struct HomeView: View {
 
             if scriptStore.scripts.isEmpty {
                 emptyState
+            } else if filteredScripts.isEmpty {
+                emptyFilterState
             } else {
                 LazyVStack(spacing: 10) {
-                    ForEach(scriptStore.scripts) { script in
+                    ForEach(filteredScripts) { script in
                         ScriptCard(
                             script: script,
+                            folders: scriptStore.folders,
                             onEdit: { editorMode = .edit(script) },
                             onPrompt: { activePrompt = script },
                             onFavorite: { scriptStore.toggleFavorite(script) },
@@ -267,12 +406,37 @@ struct HomeView: View {
                                     showsPaywall = true
                                 }
                             },
+                            onMove: { folderID in
+                                scriptStore.move(script, toFolder: folderID)
+                            },
                             onDelete: { scriptStore.delete(script) }
                         )
                     }
                 }
             }
         }
+    }
+
+    private var emptyFilterState: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "folder")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(Color.creatorViolet)
+                .frame(width: 38, height: 38)
+                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 8))
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text("No scripts here")
+                    .font(.headline)
+                Text("Move a script into this folder from its menu, or create a new one.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+        }
+        .padding(14)
+        .contentCard()
     }
 
     private var emptyState: some View {
@@ -346,7 +510,8 @@ struct HomeView: View {
                 title: imported.title,
                 body: imported.text,
                 isDraft: true,
-                sourceFileName: imported.fileName
+                sourceFileName: imported.fileName,
+                folderID: currentFolderID
             )
             scriptStore.upsert(script)
             editorMode = .edit(script)
@@ -358,11 +523,13 @@ struct HomeView: View {
 
 private struct ScriptCard: View {
     let script: PromptScript
+    let folders: [ScriptFolder]
     let onEdit: () -> Void
     let onPrompt: () -> Void
     let onFavorite: () -> Void
     let onRename: () -> Void
     let onDuplicate: () -> Void
+    let onMove: (UUID?) -> Void
     let onDelete: () -> Void
 
     var body: some View {
@@ -425,6 +592,29 @@ private struct ScriptCard: View {
                     Button(action: onDuplicate) {
                         Label("Duplicate", systemImage: "doc.on.doc")
                     }
+                    Menu {
+                        if script.folderID != nil {
+                            Button {
+                                onMove(nil)
+                            } label: {
+                                Label("No Folder", systemImage: "circle.slash")
+                            }
+                            Divider()
+                        }
+                        ForEach(folders) { folder in
+                            Button {
+                                onMove(folder.id)
+                            } label: {
+                                if script.folderID == folder.id {
+                                    Label(folder.displayName, systemImage: "checkmark")
+                                } else {
+                                    Text(folder.displayName)
+                                }
+                            }
+                        }
+                    } label: {
+                        Label("Move to Folder", systemImage: "folder")
+                    }
                     Divider()
                     Button(role: .destructive, action: onDelete) {
                         Label("Delete", systemImage: "trash")
@@ -458,5 +648,32 @@ private struct ScriptCard: View {
         .contentCard()
         .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .onTapGesture(perform: onEdit)
+    }
+}
+
+private struct FolderChip: View {
+    let title: String
+    let count: Int
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                Text("\(count)")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(isSelected ? .white.opacity(0.8) : Color.creatorViolet.opacity(0.7))
+            }
+            .padding(.horizontal, 14)
+            .frame(height: 36)
+            .background(
+                isSelected ? Color.creatorViolet : Color.creatorViolet.opacity(0.10),
+                in: Capsule()
+            )
+            .foregroundStyle(isSelected ? .white : .primary)
+        }
+        .buttonStyle(.plain)
     }
 }

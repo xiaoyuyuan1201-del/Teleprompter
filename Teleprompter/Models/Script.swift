@@ -9,6 +9,7 @@ struct PromptScript: Identifiable, Codable, Hashable {
     var isFavorite: Bool
     var isDraft: Bool
     var sourceFileName: String?
+    var folderID: UUID?
 
     init(
         id: UUID = UUID(),
@@ -18,7 +19,8 @@ struct PromptScript: Identifiable, Codable, Hashable {
         updatedAt: Date = .now,
         isFavorite: Bool = false,
         isDraft: Bool = false,
-        sourceFileName: String? = nil
+        sourceFileName: String? = nil,
+        folderID: UUID? = nil
     ) {
         self.id = id
         self.title = title
@@ -28,6 +30,7 @@ struct PromptScript: Identifiable, Codable, Hashable {
         self.isFavorite = isFavorite
         self.isDraft = isDraft
         self.sourceFileName = sourceFileName
+        self.folderID = folderID
     }
 
     var displayTitle: String {
@@ -54,6 +57,7 @@ struct PromptScript: Identifiable, Codable, Hashable {
         case isFavorite
         case isDraft
         case sourceFileName
+        case folderID
     }
 
     init(from decoder: Decoder) throws {
@@ -66,6 +70,24 @@ struct PromptScript: Identifiable, Codable, Hashable {
         isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
         isDraft = try container.decodeIfPresent(Bool.self, forKey: .isDraft) ?? false
         sourceFileName = try container.decodeIfPresent(String.self, forKey: .sourceFileName)
+        folderID = try container.decodeIfPresent(UUID.self, forKey: .folderID)
+    }
+}
+
+struct ScriptFolder: Identifiable, Codable, Hashable {
+    var id: UUID
+    var name: String
+    var createdAt: Date
+
+    init(id: UUID = UUID(), name: String, createdAt: Date = .now) {
+        self.id = id
+        self.name = name
+        self.createdAt = createdAt
+    }
+
+    var displayName: String {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? "Untitled folder" : trimmed
     }
 }
 
