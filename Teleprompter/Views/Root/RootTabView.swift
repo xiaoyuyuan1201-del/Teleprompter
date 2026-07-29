@@ -54,31 +54,27 @@ struct RootTabView: View {
             TabView(selection: $selectedTab) {
                 HomeView()
                     .tag(AppTab.home)
-                    .tabItem {
-                        Label("Home", systemImage: selectedTab == .home ? "house.fill" : "house")
-                    }
 
                 VideosView()
                     .tag(AppTab.videos)
-                    .tabItem {
-                        Label("Videos", systemImage: selectedTab == .videos ? "play.rectangle.fill" : "play.rectangle")
-                    }
 
                 MineView()
                     .tag(AppTab.mine)
-                    .tabItem {
-                        Label("Mine", systemImage: selectedTab == .mine ? "person.crop.circle.fill" : "person.crop.circle")
-                    }
             }
             .tint(.creatorViolet)
+            .toolbar(.hidden, for: .tabBar)
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 68)
+            }
 
-            HStack {
+            HStack(spacing: 12) {
+                customTabBar
                 Spacer()
                 fabButton
-                    .padding(.trailing, 16)
             }
+            .padding(.leading, 32)
+            .padding(.trailing, 32)
             .padding(.bottom, 8)
-            .ignoresSafeArea(.container, edges: .bottom)
 
             if showsQuickActions {
                 Rectangle()
@@ -150,6 +146,33 @@ struct RootTabView: View {
         } message: {
             Text("Give your folder a name to help sort your scripts.")
         }
+    }
+
+    private var customTabBar: some View {
+        HStack(spacing: 28) {
+            tabBarButton(.home, systemImage: selectedTab == .home ? "house.fill" : "house")
+            tabBarButton(.videos, systemImage: selectedTab == .videos ? "play.rectangle.fill" : "play.rectangle")
+            tabBarButton(.mine, systemImage: selectedTab == .mine ? "person.crop.circle.fill" : "person.crop.circle")
+        }
+        .padding(.horizontal, 22)
+        .frame(height: 52)
+        .background(Color.appSurface, in: Capsule())
+        .overlay {
+            Capsule().stroke(Color(uiColor: .separator).opacity(0.3), lineWidth: 0.5)
+        }
+        .shadow(color: .black.opacity(0.08), radius: 8, y: 3)
+    }
+
+    private func tabBarButton(_ tab: AppTab, systemImage: String) -> some View {
+        Button {
+            selectedTab = tab
+        } label: {
+            Image(systemName: systemImage)
+                .font(.system(size: 19, weight: .semibold))
+                .foregroundStyle(selectedTab == tab ? Color.creatorViolet : Color.secondary)
+                .frame(width: 30, height: 30)
+        }
+        .buttonStyle(.plain)
     }
 
     private var fabButton: some View {
