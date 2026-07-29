@@ -22,6 +22,7 @@
 		B20000000000000000000001 /* Teleprompter/Models/Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* Teleprompter/Models/Recording.swift */; };
 		B30000000000000000000001 /* Teleprompter/Stores/RecordingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000001 /* Teleprompter/Stores/RecordingStore.swift */; };
 		B36537D0ECF7D9AF7F2B5A46 /* Teleprompter/Views/Home/HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB96C0B6BF96036D3FD34C4 /* Teleprompter/Views/Home/HomeView.swift */; };
+		FB0000000000000000000001 /* Teleprompter/Views/Home/FolderDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000001 /* Teleprompter/Views/Home/FolderDetailView.swift */; };
 		B40000000000000000000001 /* Teleprompter/Views/Videos/VideosView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000001 /* Teleprompter/Views/Videos/VideosView.swift */; };
 		CDF72D9AAB388890790EB41A /* Teleprompter/Components/Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B244C6C89B4B1659462723AE /* Teleprompter/Components/Theme.swift */; };
 		D1A1B1C1D1E1F10111213141 /* Teleprompter/Services/DocumentImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A1B1C1D1E1F10111213141 /* Teleprompter/Services/DocumentImportService.swift */; };
@@ -39,6 +40,7 @@
 		2975345FFDD24379F6199EE5 /* Teleprompter/Views/Prompt/TeleprompterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Prompt/TeleprompterView.swift; sourceTree = "<group>"; };
 		38A007151ABE87CC01A5B6E9 /* Teleprompter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Teleprompter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DB96C0B6BF96036D3FD34C4 /* Teleprompter/Views/Home/HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Home/HomeView.swift; sourceTree = "<group>"; };
+		FC0000000000000000000001 /* Teleprompter/Views/Home/FolderDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Home/FolderDetailView.swift; sourceTree = "<group>"; };
 		53F2DE1E16DC3233A2FBAD4D /* Teleprompter/Views/Paywall/PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Paywall/PaywallView.swift; sourceTree = "<group>"; };
 		81CDCA56E84E329372D25428 /* Teleprompter/Models/Script.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Models/Script.swift; sourceTree = "<group>"; };
 		83EE1AB73FA9EAEC45FA2720 /* Teleprompter/Stores/ScriptStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Stores/ScriptStore.swift; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 				C7655349DDD3BEE5EB2C1685 /* Teleprompter/Views/Onboarding/OnboardingView.swift */,
 				53F2DE1E16DC3233A2FBAD4D /* Teleprompter/Views/Paywall/PaywallView.swift */,
 				3DB96C0B6BF96036D3FD34C4 /* Teleprompter/Views/Home/HomeView.swift */,
+				FC0000000000000000000001 /* Teleprompter/Views/Home/FolderDetailView.swift */,
 				ECC2897EC9CFC8E7F2724657 /* Teleprompter/Views/Editor/ScriptEditorView.swift */,
 				2975345FFDD24379F6199EE5 /* Teleprompter/Views/Prompt/TeleprompterView.swift */,
 				BCCCFD51780375DAFB9E4607 /* Teleprompter/Views/Mine/MineView.swift */,
@@ -198,6 +201,7 @@
 				660174956340BEA9958B8EEE /* Teleprompter/Views/Onboarding/OnboardingView.swift in Sources */,
 				9194B0479A92186C8DFFDEFE /* Teleprompter/Views/Paywall/PaywallView.swift in Sources */,
 				B36537D0ECF7D9AF7F2B5A46 /* Teleprompter/Views/Home/HomeView.swift in Sources */,
+				FB0000000000000000000001 /* Teleprompter/Views/Home/FolderDetailView.swift in Sources */,
 				AAF0D3D8EBF02EC68916D0AD /* Teleprompter/Views/Editor/ScriptEditorView.swift in Sources */,
 				219D2901B5026360840BEEE2 /* Teleprompter/Views/Prompt/TeleprompterView.swift in Sources */,
 				D1A1B1C1D1E1F10111213141 /* Teleprompter/Services/DocumentImportService.swift in Sources */,

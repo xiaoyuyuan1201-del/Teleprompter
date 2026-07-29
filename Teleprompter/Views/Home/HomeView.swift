@@ -12,13 +12,13 @@ struct HomeView: View {
     @State private var renameText = ""
     @State private var showsFileImporter = false
     @State private var importError: String?
-    @State private var folderFilter: FolderFilter = .all
     @State private var showsNewFolderAlert = false
     @State private var newFolderName = ""
     @State private var folderRenameTarget: ScriptFolder?
     @State private var folderRenameText = ""
     @State private var folderDeleteTarget: ScriptFolder?
     @State private var searchText = ""
+    @State private var openedFolder: ScriptFolder?
 
     private enum EditorMode: Identifiable {
         case new
@@ -32,12 +32,6 @@ struct HomeView: View {
                 script.id.uuidString
             }
         }
-    }
-
-    private enum FolderFilter: Hashable {
-        case all
-        case unfiled
-        case folder(UUID)
     }
 
     var body: some View {
@@ -75,12 +69,18 @@ struct HomeView: View {
                     }
                 }
             }
+            .navigationDestination(item: $openedFolder) { folder in
+                FolderDetailView(folder: folder)
+                    .environmentObject(scriptStore)
+                    .environmentObject(purchaseManager)
+                    .environmentObject(recordingStore)
+            }
         }
         .sheet(item: $editorMode) { mode in
             NavigationStack {
                 switch mode {
                 case .new:
-                    ScriptEditorView(script: nil, folderID: currentFolderID)
+                    ScriptEditorView(script: nil)
                 case .edit(let script):
                     ScriptEditorView(script: scriptStore.script(with: script.id) ?? script)
                 }
@@ -122,7 +122,7 @@ struct HomeView: View {
             Button("Create") {
                 let folder = scriptStore.createFolder(name: newFolderName)
                 newFolderName = ""
-                folderFilter = .folder(folder.id)
+                openedFolder = folder
             }
         } message: {
             Text("Give your folder a name to help sort your scripts.")
@@ -151,9 +151,6 @@ struct HomeView: View {
             }
             Button("Delete", role: .destructive) {
                 if let folderDeleteTarget {
-                    if folderFilter == .folder(folderDeleteTarget.id) {
-                        folderFilter = .all
-                    }
                     scriptStore.deleteFolder(folderDeleteTarget)
                 }
                 folderDeleteTarget = nil
@@ -261,29 +258,14 @@ struct HomeView: View {
         .shadow(color: Color.creatorViolet.opacity(0.14), radius: 14, y: 8)
     }
 
-    private var currentFolderID: UUID? {
-        if case .folder(let id) = folderFilter {
-            return id
-        }
-        return nil
-    }
-
-    private var currentFolder: ScriptFolder? {
-        guard let currentFolderID else { return nil }
-        return scriptStore.folders.first { $0.id == currentFolderID }
+    private var visibleFolders: [ScriptFolder] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return scriptStore.folders }
+        return scriptStore.folders.filter { $0.displayName.localizedCaseInsensitiveContains(query) }
     }
 
     private var filteredScripts: [PromptScript] {
-        let base: [PromptScript]
-        switch folderFilter {
-        case .all:
-            base = scriptStore.scripts
-        case .unfiled:
-            base = scriptStore.scripts(in: nil)
-        case .folder(let id):
-            base = scriptStore.scripts(in: id)
-        }
-
+        let base = scriptStore.scripts(in: nil)
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return base }
         return base.filter {
@@ -292,20 +274,9 @@ struct HomeView: View {
         }
     }
 
-    private var visibleFolders: [ScriptFolder] {
-        guard folderFilter == .all else { return [] }
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return scriptStore.folders }
-        return scriptStore.folders.filter { $0.displayName.localizedCaseInsensitiveContains(query) }
-    }
-
     private var libraryList: some View {
         VStack(alignment: .leading, spacing: 14) {
             searchBar
-
-            if let currentFolder {
-                breadcrumbRow(for: currentFolder)
-            }
 
             if scriptStore.scripts.isEmpty {
                 emptyState
@@ -317,7 +288,7 @@ struct HomeView: View {
                         FolderRow(
                             folder: folder,
                             count: scriptStore.scripts(in: folder.id).count,
-                            onOpen: { folderFilter = .folder(folder.id) },
+                            onOpen: { openedFolder = folder },
                             onRename: {
                                 folderRenameText = folder.displayName
                                 folderRenameTarget = folder
@@ -389,26 +360,6 @@ struct HomeView: View {
                     }
                 }
 
-                Section("Go to") {
-                    Button {
-                        folderFilter = .all
-                    } label: {
-                        Label("All scripts", systemImage: "tray.full")
-                    }
-                    Button {
-                        folderFilter = .unfiled
-                    } label: {
-                        Label("No folder", systemImage: "doc")
-                    }
-                    ForEach(scriptStore.folders) { folder in
-                        Button {
-                            folderFilter = .folder(folder.id)
-                        } label: {
-                            Label(folder.displayName, systemImage: "folder")
-                        }
-                    }
-                }
-
                 Button {
                     newFolderName = ""
                     showsNewFolderAlert = true
@@ -423,42 +374,6 @@ struct HomeView: View {
                     .contentCard(cornerRadius: 23)
             }
             .accessibilityLabel("Sort and filter")
-        }
-    }
-
-    private func breadcrumbRow(for folder: ScriptFolder) -> some View {
-        HStack(spacing: 10) {
-            Button {
-                folderFilter = .all
-            } label: {
-                Label("All", systemImage: "chevron.left")
-                    .font(.subheadline.weight(.semibold))
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(Color.creatorViolet)
-
-            Text(folder.displayName)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.secondary)
-
-            Spacer()
-
-            Menu {
-                Button {
-                    folderRenameText = folder.displayName
-                    folderRenameTarget = folder
-                } label: {
-                    Label("Rename", systemImage: "character.cursor.ibeam")
-                }
-                Button(role: .destructive) {
-                    folderDeleteTarget = folder
-                } label: {
-                    Label("Delete", systemImage: "trash")
-                }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .frame(width: 30, height: 30)
-            }
         }
     }
 
@@ -547,8 +462,7 @@ struct HomeView: View {
                 title: imported.title,
                 body: imported.text,
                 isDraft: true,
-                sourceFileName: imported.fileName,
-                folderID: currentFolderID
+                sourceFileName: imported.fileName
             )
             scriptStore.upsert(script)
             editorMode = .edit(script)
@@ -558,7 +472,7 @@ struct HomeView: View {
     }
 }
 
-private struct ScriptRow: View {
+struct ScriptRow: View {
     let script: PromptScript
     let folders: [ScriptFolder]
     let onEdit: () -> Void
@@ -678,7 +592,7 @@ private struct ScriptRow: View {
     }
 }
 
-private struct FolderRow: View {
+struct FolderRow: View {
     let folder: ScriptFolder
     let count: Int
     let onOpen: () -> Void
