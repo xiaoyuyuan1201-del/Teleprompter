@@ -45,7 +45,7 @@ struct HomeView: View {
                 AppBackground()
 
                 ScrollView(showsIndicators: false) {
-                    LazyVStack(alignment: .leading, spacing: 20) {
+                    LazyVStack(alignment: .leading, spacing: 32) {
                         welcomeHeader
                         quickStartCard
                         foldersSection
@@ -646,7 +646,7 @@ private struct ScriptCard: View {
         }
         .padding(14)
         .contentCard()
-        .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .onTapGesture(perform: onEdit)
     }
 }

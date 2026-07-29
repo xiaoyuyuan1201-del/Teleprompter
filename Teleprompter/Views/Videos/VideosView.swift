@@ -88,7 +88,7 @@ struct VideosView: View {
             Spacer()
         }
         .padding(16)
-        .contentCard(cornerRadius: 10)
+        .contentCard()
     }
 
     private var emptyState: some View {
@@ -180,7 +180,7 @@ private struct RecordingCard: View {
             .foregroundStyle(.primary)
         }
         .padding(12)
-        .contentCard(cornerRadius: 10)
+        .contentCard()
         .sheet(isPresented: $showsShare) {
             SystemShareSheet(items: [url])
         }

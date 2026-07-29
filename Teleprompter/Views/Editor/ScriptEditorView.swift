@@ -46,7 +46,7 @@ struct ScriptEditorView: View {
             AppBackground()
 
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 32) {
                     statusRow
                     titleSection
                     scriptSection
@@ -171,7 +171,7 @@ struct ScriptEditorView: View {
                 .textInputAutocapitalization(.sentences)
                 .focused($focusedField, equals: .title)
                 .padding(18)
-                .contentCard(cornerRadius: 10)
+                .contentCard()
                 .submitLabel(.next)
                 .onSubmit {
                     focusedField = .body
@@ -249,7 +249,7 @@ struct ScriptEditorView: View {
                     .focused($focusedField, equals: .body)
                     .padding(12)
                     .frame(minHeight: 430)
-                    .contentCard(cornerRadius: 10)
+                    .contentCard()
 
                 if bodyText.isEmpty {
                     Text("Paste, import, or write what you want to say...")
@@ -379,7 +379,7 @@ private struct AIPolishSheet: View {
                 AppBackground()
 
                 ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 32) {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Choose how to improve it")
                                 .font(.title2.bold())
@@ -426,7 +426,7 @@ private struct AIPolishSheet: View {
                             .textSelection(.enabled)
                             .frame(maxWidth: .infinity, minHeight: 280, alignment: .topLeading)
                             .padding(18)
-                            .contentCard(cornerRadius: 10)
+                            .contentCard()
 
                         Button {
                             Task {

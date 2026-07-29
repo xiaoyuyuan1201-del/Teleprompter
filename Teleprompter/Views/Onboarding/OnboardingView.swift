@@ -379,7 +379,7 @@ private struct WelcomeStep: View {
             Spacer(minLength: 22)
 
             ZStack {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(
                         LinearGradient(
                             colors: [
@@ -416,11 +416,11 @@ private struct WelcomeStep: View {
 private struct PromptPhoneMockup: View {
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(Color.promptBlack)
                 .frame(width: 214, height: 330)
                 .overlay {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .stroke(.white.opacity(0.18), lineWidth: 1)
                 }
 
@@ -487,7 +487,7 @@ private struct FeatureVisual: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(Color.appSurface)
 
             RadialGradient(
@@ -504,9 +504,9 @@ private struct FeatureVisual: View {
                 recordingVisual
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .stroke(Color.primary.opacity(0.06), lineWidth: 0.75)
         }
     }
@@ -534,7 +534,7 @@ private struct FeatureVisual: View {
             .multilineTextAlignment(.center)
             .padding(22)
             .frame(maxWidth: 300)
-            .contentCard(cornerRadius: 10)
+            .contentCard()
 
             HStack(spacing: 7) {
                 Image(systemName: "eye.fill")
@@ -607,7 +607,7 @@ private struct MiniFeature: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
-        .contentCard(cornerRadius: 10)
+        .contentCard()
     }
 }
 
@@ -717,7 +717,7 @@ private struct FontSizeStep: View {
                     .foregroundStyle(.secondary)
                 }
                 .padding(20)
-                .contentCard(cornerRadius: 10)
+                .contentCard()
             }
         }
     }
@@ -760,7 +760,7 @@ private struct PaceStep: View {
                     .foregroundStyle(.secondary)
                 }
                 .padding(20)
-                .contentCard(cornerRadius: 10)
+                .contentCard()
             }
         }
     }
@@ -856,7 +856,7 @@ private struct PreferencesStep: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
-                .contentCard(cornerRadius: 10)
+                .contentCard()
             }
         }
     }
@@ -992,10 +992,10 @@ private struct ChoiceCard: View {
             .frame(maxWidth: .infinity)
             .background(
                 isSelected ? Color.creatorViolet.opacity(0.08) : Color.appSurface,
-                in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+                in: RoundedRectangle(cornerRadius: 12, style: .continuous)
             )
             .overlay {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .stroke(
                         isSelected ? Color.creatorViolet : Color.primary.opacity(0.055),
                         lineWidth: isSelected ? 1.5 : 0.75
@@ -1035,7 +1035,7 @@ private struct PreferenceCard: View {
                 .tint(.creatorViolet)
         }
         .padding(17)
-        .contentCard(cornerRadius: 10)
+        .contentCard()
     }
 }
 

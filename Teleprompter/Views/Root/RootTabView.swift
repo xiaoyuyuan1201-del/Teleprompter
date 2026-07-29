@@ -196,7 +196,7 @@ struct RootTabView: View {
                     }
                     .padding(.horizontal, 16)
                     .frame(height: 56)
-                    .background(Color.appSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .background(Color.appSurface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 .buttonStyle(.plain)
             }

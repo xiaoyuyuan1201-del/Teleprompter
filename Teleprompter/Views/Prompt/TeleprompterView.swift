@@ -250,10 +250,10 @@ struct TeleprompterView: View {
 
     private var promptArea: some View {
         ZStack(alignment: .trailing) {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(.black.opacity(0.38))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .stroke(.white.opacity(0.12), lineWidth: 0.75)
                 }
 
@@ -274,7 +274,7 @@ struct TeleprompterView: View {
                 useLexendFont: useLexendFont
             )
             .scaleEffect(x: isMirrored ? -1 : 1, y: isMirroredVertical ? -1 : 1)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
             if showCueIndicator {
                 VStack(spacing: 0) {
@@ -711,7 +711,7 @@ private struct RecordingPreflightSheet: View {
                         isReady: snapshot.availableStorageBytes >= 250_000_000
                     )
                 }
-                .contentCard(cornerRadius: 10)
+                .contentCard()
 
                 if !snapshot.microphoneAuthorized {
                     Label("You can continue, but the video will be recorded without microphone audio.", systemImage: "speaker.slash.fill")

@@ -232,7 +232,7 @@ struct PromptingSettingsView: View {
         .scaleEffect(x: mirrorHorizontal && purchaseManager.isPro ? -1 : 1, y: mirrorVertical && purchaseManager.isPro ? -1 : 1)
         .frame(height: 220)
         .background(Color.promptBlack)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 
