@@ -309,18 +309,22 @@ private struct RecordingPlayerView: View {
                             showsShare = true
                         }
 
-                        RecordingActionButton(
-                            title: savedToPhotos ? "Saved" : "Save",
-                            systemImage: savedToPhotos ? "checkmark.circle.fill" : "square.and.arrow.down"
-                        ) {
-                            saveToPhotos()
-                        }
-                        .disabled(isSavingToPhotos || savedToPhotos)
-
                         RecordingActionButton(title: "Delete", systemImage: "trash", tint: .red) {
                             showsDeleteConfirmation = true
                         }
                     }
+
+                    Button {
+                        saveToPhotos()
+                    } label: {
+                        VioletGlassButtonLabel(
+                            title: savedToPhotos ? "Saved to Photos" : "Save to Photos",
+                            systemImage: savedToPhotos ? "checkmark.circle.fill" : "square.and.arrow.down"
+                        )
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(.creatorViolet)
+                    .disabled(isSavingToPhotos || savedToPhotos)
                 }
                 .padding(16)
             }
