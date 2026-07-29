@@ -22,6 +22,7 @@ struct ScriptEditorView: View {
     @State private var autosaveTask: Task<Void, Never>?
     @State private var autosaveLabel = ""
     @State private var hasUnsavedChanges = false
+    @State private var showsUnsavedChangesAlert = false
     @FocusState private var focusedField: Field?
 
     private enum Field {
@@ -58,8 +59,7 @@ struct ScriptEditorView: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Close") {
-                    flushDraftIfNeeded()
-                    dismiss()
+                    requestClose()
                 }
             }
 
@@ -69,13 +69,6 @@ struct ScriptEditorView: View {
                 }
                 .fontWeight(.semibold)
                 .disabled(!canSave)
-            }
-
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Done") {
-                    focusedField = nil
-                }
             }
         }
         .onAppear {
@@ -125,6 +118,14 @@ struct ScriptEditorView: View {
             }
         } message: {
             Text(importError ?? "")
+        }
+        .alert("Discard changes?", isPresented: $showsUnsavedChangesAlert) {
+            Button("Discard", role: .destructive) {
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("You haven't saved your changes yet.")
         }
     }
 
@@ -291,6 +292,14 @@ struct ScriptEditorView: View {
             guard !Task.isCancelled else { return }
             scriptStore.autosave(workingScript)
             autosaveLabel = "Saved"
+        }
+    }
+
+    private func requestClose() {
+        if hasUnsavedChanges {
+            showsUnsavedChangesAlert = true
+        } else {
+            dismiss()
         }
     }
 
