@@ -32,6 +32,7 @@
 		E74D7E2597299F54CAC14E3C /* Teleprompter/Services/PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1605DFFC8CF85B2F7BCF9BEA /* Teleprompter/Services/PurchaseManager.swift */; };
 		F50000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift */; };
 		F90000000000000000000001 /* Teleprompter/Views/Mine/PromptingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000001 /* Teleprompter/Views/Mine/PromptingSettingsView.swift */; };
+		F2A2B2C2D2E2F20212223252 /* Teleprompter/Components/TitleTapTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A1B1C1D1E1F10111213151 /* Teleprompter/Components/TitleTapTrigger.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,6 +63,7 @@
 		ECC2897EC9CFC8E7F2724657 /* Teleprompter/Views/Editor/ScriptEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Editor/ScriptEditorView.swift; sourceTree = "<group>"; };
 		F60000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/VideoWatermarkService.swift; sourceTree = "<group>"; };
 		FA0000000000000000000001 /* Teleprompter/Views/Mine/PromptingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Mine/PromptingSettingsView.swift; sourceTree = "<group>"; };
+		F1A1B1C1D1E1F10111213151 /* Teleprompter/Components/TitleTapTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Components/TitleTapTrigger.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +112,7 @@
 				E2A2B2C2D2E2F20212223242 /* Teleprompter/Services/AIPolishService.swift */,
 				E3A3B3C3D3E3F30313233343 /* Teleprompter/Components/SystemShareSheet.swift */,
 				E4A4B4C4D4E4F40414243444 /* Teleprompter/Services/AppAnalytics.swift */,
+				F1A1B1C1D1E1F10111213151 /* Teleprompter/Components/TitleTapTrigger.swift */,
 				DEB60649A62E8C4D498B1020 /* Teleprompter/Resources/Assets.xcassets */,
 				D0FC94D376F2E41E38595D62 /* Teleprompter/Info.plist */,
 				021F2B7F3E0C61452C987484 /* Products */,
@@ -209,6 +212,7 @@
 				D3A3B3C3D3E3F30313233343 /* Teleprompter/Components/SystemShareSheet.swift in Sources */,
 				D4A4B4C4D4E4F40414243444 /* Teleprompter/Services/AppAnalytics.swift in Sources */,
 				8CE37850C6A1D25FF3E108D3 /* Teleprompter/Views/Mine/MineView.swift in Sources */,
+				F2A2B2C2D2E2F20212223252 /* Teleprompter/Components/TitleTapTrigger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -20,6 +20,8 @@ struct HomeView: View {
     @State private var searchText = ""
     @State private var openedFolder: ScriptFolder?
 
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = true
+
     private enum EditorMode: Identifiable {
         case new
         case edit(PromptScript)
@@ -36,44 +38,22 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                AppBackground()
-
-                ScrollView(showsIndicators: false) {
-                    LazyVStack(alignment: .leading, spacing: 32) {
-                        quickStartCard
-                        libraryList
-                    }
-                    .padding(.horizontal, AppLayout.screenHorizontalPadding)
-                    .padding(.top, 8)
-                    .padding(.bottom, 32)
-                }
-            }
-            .navigationTitle("Teleprompter")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    if !purchaseManager.isPro {
-                        Button {
-                            showsPaywall = true
-                        } label: {
-                            HStack(spacing: 5) {
-                                Image(systemName: "crown.fill")
-                                Text("Pro")
-                                    .font(.caption.weight(.semibold))
-                            }
+            mainContent
+                .navigationTitle("Teleprompter")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        if !purchaseManager.isPro {
+                            proButton
                         }
-                        .tint(.creatorViolet)
-                        .accessibilityLabel("Teleprompter Pro")
                     }
                 }
-            }
-            .navigationDestination(item: $openedFolder) { folder in
-                FolderDetailView(folder: folder)
-                    .environmentObject(scriptStore)
-                    .environmentObject(purchaseManager)
-                    .environmentObject(recordingStore)
-            }
+                .navigationDestination(item: $openedFolder) { folder in
+                    FolderDetailView(folder: folder)
+                        .environmentObject(scriptStore)
+                        .environmentObject(purchaseManager)
+                        .environmentObject(recordingStore)
+                }
         }
         .sheet(item: $editorMode) { mode in
             NavigationStack {
@@ -174,6 +154,39 @@ struct HomeView: View {
         } message: {
             Text(importError ?? "")
         }
+    }
+
+    private var mainContent: some View {
+        ZStack {
+            AppBackground()
+
+            ScrollView(showsIndicators: false) {
+                LazyVStack(alignment: .leading, spacing: 32) {
+                    quickStartCard
+                    libraryList
+                }
+                .padding(.horizontal, AppLayout.screenHorizontalPadding)
+                .padding(.top, 8)
+                .padding(.bottom, 32)
+            }
+        }
+        .onTitleTapped("Teleprompter", taps: 5) {
+            hasCompletedOnboarding = false
+        }
+    }
+
+    private var proButton: some View {
+        Button {
+            showsPaywall = true
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "crown.fill")
+                Text("Pro")
+                    .font(.caption.weight(.semibold))
+            }
+        }
+        .tint(.creatorViolet)
+        .accessibilityLabel("Teleprompter Pro")
     }
 
     private var quickStartCard: some View {
