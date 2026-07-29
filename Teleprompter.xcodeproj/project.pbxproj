@@ -30,7 +30,6 @@
 		D4A4B4C4D4E4F40414243444 /* Teleprompter/Services/AppAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A4B4C4D4E4F40414243444 /* Teleprompter/Services/AppAnalytics.swift */; };
 		E74D7E2597299F54CAC14E3C /* Teleprompter/Services/PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1605DFFC8CF85B2F7BCF9BEA /* Teleprompter/Services/PurchaseManager.swift */; };
 		F50000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift */; };
-		F70000000000000000000001 /* Teleprompter/Views/Mine/TextSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80000000000000000000001 /* Teleprompter/Views/Mine/TextSettingsView.swift */; };
 		F90000000000000000000001 /* Teleprompter/Views/Mine/PromptingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000000000000000000001 /* Teleprompter/Views/Mine/PromptingSettingsView.swift */; };
 /* End PBXBuildFile section */
 
@@ -60,7 +59,6 @@
 		E4A4B4C4D4E4F40414243444 /* Teleprompter/Services/AppAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/AppAnalytics.swift; sourceTree = "<group>"; };
 		ECC2897EC9CFC8E7F2724657 /* Teleprompter/Views/Editor/ScriptEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Editor/ScriptEditorView.swift; sourceTree = "<group>"; };
 		F60000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/VideoWatermarkService.swift; sourceTree = "<group>"; };
-		F80000000000000000000001 /* Teleprompter/Views/Mine/TextSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Mine/TextSettingsView.swift; sourceTree = "<group>"; };
 		FA0000000000000000000001 /* Teleprompter/Views/Mine/PromptingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Mine/PromptingSettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -98,7 +96,6 @@
 				1605DFFC8CF85B2F7BCF9BEA /* Teleprompter/Services/PurchaseManager.swift */,
 				84E6094AE633683D99C3B172 /* Teleprompter/Services/CameraManager.swift */,
 				F60000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift */,
-				F80000000000000000000001 /* Teleprompter/Views/Mine/TextSettingsView.swift */,
 				FA0000000000000000000001 /* Teleprompter/Views/Mine/PromptingSettingsView.swift */,
 				C7655349DDD3BEE5EB2C1685 /* Teleprompter/Views/Onboarding/OnboardingView.swift */,
 				53F2DE1E16DC3233A2FBAD4D /* Teleprompter/Views/Paywall/PaywallView.swift */,
@@ -197,7 +194,6 @@
 				E74D7E2597299F54CAC14E3C /* Teleprompter/Services/PurchaseManager.swift in Sources */,
 				A29A0B8CF80BFBF32E6F89FF /* Teleprompter/Services/CameraManager.swift in Sources */,
 				F50000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift in Sources */,
-				F70000000000000000000001 /* Teleprompter/Views/Mine/TextSettingsView.swift in Sources */,
 				F90000000000000000000001 /* Teleprompter/Views/Mine/PromptingSettingsView.swift in Sources */,
 				660174956340BEA9958B8EEE /* Teleprompter/Views/Onboarding/OnboardingView.swift in Sources */,
 				9194B0479A92186C8DFFDEFE /* Teleprompter/Views/Paywall/PaywallView.swift in Sources */,
