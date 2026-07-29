@@ -192,6 +192,7 @@ struct PromptingSettingsView: View {
         }
         .navigationTitle("Prompting")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .fullScreenCover(isPresented: $showsPaywall) {
             PaywallView(source: .inApp)
                 .environmentObject(purchaseManager)
