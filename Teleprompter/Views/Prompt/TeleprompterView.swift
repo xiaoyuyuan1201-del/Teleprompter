@@ -17,9 +17,21 @@ struct TeleprompterView: View {
     @AppStorage("defaultPromptMargin") private var promptMargin = 24.0
     @AppStorage("defaultPromptTimingMode") private var timingModeRaw = PromptScrollTimingMode.fixed.rawValue
     @AppStorage("defaultPromptTargetMinutes") private var targetMinutes = 2.0
+    @AppStorage("defaultPromptAreaHeight") private var promptAreaHeight = 430.0
+    @AppStorage("defaultPromptLineSpacing") private var lineSpacing = 0.0
+    @AppStorage("defaultPromptUppercase") private var uppercase = false
+    @AppStorage("defaultPromptFontStyle") private var fontStyleRaw = PromptFontStyle.standard.rawValue
+    @AppStorage("defaultPromptUseOpenDyslexicFont") private var useOpenDyslexicFont = false
+    @AppStorage("defaultPromptUseLexendFont") private var useLexendFont = false
+    @AppStorage("defaultPromptShowCueIndicator") private var showCueIndicator = true
+    @AppStorage("defaultPromptMirrorHorizontal") private var defaultMirrorHorizontal = false
+    @AppStorage("defaultPromptMirrorVertical") private var defaultMirrorVertical = false
+    @AppStorage("defaultPromptApplyMarginToRecordScreen") private var applyMarginToRecordScreen = true
 
     @State private var isPlaying = false
+    @State private var resizeDragStartHeight: CGFloat?
     @State private var isMirrored = false
+    @State private var isMirroredVertical = false
     @State private var resetToken = 0
     @State private var showsControls = false
     @State private var showsPaywall = false
@@ -34,6 +46,14 @@ struct TeleprompterView: View {
             get: { PromptScrollTimingMode(rawValue: timingModeRaw) ?? .fixed },
             set: { timingModeRaw = $0.rawValue }
         )
+    }
+
+    private var fontStyle: PromptFontStyle {
+        PromptFontStyle(rawValue: fontStyleRaw) ?? .standard
+    }
+
+    private var effectiveMargin: Double {
+        applyMarginToRecordScreen ? promptMargin : 24.0
     }
 
     var body: some View {
@@ -82,6 +102,10 @@ struct TeleprompterView: View {
         .onAppear {
             camera.start()
             UIApplication.shared.isIdleTimerDisabled = true
+            if purchaseManager.isPro {
+                isMirrored = defaultMirrorHorizontal
+                isMirroredVertical = defaultMirrorVertical
+            }
         }
         .onDisappear {
             countdownTask?.cancel()
@@ -225,7 +249,7 @@ struct TeleprompterView: View {
     }
 
     private var promptArea: some View {
-        ZStack {
+        ZStack(alignment: .trailing) {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(.black.opacity(0.38))
                 .overlay {
@@ -239,38 +263,73 @@ struct TeleprompterView: View {
                 speed: CGFloat(speed),
                 timingMode: timingMode.wrappedValue,
                 targetDuration: targetMinutes * 60,
-                horizontalPadding: CGFloat(promptMargin),
+                horizontalPadding: CGFloat(effectiveMargin),
                 isPlaying: isPlaying,
                 resetToken: resetToken,
-                topPadding: focusNearLens ? 72 : 170
+                topPadding: focusNearLens ? 72 : 170,
+                lineSpacing: CGFloat(lineSpacing),
+                uppercase: uppercase,
+                fontStyle: fontStyle,
+                useOpenDyslexicFont: useOpenDyslexicFont,
+                useLexendFont: useLexendFont
             )
-            .scaleEffect(x: isMirrored ? -1 : 1, y: 1)
+            .scaleEffect(x: isMirrored ? -1 : 1, y: isMirroredVertical ? -1 : 1)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
-            VStack(spacing: 0) {
-                if focusNearLens {
-                    Spacer().frame(height: 66)
-                } else {
-                    Spacer()
-                }
-
-                Rectangle()
-                    .fill(Color.creatorViolet.opacity(0.16))
-                    .frame(height: max(CGFloat(fontSize) * 1.72, 64))
-                    .overlay(alignment: .leading) {
-                        Capsule()
-                            .fill(Color.creatorViolet)
-                            .frame(width: 4, height: max(CGFloat(fontSize) * 1.15, 44))
-                            .padding(.leading, 8)
+            if showCueIndicator {
+                VStack(spacing: 0) {
+                    if focusNearLens {
+                        Spacer().frame(height: 66)
+                    } else {
+                        Spacer()
                     }
 
-                Spacer()
+                    Rectangle()
+                        .fill(Color.creatorViolet.opacity(0.16))
+                        .frame(height: max(CGFloat(fontSize) * 1.72, 64))
+                        .overlay(alignment: .leading) {
+                            Capsule()
+                                .fill(Color.creatorViolet)
+                                .frame(width: 4, height: max(CGFloat(fontSize) * 1.15, 44))
+                                .padding(.leading, 8)
+                        }
+
+                    Spacer()
+                }
+                .allowsHitTesting(false)
             }
-            .allowsHitTesting(false)
+
+            resizeHandle
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 430)
+        .frame(height: CGFloat(promptAreaHeight))
         .accessibilityLabel("Teleprompter script")
+    }
+
+    private var resizeHandle: some View {
+        Image(systemName: "arrow.up.and.down")
+            .font(.system(size: 13, weight: .bold))
+            .foregroundStyle(.white.opacity(0.85))
+            .frame(width: 32, height: 32)
+            .background(.black.opacity(0.45), in: Circle())
+            .overlay {
+                Circle().stroke(.white.opacity(0.18), lineWidth: 0.75)
+            }
+            .padding(.trailing, 8)
+            .contentShape(Circle())
+            .gesture(
+                DragGesture(minimumDistance: 2)
+                    .onChanged { value in
+                        let startHeight = resizeDragStartHeight ?? CGFloat(promptAreaHeight)
+                        resizeDragStartHeight = startHeight
+                        let proposed = startHeight + value.translation.height
+                        promptAreaHeight = Double(min(640, max(220, proposed)))
+                    }
+                    .onEnded { _ in
+                        resizeDragStartHeight = nil
+                    }
+            )
+            .accessibilityLabel("Resize teleprompter area")
     }
 
     private var bottomControls: some View {

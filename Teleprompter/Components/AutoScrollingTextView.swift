@@ -15,6 +15,33 @@ enum PromptScrollTimingMode: String, CaseIterable, Identifiable {
     }
 }
 
+enum PromptFontStyle: String, CaseIterable, Identifiable {
+    case standard
+    case rounded
+    case serif
+    case monospaced
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .standard: "Default"
+        case .rounded: "Rounded"
+        case .serif: "Serif"
+        case .monospaced: "Monospaced"
+        }
+    }
+
+    var design: UIFontDescriptor.SystemDesign {
+        switch self {
+        case .standard: .default
+        case .rounded: .rounded
+        case .serif: .serif
+        case .monospaced: .monospaced
+        }
+    }
+}
+
 struct AutoScrollingTextView: UIViewRepresentable {
     let text: String
     let fontSize: CGFloat
@@ -25,6 +52,34 @@ struct AutoScrollingTextView: UIViewRepresentable {
     let isPlaying: Bool
     let resetToken: Int
     let topPadding: CGFloat
+    var lineSpacing: CGFloat = 0
+    var uppercase: Bool = false
+    var fontStyle: PromptFontStyle = .standard
+    var useOpenDyslexicFont: Bool = false
+    var useLexendFont: Bool = false
+
+    private func makeFont() -> UIFont {
+        let base = UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        let design: UIFontDescriptor.SystemDesign = useLexendFont || useOpenDyslexicFont ? .rounded : fontStyle.design
+        guard let descriptor = base.fontDescriptor.withDesign(design) else { return base }
+        return UIFont(descriptor: descriptor, size: fontSize)
+    }
+
+    private func makeAttributedText() -> NSAttributedString {
+        let content = text.isEmpty ? "Your script will appear here." : (uppercase ? text.uppercased() : text)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
+        paragraphStyle.lineSpacing = lineSpacing
+        var attributes: [NSAttributedString.Key: Any] = [
+            .font: makeFont(),
+            .foregroundColor: UIColor.white,
+            .paragraphStyle: paragraphStyle
+        ]
+        if useOpenDyslexicFont || useLexendFont {
+            attributes[.kern] = 0.4
+        }
+        return NSAttributedString(string: content, attributes: attributes)
+    }
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -42,8 +97,7 @@ struct AutoScrollingTextView: UIViewRepresentable {
         let label = UILabel()
         label.numberOfLines = 0
         label.textAlignment = .center
-        label.textColor = .white
-        label.font = .systemFont(ofSize: fontSize, weight: .semibold)
+        label.attributedText = makeAttributedText()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.accessibilityIdentifier = "PromptText"
 
@@ -90,8 +144,7 @@ struct AutoScrollingTextView: UIViewRepresentable {
 
     func updateUIView(_ scrollView: UIScrollView, context: Context) {
         let coordinator = context.coordinator
-        coordinator.label?.text = text.isEmpty ? "Your script will appear here." : text
-        coordinator.label?.font = .systemFont(ofSize: fontSize, weight: .semibold)
+        coordinator.label?.attributedText = makeAttributedText()
         coordinator.topConstraint?.constant = topPadding
         coordinator.leadingConstraint?.constant = horizontalPadding
         coordinator.trailingConstraint?.constant = -horizontalPadding

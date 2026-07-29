@@ -1,62 +1,65 @@
 // !$*UTF8*$!
 {
 	archiveVersion = 1;
-	classes = {};
+	classes = {
+	};
 	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3BA32538096436685D070FB6 /* TeleprompterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EAEC67014EC03BDED98C26 /* TeleprompterApp.swift */; };
-		CDF72D9AAB388890790EB41A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B244C6C89B4B1659462723AE /* Theme.swift */; };
-		73920E94708388C983211D1C /* AutoScrollingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B51A6BD3241580F08E45879 /* AutoScrollingTextView.swift */; };
-		72DDCBEEE5DB8AB2BFB79569 /* Script.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81CDCA56E84E329372D25428 /* Script.swift */; };
-		2B5C9F97C4CFC096F3AABB75 /* ScriptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83EE1AB73FA9EAEC45FA2720 /* ScriptStore.swift */; };
-		E74D7E2597299F54CAC14E3C /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1605DFFC8CF85B2F7BCF9BEA /* PurchaseManager.swift */; };
-		A29A0B8CF80BFBF32E6F89FF /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6094AE633683D99C3B172 /* CameraManager.swift */; };
-		660174956340BEA9958B8EEE /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7655349DDD3BEE5EB2C1685 /* OnboardingView.swift */; };
-		9194B0479A92186C8DFFDEFE /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F2DE1E16DC3233A2FBAD4D /* PaywallView.swift */; };
-		B36537D0ECF7D9AF7F2B5A46 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB96C0B6BF96036D3FD34C4 /* HomeView.swift */; };
-		AAF0D3D8EBF02EC68916D0AD /* ScriptEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECC2897EC9CFC8E7F2724657 /* ScriptEditorView.swift */; };
-		219D2901B5026360840BEEE2 /* TeleprompterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2975345FFDD24379F6199EE5 /* TeleprompterView.swift */; };
-		8CE37850C6A1D25FF3E108D3 /* MineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCCCFD51780375DAFB9E4607 /* MineView.swift */; };
-		45F74CFCB81A9B42B22864C7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DEB60649A62E8C4D498B1020 /* Assets.xcassets */; };
-		D1A1B1C1D1E1F10111213141 /* DocumentImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A1B1C1D1E1F10111213141 /* DocumentImportService.swift */; };
-		D2A2B2C2D2E2F20212223242 /* AIPolishService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2A2B2C2D2E2F20212223242 /* AIPolishService.swift */; };
-		D3A3B3C3D3E3F30313233343 /* SystemShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A3B3C3D3E3F30313233343 /* SystemShareSheet.swift */; };
-		D4A4B4C4D4E4F40414243444 /* AppAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A4B4C4D4E4F40414243444 /* AppAnalytics.swift */; };
-		B10000000000000000000001 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000001 /* RootTabView.swift */; };
-		B20000000000000000000001 /* Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* Recording.swift */; };
-		B30000000000000000000001 /* RecordingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000001 /* RecordingStore.swift */; };
-		B40000000000000000000001 /* VideosView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000001 /* VideosView.swift */; };
-		F50000000000000000000001 /* VideoWatermarkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60000000000000000000001 /* VideoWatermarkService.swift */; };
+		219D2901B5026360840BEEE2 /* Teleprompter/Views/Prompt/TeleprompterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2975345FFDD24379F6199EE5 /* Teleprompter/Views/Prompt/TeleprompterView.swift */; };
+		2B5C9F97C4CFC096F3AABB75 /* Teleprompter/Stores/ScriptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83EE1AB73FA9EAEC45FA2720 /* Teleprompter/Stores/ScriptStore.swift */; };
+		3BA32538096436685D070FB6 /* Teleprompter/TeleprompterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EAEC67014EC03BDED98C26 /* Teleprompter/TeleprompterApp.swift */; };
+		45F74CFCB81A9B42B22864C7 /* Teleprompter/Resources/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DEB60649A62E8C4D498B1020 /* Teleprompter/Resources/Assets.xcassets */; };
+		660174956340BEA9958B8EEE /* Teleprompter/Views/Onboarding/OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7655349DDD3BEE5EB2C1685 /* Teleprompter/Views/Onboarding/OnboardingView.swift */; };
+		72DDCBEEE5DB8AB2BFB79569 /* Teleprompter/Models/Script.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81CDCA56E84E329372D25428 /* Teleprompter/Models/Script.swift */; };
+		73920E94708388C983211D1C /* Teleprompter/Components/AutoScrollingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B51A6BD3241580F08E45879 /* Teleprompter/Components/AutoScrollingTextView.swift */; };
+		8CE37850C6A1D25FF3E108D3 /* Teleprompter/Views/Mine/MineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCCCFD51780375DAFB9E4607 /* Teleprompter/Views/Mine/MineView.swift */; };
+		9194B0479A92186C8DFFDEFE /* Teleprompter/Views/Paywall/PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F2DE1E16DC3233A2FBAD4D /* Teleprompter/Views/Paywall/PaywallView.swift */; };
+		A29A0B8CF80BFBF32E6F89FF /* Teleprompter/Services/CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6094AE633683D99C3B172 /* Teleprompter/Services/CameraManager.swift */; };
+		AAF0D3D8EBF02EC68916D0AD /* Teleprompter/Views/Editor/ScriptEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECC2897EC9CFC8E7F2724657 /* Teleprompter/Views/Editor/ScriptEditorView.swift */; };
+		B10000000000000000000001 /* Teleprompter/Views/Root/RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000001 /* Teleprompter/Views/Root/RootTabView.swift */; };
+		B20000000000000000000001 /* Teleprompter/Models/Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* Teleprompter/Models/Recording.swift */; };
+		B30000000000000000000001 /* Teleprompter/Stores/RecordingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000001 /* Teleprompter/Stores/RecordingStore.swift */; };
+		B36537D0ECF7D9AF7F2B5A46 /* Teleprompter/Views/Home/HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB96C0B6BF96036D3FD34C4 /* Teleprompter/Views/Home/HomeView.swift */; };
+		B40000000000000000000001 /* Teleprompter/Views/Videos/VideosView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000001 /* Teleprompter/Views/Videos/VideosView.swift */; };
+		CDF72D9AAB388890790EB41A /* Teleprompter/Components/Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B244C6C89B4B1659462723AE /* Teleprompter/Components/Theme.swift */; };
+		D1A1B1C1D1E1F10111213141 /* Teleprompter/Services/DocumentImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A1B1C1D1E1F10111213141 /* Teleprompter/Services/DocumentImportService.swift */; };
+		D2A2B2C2D2E2F20212223242 /* Teleprompter/Services/AIPolishService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2A2B2C2D2E2F20212223242 /* Teleprompter/Services/AIPolishService.swift */; };
+		D3A3B3C3D3E3F30313233343 /* Teleprompter/Components/SystemShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A3B3C3D3E3F30313233343 /* Teleprompter/Components/SystemShareSheet.swift */; };
+		D4A4B4C4D4E4F40414243444 /* Teleprompter/Services/AppAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A4B4C4D4E4F40414243444 /* Teleprompter/Services/AppAnalytics.swift */; };
+		E74D7E2597299F54CAC14E3C /* Teleprompter/Services/PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1605DFFC8CF85B2F7BCF9BEA /* Teleprompter/Services/PurchaseManager.swift */; };
+		F50000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift */; };
+		F70000000000000000000001 /* Teleprompter/Views/Mine/TextSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80000000000000000000001 /* Teleprompter/Views/Mine/TextSettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A0EAEC67014EC03BDED98C26 /* TeleprompterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/TeleprompterApp.swift; sourceTree = "<group>"; };
-		B244C6C89B4B1659462723AE /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Components/Theme.swift; sourceTree = "<group>"; };
-		0B51A6BD3241580F08E45879 /* AutoScrollingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Components/AutoScrollingTextView.swift; sourceTree = "<group>"; };
-		81CDCA56E84E329372D25428 /* Script.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Models/Script.swift; sourceTree = "<group>"; };
-		83EE1AB73FA9EAEC45FA2720 /* ScriptStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Stores/ScriptStore.swift; sourceTree = "<group>"; };
-		1605DFFC8CF85B2F7BCF9BEA /* PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/PurchaseManager.swift; sourceTree = "<group>"; };
-		84E6094AE633683D99C3B172 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/CameraManager.swift; sourceTree = "<group>"; };
-		F60000000000000000000001 /* VideoWatermarkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/VideoWatermarkService.swift; sourceTree = "<group>"; };
-		C7655349DDD3BEE5EB2C1685 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Onboarding/OnboardingView.swift; sourceTree = "<group>"; };
-		53F2DE1E16DC3233A2FBAD4D /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Paywall/PaywallView.swift; sourceTree = "<group>"; };
-		3DB96C0B6BF96036D3FD34C4 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Home/HomeView.swift; sourceTree = "<group>"; };
-		ECC2897EC9CFC8E7F2724657 /* ScriptEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Editor/ScriptEditorView.swift; sourceTree = "<group>"; };
-		2975345FFDD24379F6199EE5 /* TeleprompterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Prompt/TeleprompterView.swift; sourceTree = "<group>"; };
-		BCCCFD51780375DAFB9E4607 /* MineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Mine/MineView.swift; sourceTree = "<group>"; };
-		DEB60649A62E8C4D498B1020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Teleprompter/Resources/Assets.xcassets; sourceTree = "<group>"; };
-		D0FC94D376F2E41E38595D62 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Teleprompter/Info.plist; sourceTree = "<group>"; };
+		0B51A6BD3241580F08E45879 /* Teleprompter/Components/AutoScrollingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Components/AutoScrollingTextView.swift; sourceTree = "<group>"; };
+		1605DFFC8CF85B2F7BCF9BEA /* Teleprompter/Services/PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/PurchaseManager.swift; sourceTree = "<group>"; };
+		2975345FFDD24379F6199EE5 /* Teleprompter/Views/Prompt/TeleprompterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Prompt/TeleprompterView.swift; sourceTree = "<group>"; };
 		38A007151ABE87CC01A5B6E9 /* Teleprompter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Teleprompter.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E1A1B1C1D1E1F10111213141 /* DocumentImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/DocumentImportService.swift; sourceTree = "<group>"; };
-		E2A2B2C2D2E2F20212223242 /* AIPolishService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/AIPolishService.swift; sourceTree = "<group>"; };
-		E3A3B3C3D3E3F30313233343 /* SystemShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Components/SystemShareSheet.swift; sourceTree = "<group>"; };
-		E4A4B4C4D4E4F40414243444 /* AppAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/AppAnalytics.swift; sourceTree = "<group>"; };
-		A10000000000000000000001 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Root/RootTabView.swift; sourceTree = "<group>"; };
-		A20000000000000000000001 /* Recording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Models/Recording.swift; sourceTree = "<group>"; };
-		A30000000000000000000001 /* RecordingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Stores/RecordingStore.swift; sourceTree = "<group>"; };
-		A40000000000000000000001 /* VideosView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Videos/VideosView.swift; sourceTree = "<group>"; };
+		3DB96C0B6BF96036D3FD34C4 /* Teleprompter/Views/Home/HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Home/HomeView.swift; sourceTree = "<group>"; };
+		53F2DE1E16DC3233A2FBAD4D /* Teleprompter/Views/Paywall/PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Paywall/PaywallView.swift; sourceTree = "<group>"; };
+		81CDCA56E84E329372D25428 /* Teleprompter/Models/Script.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Models/Script.swift; sourceTree = "<group>"; };
+		83EE1AB73FA9EAEC45FA2720 /* Teleprompter/Stores/ScriptStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Stores/ScriptStore.swift; sourceTree = "<group>"; };
+		84E6094AE633683D99C3B172 /* Teleprompter/Services/CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/CameraManager.swift; sourceTree = "<group>"; };
+		A0EAEC67014EC03BDED98C26 /* Teleprompter/TeleprompterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/TeleprompterApp.swift; sourceTree = "<group>"; };
+		A10000000000000000000001 /* Teleprompter/Views/Root/RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Root/RootTabView.swift; sourceTree = "<group>"; };
+		A20000000000000000000001 /* Teleprompter/Models/Recording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Models/Recording.swift; sourceTree = "<group>"; };
+		A30000000000000000000001 /* Teleprompter/Stores/RecordingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Stores/RecordingStore.swift; sourceTree = "<group>"; };
+		A40000000000000000000001 /* Teleprompter/Views/Videos/VideosView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Videos/VideosView.swift; sourceTree = "<group>"; };
+		B244C6C89B4B1659462723AE /* Teleprompter/Components/Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Components/Theme.swift; sourceTree = "<group>"; };
+		BCCCFD51780375DAFB9E4607 /* Teleprompter/Views/Mine/MineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Mine/MineView.swift; sourceTree = "<group>"; };
+		C7655349DDD3BEE5EB2C1685 /* Teleprompter/Views/Onboarding/OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Onboarding/OnboardingView.swift; sourceTree = "<group>"; };
+		D0FC94D376F2E41E38595D62 /* Teleprompter/Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Teleprompter/Info.plist; sourceTree = "<group>"; };
+		DEB60649A62E8C4D498B1020 /* Teleprompter/Resources/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Teleprompter/Resources/Assets.xcassets; sourceTree = "<group>"; };
+		E1A1B1C1D1E1F10111213141 /* Teleprompter/Services/DocumentImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/DocumentImportService.swift; sourceTree = "<group>"; };
+		E2A2B2C2D2E2F20212223242 /* Teleprompter/Services/AIPolishService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/AIPolishService.swift; sourceTree = "<group>"; };
+		E3A3B3C3D3E3F30313233343 /* Teleprompter/Components/SystemShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Components/SystemShareSheet.swift; sourceTree = "<group>"; };
+		E4A4B4C4D4E4F40414243444 /* Teleprompter/Services/AppAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/AppAnalytics.swift; sourceTree = "<group>"; };
+		ECC2897EC9CFC8E7F2724657 /* Teleprompter/Views/Editor/ScriptEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Editor/ScriptEditorView.swift; sourceTree = "<group>"; };
+		F60000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/VideoWatermarkService.swift; sourceTree = "<group>"; };
+		F80000000000000000000001 /* Teleprompter/Views/Mine/TextSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Mine/TextSettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,43 +73,44 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		6CFC827E67DCAE34C72B9CED = {
-			isa = PBXGroup;
-			children = (
-				A0EAEC67014EC03BDED98C26 /* TeleprompterApp.swift */,
-				A10000000000000000000001 /* RootTabView.swift */,
-				A20000000000000000000001 /* Recording.swift */,
-				A30000000000000000000001 /* RecordingStore.swift */,
-				A40000000000000000000001 /* VideosView.swift */,
-				B244C6C89B4B1659462723AE /* Theme.swift */,
-				0B51A6BD3241580F08E45879 /* AutoScrollingTextView.swift */,
-				81CDCA56E84E329372D25428 /* Script.swift */,
-				83EE1AB73FA9EAEC45FA2720 /* ScriptStore.swift */,
-				1605DFFC8CF85B2F7BCF9BEA /* PurchaseManager.swift */,
-				84E6094AE633683D99C3B172 /* CameraManager.swift */,
-				F60000000000000000000001 /* VideoWatermarkService.swift */,
-				C7655349DDD3BEE5EB2C1685 /* OnboardingView.swift */,
-				53F2DE1E16DC3233A2FBAD4D /* PaywallView.swift */,
-				3DB96C0B6BF96036D3FD34C4 /* HomeView.swift */,
-				ECC2897EC9CFC8E7F2724657 /* ScriptEditorView.swift */,
-				2975345FFDD24379F6199EE5 /* TeleprompterView.swift */,
-				BCCCFD51780375DAFB9E4607 /* MineView.swift */,
-				E1A1B1C1D1E1F10111213141 /* DocumentImportService.swift */,
-				E2A2B2C2D2E2F20212223242 /* AIPolishService.swift */,
-				E3A3B3C3D3E3F30313233343 /* SystemShareSheet.swift */,
-				E4A4B4C4D4E4F40414243444 /* AppAnalytics.swift */,
-				DEB60649A62E8C4D498B1020 /* Assets.xcassets */,
-				D0FC94D376F2E41E38595D62 /* Info.plist */,
-				021F2B7F3E0C61452C987484 /* Products */,
-			);
-			sourceTree = "<group>";
-		};
 		021F2B7F3E0C61452C987484 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				38A007151ABE87CC01A5B6E9 /* Teleprompter.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		6CFC827E67DCAE34C72B9CED = {
+			isa = PBXGroup;
+			children = (
+				A0EAEC67014EC03BDED98C26 /* Teleprompter/TeleprompterApp.swift */,
+				A10000000000000000000001 /* Teleprompter/Views/Root/RootTabView.swift */,
+				A20000000000000000000001 /* Teleprompter/Models/Recording.swift */,
+				A30000000000000000000001 /* Teleprompter/Stores/RecordingStore.swift */,
+				A40000000000000000000001 /* Teleprompter/Views/Videos/VideosView.swift */,
+				B244C6C89B4B1659462723AE /* Teleprompter/Components/Theme.swift */,
+				0B51A6BD3241580F08E45879 /* Teleprompter/Components/AutoScrollingTextView.swift */,
+				81CDCA56E84E329372D25428 /* Teleprompter/Models/Script.swift */,
+				83EE1AB73FA9EAEC45FA2720 /* Teleprompter/Stores/ScriptStore.swift */,
+				1605DFFC8CF85B2F7BCF9BEA /* Teleprompter/Services/PurchaseManager.swift */,
+				84E6094AE633683D99C3B172 /* Teleprompter/Services/CameraManager.swift */,
+				F60000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift */,
+				F80000000000000000000001 /* Teleprompter/Views/Mine/TextSettingsView.swift */,
+				C7655349DDD3BEE5EB2C1685 /* Teleprompter/Views/Onboarding/OnboardingView.swift */,
+				53F2DE1E16DC3233A2FBAD4D /* Teleprompter/Views/Paywall/PaywallView.swift */,
+				3DB96C0B6BF96036D3FD34C4 /* Teleprompter/Views/Home/HomeView.swift */,
+				ECC2897EC9CFC8E7F2724657 /* Teleprompter/Views/Editor/ScriptEditorView.swift */,
+				2975345FFDD24379F6199EE5 /* Teleprompter/Views/Prompt/TeleprompterView.swift */,
+				BCCCFD51780375DAFB9E4607 /* Teleprompter/Views/Mine/MineView.swift */,
+				E1A1B1C1D1E1F10111213141 /* Teleprompter/Services/DocumentImportService.swift */,
+				E2A2B2C2D2E2F20212223242 /* Teleprompter/Services/AIPolishService.swift */,
+				E3A3B3C3D3E3F30313233343 /* Teleprompter/Components/SystemShareSheet.swift */,
+				E4A4B4C4D4E4F40414243444 /* Teleprompter/Services/AppAnalytics.swift */,
+				DEB60649A62E8C4D498B1020 /* Teleprompter/Resources/Assets.xcassets */,
+				D0FC94D376F2E41E38595D62 /* Teleprompter/Info.plist */,
+				021F2B7F3E0C61452C987484 /* Products */,
+			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -167,7 +171,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				45F74CFCB81A9B42B22864C7 /* Assets.xcassets in Resources */,
+				45F74CFCB81A9B42B22864C7 /* Teleprompter/Resources/Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,34 +182,64 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3BA32538096436685D070FB6 /* TeleprompterApp.swift in Sources */,
-				B10000000000000000000001 /* RootTabView.swift in Sources */,
-				B20000000000000000000001 /* Recording.swift in Sources */,
-				B30000000000000000000001 /* RecordingStore.swift in Sources */,
-				B40000000000000000000001 /* VideosView.swift in Sources */,
-				CDF72D9AAB388890790EB41A /* Theme.swift in Sources */,
-				73920E94708388C983211D1C /* AutoScrollingTextView.swift in Sources */,
-				72DDCBEEE5DB8AB2BFB79569 /* Script.swift in Sources */,
-				2B5C9F97C4CFC096F3AABB75 /* ScriptStore.swift in Sources */,
-				E74D7E2597299F54CAC14E3C /* PurchaseManager.swift in Sources */,
-				A29A0B8CF80BFBF32E6F89FF /* CameraManager.swift in Sources */,
-				F50000000000000000000001 /* VideoWatermarkService.swift in Sources */,
-				660174956340BEA9958B8EEE /* OnboardingView.swift in Sources */,
-				9194B0479A92186C8DFFDEFE /* PaywallView.swift in Sources */,
-				B36537D0ECF7D9AF7F2B5A46 /* HomeView.swift in Sources */,
-				AAF0D3D8EBF02EC68916D0AD /* ScriptEditorView.swift in Sources */,
-				219D2901B5026360840BEEE2 /* TeleprompterView.swift in Sources */,
-				D1A1B1C1D1E1F10111213141 /* DocumentImportService.swift in Sources */,
-				D2A2B2C2D2E2F20212223242 /* AIPolishService.swift in Sources */,
-				D3A3B3C3D3E3F30313233343 /* SystemShareSheet.swift in Sources */,
-				D4A4B4C4D4E4F40414243444 /* AppAnalytics.swift in Sources */,
-				8CE37850C6A1D25FF3E108D3 /* MineView.swift in Sources */,
+				3BA32538096436685D070FB6 /* Teleprompter/TeleprompterApp.swift in Sources */,
+				B10000000000000000000001 /* Teleprompter/Views/Root/RootTabView.swift in Sources */,
+				B20000000000000000000001 /* Teleprompter/Models/Recording.swift in Sources */,
+				B30000000000000000000001 /* Teleprompter/Stores/RecordingStore.swift in Sources */,
+				B40000000000000000000001 /* Teleprompter/Views/Videos/VideosView.swift in Sources */,
+				CDF72D9AAB388890790EB41A /* Teleprompter/Components/Theme.swift in Sources */,
+				73920E94708388C983211D1C /* Teleprompter/Components/AutoScrollingTextView.swift in Sources */,
+				72DDCBEEE5DB8AB2BFB79569 /* Teleprompter/Models/Script.swift in Sources */,
+				2B5C9F97C4CFC096F3AABB75 /* Teleprompter/Stores/ScriptStore.swift in Sources */,
+				E74D7E2597299F54CAC14E3C /* Teleprompter/Services/PurchaseManager.swift in Sources */,
+				A29A0B8CF80BFBF32E6F89FF /* Teleprompter/Services/CameraManager.swift in Sources */,
+				F50000000000000000000001 /* Teleprompter/Services/VideoWatermarkService.swift in Sources */,
+				F70000000000000000000001 /* Teleprompter/Views/Mine/TextSettingsView.swift in Sources */,
+				660174956340BEA9958B8EEE /* Teleprompter/Views/Onboarding/OnboardingView.swift in Sources */,
+				9194B0479A92186C8DFFDEFE /* Teleprompter/Views/Paywall/PaywallView.swift in Sources */,
+				B36537D0ECF7D9AF7F2B5A46 /* Teleprompter/Views/Home/HomeView.swift in Sources */,
+				AAF0D3D8EBF02EC68916D0AD /* Teleprompter/Views/Editor/ScriptEditorView.swift in Sources */,
+				219D2901B5026360840BEEE2 /* Teleprompter/Views/Prompt/TeleprompterView.swift in Sources */,
+				D1A1B1C1D1E1F10111213141 /* Teleprompter/Services/DocumentImportService.swift in Sources */,
+				D2A2B2C2D2E2F20212223242 /* Teleprompter/Services/AIPolishService.swift in Sources */,
+				D3A3B3C3D3E3F30313233343 /* Teleprompter/Components/SystemShareSheet.swift in Sources */,
+				D4A4B4C4D4E4F40414243444 /* Teleprompter/Services/AppAnalytics.swift in Sources */,
+				8CE37850C6A1D25FF3E108D3 /* Teleprompter/Views/Mine/MineView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		5BDD486E465E20A146951F86 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = K5F2NQJ4SK;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Teleprompter/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.teleprompter12233;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		5E8ACABCCBE1DB5D311988C9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -244,6 +278,39 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		96F032C02E8A3FC1B0365FA6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = K5F2NQJ4SK;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Teleprompter/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.teleprompter12233;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -288,66 +355,6 @@
 			};
 			name = Release;
 		};
-		96F032C02E8A3FC1B0365FA6 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_TESTABILITY = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				ONLY_ACTIVE_ARCH = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Teleprompter/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.teleprompter;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_STRICT_CONCURRENCY = minimal;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		5BDD486E465E20A146951F86 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				SWIFT_COMPILATION_MODE = wholemodule;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Teleprompter/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.teleprompter;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_STRICT_CONCURRENCY = minimal;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -370,7 +377,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 	};
 	rootObject = 98F54143AB4E86B28C3AFEE0 /* Project object */;
 }

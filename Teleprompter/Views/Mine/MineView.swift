@@ -178,6 +178,13 @@ struct MineView: View {
             }
 
             LabeledContent("Recording quality", value: "1080p")
+
+            NavigationLink {
+                TextSettingsView()
+                    .environmentObject(purchaseManager)
+            } label: {
+                Label("Text", systemImage: "textformat")
+            }
         } header: {
             Text("Prompting")
         } footer: {
