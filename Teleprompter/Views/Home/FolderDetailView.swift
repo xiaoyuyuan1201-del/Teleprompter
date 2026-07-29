@@ -61,7 +61,7 @@ struct FolderDetailView: View {
                     } else if filteredScripts.isEmpty {
                         emptySearchState
                     } else {
-                        LazyVStack(spacing: 10) {
+                        LazyVStack(spacing: 12) {
                             ForEach(filteredScripts) { script in
                                 ScriptRow(
                                     script: script,
@@ -217,52 +217,52 @@ struct FolderDetailView: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 14)
+        .padding(.horizontal, 16)
         .frame(height: 46)
-        .contentCard(cornerRadius: 23)
+        .contentCard(cornerRadius: 16)
     }
 
     private var emptyState: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "folder")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.appHeadline)
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 38, height: 38)
-                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 8))
+                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16))
 
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("No scripts here yet")
-                    .font(.headline)
+                    .font(.appHeadline)
                 Text("Create or import a script, or move one in from its menu.")
-                    .font(.subheadline)
+                    .font(.appSecondary)
                     .foregroundStyle(.secondary)
             }
 
             Spacer()
         }
-        .padding(14)
+        .padding(16)
         .contentCard()
     }
 
     private var emptySearchState: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.appHeadline)
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 38, height: 38)
-                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 8))
+                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16))
 
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("No matches")
-                    .font(.headline)
+                    .font(.appHeadline)
                 Text("Try a different search term.")
-                    .font(.subheadline)
+                    .font(.appSecondary)
                     .foregroundStyle(.secondary)
             }
 
             Spacer()
         }
-        .padding(14)
+        .padding(16)
         .contentCard()
     }
 

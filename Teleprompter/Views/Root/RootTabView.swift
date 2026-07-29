@@ -89,7 +89,7 @@ struct RootTabView: View {
                     }
                     .transition(.opacity)
 
-                VStack(spacing: 14) {
+                VStack(spacing: 16) {
                     Spacer()
                     quickActionMenu
                     Spacer()
@@ -159,7 +159,7 @@ struct RootTabView: View {
             }
         } label: {
             Image(systemName: showsQuickActions ? "xmark" : "plus")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.appHeadline)
                 .foregroundStyle(.white)
                 .frame(width: 52, height: 52)
                 .background(
@@ -176,27 +176,27 @@ struct RootTabView: View {
     }
 
     private var quickActionMenu: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 12) {
             ForEach(QuickAction.allCases) { action in
                 Button {
                     perform(action)
                 } label: {
-                    HStack(spacing: 14) {
+                    HStack(spacing: 16) {
                         Image(systemName: action.systemImage)
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.appSubheadline)
                             .foregroundStyle(Color.creatorViolet)
                             .frame(width: 34, height: 34)
-                            .background(Color.creatorViolet.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                            .background(Color.creatorViolet.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
                         Text(action.title)
-                            .font(.subheadline.weight(.semibold))
+                            .font(.appSubheadline)
                             .foregroundStyle(.primary)
 
                         Spacer()
                     }
                     .padding(.horizontal, 16)
                     .frame(height: 56)
-                    .background(Color.appSurface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(Color.appSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
                 .buttonStyle(.plain)
             }

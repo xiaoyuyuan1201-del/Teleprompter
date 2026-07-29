@@ -27,7 +27,7 @@ struct OnboardingView: View {
                         .frame(maxWidth: 620)
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal, 20)
-                        .padding(.top, 18)
+                        .padding(.top, 20)
                         .padding(.bottom, 28)
                 }
                 .scrollBounceBehavior(.basedOnSize)
@@ -46,14 +46,14 @@ struct OnboardingView: View {
     }
 
     private var header: some View {
-        VStack(spacing: 18) {
-            HStack(spacing: 14) {
+        VStack(spacing: 20) {
+            HStack(spacing: 16) {
                 if step != .welcome {
                     Button {
                         goBack()
                     } label: {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.appSubheadline)
                             .frame(width: 42, height: 42)
                     }
                     .buttonStyle(.glass)
@@ -80,13 +80,13 @@ struct OnboardingView: View {
             VStack(spacing: 8) {
                 if let headerEyebrow {
                     Text(headerEyebrow)
-                        .font(.caption2.weight(.bold))
-                        .tracking(1.0)
+                        .font(.appCaptionEmphasis)
+                        .tracking(1)
                         .foregroundStyle(Color.creatorViolet)
                 }
 
                 Text(headerTitle)
-                    .font(.system(size: 30, weight: .bold))
+                    .font(.appTitle)
                     .multilineTextAlignment(.center)
                     .lineLimit(3)
                     .minimumScaleFactor(0.84)
@@ -212,7 +212,7 @@ struct OnboardingView: View {
     }
 
     private var bottomAction: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 12) {
             Button {
                 continueFlow()
             } label: {
@@ -226,7 +226,7 @@ struct OnboardingView: View {
 
             if step == .ready {
                 Text("Your preferences are already saved")
-                    .font(.caption)
+                    .font(.appCaption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -375,11 +375,11 @@ private enum RecordingDistance: String, CaseIterable, Identifiable {
 
 private struct WelcomeStep: View {
     var body: some View {
-        VStack(spacing: 26) {
+        VStack(spacing: 28) {
             Spacer(minLength: 22)
 
             ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(
                         LinearGradient(
                             colors: [
@@ -404,7 +404,7 @@ private struct WelcomeStep: View {
             }
 
             Text("A simple teleprompter that helps you stay confident, keep eye contact and finish every take smoothly.")
-                .font(.title3)
+                .font(.appHeadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
@@ -416,11 +416,11 @@ private struct WelcomeStep: View {
 private struct PromptPhoneMockup: View {
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color.promptBlack)
                 .frame(width: 214, height: 330)
                 .overlay {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .stroke(.white.opacity(0.18), lineWidth: 1)
                 }
 
@@ -428,11 +428,11 @@ private struct PromptPhoneMockup: View {
                 Capsule()
                     .fill(.black)
                     .frame(width: 72, height: 22)
-                    .padding(.top, 11)
+                    .padding(.top, 12)
 
                 Spacer()
 
-                VStack(spacing: 11) {
+                VStack(spacing: 12) {
                     Text("Speak clearly and")
                         .foregroundStyle(.white.opacity(0.46))
                     Text("look right at the lens")
@@ -440,9 +440,9 @@ private struct PromptPhoneMockup: View {
                     Text("while your script moves")
                         .foregroundStyle(.white.opacity(0.46))
                 }
-                .font(.system(size: 17, weight: .semibold))
+                .font(.appHeadline)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 18)
+                .padding(.horizontal, 20)
 
                 Spacer()
 
@@ -454,7 +454,7 @@ private struct PromptPhoneMockup: View {
                         .overlay(Circle().stroke(.white, lineWidth: 4))
                     Circle().fill(.white.opacity(0.12)).frame(width: 38, height: 38)
                 }
-                .padding(.bottom, 22)
+                .padding(.bottom, 24)
             }
             .frame(width: 214, height: 330)
         }
@@ -473,11 +473,11 @@ private struct FeatureStep: View {
                 .frame(height: 390)
 
             Text(message)
-                .font(.title3)
+                .font(.appHeadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
-                .padding(.horizontal, 10)
+                .padding(.horizontal, 12)
         }
     }
 }
@@ -487,7 +487,7 @@ private struct FeatureVisual: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color.appSurface)
 
             RadialGradient(
@@ -504,9 +504,9 @@ private struct FeatureVisual: View {
                 recordingVisual
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(Color.primary.opacity(0.06), lineWidth: 0.75)
         }
     }
@@ -519,7 +519,7 @@ private struct FeatureVisual: View {
                     .frame(width: 112, height: 112)
 
                 Image(systemName: "camera.aperture")
-                    .font(.system(size: 42, weight: .semibold))
+                    .font(.appHero)
                     .foregroundStyle(Color.creatorViolet)
             }
 
@@ -530,26 +530,26 @@ private struct FeatureVisual: View {
                 Text("Stay relaxed and keep your eyes close to the camera")
                     .foregroundStyle(.secondary)
             }
-            .font(.title3)
+            .font(.appHeadline)
             .multilineTextAlignment(.center)
-            .padding(22)
+            .padding(24)
             .frame(maxWidth: 300)
             .contentCard()
 
-            HStack(spacing: 7) {
+            HStack(spacing: 8) {
                 Image(systemName: "eye.fill")
                 Text("Less visible eye movement")
             }
-            .font(.subheadline.weight(.semibold))
+            .font(.appSubheadline)
             .foregroundStyle(Color.creatorViolet)
         }
         .padding(28)
     }
 
     private var recordingVisual: some View {
-        VStack(spacing: 22) {
+        VStack(spacing: 24) {
             ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(Color.promptBlack)
                     .frame(height: 220)
 
@@ -562,7 +562,7 @@ private struct FeatureVisual: View {
                     Text("Pause whenever you need")
                         .foregroundStyle(.white.opacity(0.40))
                 }
-                .font(.title3)
+                .font(.appHeadline)
 
                 Capsule()
                     .fill(Color.creatorViolet.opacity(0.22))
@@ -572,7 +572,7 @@ private struct FeatureVisual: View {
                 HStack {
                     Label("00:12", systemImage: "record.circle")
                         .foregroundStyle(.white)
-                        .font(.caption.monospacedDigit().weight(.semibold))
+                        .font(.appCaptionEmphasis.monospacedDigit())
                         .padding(.horizontal, 12)
                         .frame(height: 36)
                         .glassEffect(.regular, in: Capsule())
@@ -599,14 +599,14 @@ private struct MiniFeature: View {
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: icon)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.appHeadline)
                 .foregroundStyle(Color.creatorViolet)
             Text(title)
-                .font(.caption.weight(.semibold))
+                .font(.appCaptionEmphasis)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
+        .padding(.vertical, 16)
         .contentCard()
     }
 }
@@ -673,14 +673,14 @@ private struct FontSizeStep: View {
             title: "Choose a comfortable text size",
             message: "Adjust this as though the phone were at your normal recording distance."
         ) {
-            VStack(spacing: 18) {
+            VStack(spacing: 20) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(Color.promptBlack)
 
                     VStack(spacing: 16) {
                         Image(systemName: "camera.fill")
-                            .font(.caption)
+                            .font(.appCaption)
                             .foregroundStyle(.white.opacity(0.44))
 
                         Text("Look confident on camera")
@@ -689,18 +689,18 @@ private struct FontSizeStep: View {
                             .multilineTextAlignment(.center)
                             .minimumScaleFactor(0.45)
                             .lineLimit(2)
-                            .padding(.horizontal, 22)
+                            .padding(.horizontal, 24)
                     }
                 }
                 .frame(height: 250)
 
-                VStack(spacing: 14) {
+                VStack(spacing: 16) {
                     HStack {
                         Label("Text size", systemImage: "textformat.size")
-                            .font(.headline)
+                            .font(.appHeadline)
                         Spacer()
                         Text("\(Int(fontSize)) pt")
-                            .font(.headline.monospacedDigit())
+                            .font(.appHeadline.monospacedDigit())
                             .foregroundStyle(Color.creatorViolet)
                             .contentTransition(.numericText())
                     }
@@ -713,7 +713,7 @@ private struct FontSizeStep: View {
                         Spacer()
                         Text("Larger")
                     }
-                    .font(.caption)
+                    .font(.appCaption)
                     .foregroundStyle(.secondary)
                 }
                 .padding(20)
@@ -732,17 +732,17 @@ private struct PaceStep: View {
             title: "Set your natural speaking pace",
             message: "Most people read too quickly at first. Start relaxed and fine-tune it during a take."
         ) {
-            VStack(spacing: 18) {
+            VStack(spacing: 20) {
                 PacePreview(speed: speed)
                     .frame(height: 250)
 
-                VStack(spacing: 14) {
+                VStack(spacing: 16) {
                     HStack {
                         Label("Scroll speed", systemImage: "speedometer")
-                            .font(.headline)
+                            .font(.appHeadline)
                         Spacer()
                         Text(paceName)
-                            .font(.headline)
+                            .font(.appHeadline)
                             .foregroundStyle(Color.creatorViolet)
                     }
 
@@ -756,7 +756,7 @@ private struct PaceStep: View {
                         Spacer()
                         Text("Brisk")
                     }
-                    .font(.caption)
+                    .font(.appCaption)
                     .foregroundStyle(.secondary)
                 }
                 .padding(20)
@@ -787,7 +787,7 @@ private struct PacePreview: View {
                 let travel = proxy.size.height + 160
 
                 ZStack {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(Color.promptBlack)
 
                     VStack(spacing: 16) {
@@ -798,7 +798,7 @@ private struct PacePreview: View {
                         Text("to one person you know")
                         Text("Pause between each idea")
                     }
-                    .font(.system(size: 26, weight: .semibold))
+                    .font(.appTitle)
                     .foregroundStyle(.white.opacity(0.38))
                     .multilineTextAlignment(.center)
                     .offset(y: travel * (0.56 - progress))
@@ -810,10 +810,10 @@ private struct PacePreview: View {
                             Capsule()
                                 .fill(Color.creatorViolet)
                                 .frame(width: 4, height: 42)
-                                .padding(.leading, 10)
+                                .padding(.leading, 12)
                         }
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
         }
     }
@@ -829,7 +829,7 @@ private struct PreferencesStep: View {
             title: "A few finishing preferences",
             message: "These defaults make it easier to start recording without adjusting the same controls every time."
         ) {
-            VStack(spacing: 14) {
+            VStack(spacing: 16) {
                 PreferenceCard(
                     icon: "timer",
                     title: "3-second countdown",
@@ -844,15 +844,15 @@ private struct PreferencesStep: View {
                     isOn: $focusNearLens
                 )
 
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 16) {
                     Label("You’re always in control", systemImage: "slider.horizontal.3")
-                        .font(.headline)
+                        .font(.appHeadline)
                         .foregroundStyle(Color.creatorViolet)
 
                     Text("Font size, scrolling speed, position and recording controls remain available during every session.")
-                        .font(.subheadline)
+                        .font(.appSecondary)
                         .foregroundStyle(.secondary)
-                        .lineSpacing(3)
+                        .lineSpacing(4)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
@@ -885,12 +885,12 @@ private struct ReadyStep: View {
                     .shadow(color: Color.creatorViolet.opacity(0.30), radius: 24, y: 14)
 
                 Image(systemName: "checkmark")
-                    .font(.system(size: 42, weight: .black))
+                    .font(.appHero)
                     .foregroundStyle(.white)
             }
 
             Text("We’ve saved a comfortable starting point for your first recording.")
-                .font(.title3)
+                .font(.appHeadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
@@ -910,7 +910,7 @@ private struct ReadyStep: View {
                     value: preferenceSummary
                 )
             }
-            .contentCard(cornerRadius: 12)
+            .contentCard(cornerRadius: 16)
         }
     }
 
@@ -943,10 +943,10 @@ private struct SetupStepHeader<Content: View>: View {
     var body: some View {
         VStack(spacing: 24) {
             Text(message)
-                .font(.body)
+                .font(.appBody)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-                .lineSpacing(3)
+                .lineSpacing(4)
                 .padding(.horizontal, 8)
 
             content
@@ -963,39 +963,39 @@ private struct ChoiceCard: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 15) {
+            HStack(spacing: 16) {
                 Image(systemName: icon)
-                    .font(.system(size: 19, weight: .semibold))
+                    .font(.appHeadline)
                     .foregroundStyle(isSelected ? .white : Color.creatorViolet)
                     .frame(width: 48, height: 48)
                     .background(
                         isSelected ? Color.creatorViolet : Color.creatorViolet.opacity(0.11),
-                        in: RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
                     )
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(.headline)
+                        .font(.appHeadline)
                         .foregroundStyle(.primary)
                     Text(detail)
-                        .font(.subheadline)
+                        .font(.appSecondary)
                         .foregroundStyle(.secondary)
                 }
 
                 Spacer(minLength: 8)
 
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
+                    .font(.appHeadline)
                     .foregroundStyle(isSelected ? Color.creatorViolet : Color.secondary.opacity(0.35))
             }
-            .padding(17)
+            .padding(16)
             .frame(maxWidth: .infinity)
             .background(
                 isSelected ? Color.creatorViolet.opacity(0.08) : Color.appSurface,
-                in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                in: RoundedRectangle(cornerRadius: 16, style: .continuous)
             )
             .overlay {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .stroke(
                         isSelected ? Color.creatorViolet : Color.primary.opacity(0.055),
                         lineWidth: isSelected ? 1.5 : 0.75
@@ -1013,18 +1013,18 @@ private struct PreferenceCard: View {
     @Binding var isOn: Bool
 
     var body: some View {
-        HStack(spacing: 15) {
+        HStack(spacing: 16) {
             Image(systemName: icon)
-                .font(.system(size: 19, weight: .semibold))
+                .font(.appHeadline)
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 48, height: 48)
-                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.headline)
+                    .font(.appHeadline)
                 Text(detail)
-                    .font(.subheadline)
+                    .font(.appSecondary)
                     .foregroundStyle(.secondary)
             }
 
@@ -1034,7 +1034,7 @@ private struct PreferenceCard: View {
                 .labelsHidden()
                 .tint(.creatorViolet)
         }
-        .padding(17)
+        .padding(16)
         .contentCard()
     }
 }
@@ -1045,23 +1045,23 @@ private struct SummaryRow: View {
     let value: String
 
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 16) {
             Image(systemName: icon)
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 28)
 
             Text(title)
-                .font(.subheadline.weight(.semibold))
+                .font(.appSubheadline)
 
             Spacer()
 
             Text(value)
-                .font(.subheadline)
+                .font(.appSecondary)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.trailing)
                 .lineLimit(2)
         }
-        .padding(.horizontal, 18)
+        .padding(.horizontal, 20)
         .padding(.vertical, 16)
     }
 }

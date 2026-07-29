@@ -14,6 +14,29 @@ extension Color {
     static let appInk = Color.primary
 }
 
+/// The app's full type scale. Every piece of UI text should use one of these —
+/// keeping the count small is what makes the app's typography feel consistent.
+extension Font {
+    /// Full-screen hero numerals (e.g. the countdown).
+    static let appHero = Font.system(size: 40, weight: .bold)
+    /// Screen and section-level titles.
+    static let appTitle = Font.system(size: 28, weight: .bold)
+    /// Primary emphasis: row titles, nav bars, prominent buttons.
+    static let appHeadline = Font.system(size: 18, weight: .semibold)
+    /// Secondary emphasis: sub-labels, compact buttons.
+    static let appSubheadline = Font.system(size: 16, weight: .semibold)
+    /// Paragraph and body copy.
+    static let appBody = Font.system(size: 16, weight: .regular)
+    /// Supporting text under a headline (empty states, plan notes).
+    static let appSecondary = Font.system(size: 14, weight: .regular)
+    /// Small, unemphasized labels.
+    static let appCaption = Font.system(size: 12, weight: .regular)
+    /// Small, emphasized labels (badges, stat values).
+    static let appCaptionEmphasis = Font.system(size: 12, weight: .semibold)
+    /// Tiny badge numerals.
+    static let appMicro = Font.system(size: 10, weight: .bold)
+}
+
 struct AppBackground: View {
     var body: some View {
         Color.appCanvas
@@ -22,7 +45,7 @@ struct AppBackground: View {
 }
 
 struct ContentCardModifier: ViewModifier {
-    var cornerRadius: CGFloat = 12
+    var cornerRadius: CGFloat = 16
 
     func body(content: Content) -> some View {
         content
@@ -38,7 +61,7 @@ struct ContentCardModifier: ViewModifier {
 }
 
 extension View {
-    func contentCard(cornerRadius: CGFloat = 12) -> some View {
+    func contentCard(cornerRadius: CGFloat = 16) -> some View {
         modifier(ContentCardModifier(cornerRadius: cornerRadius))
     }
 }
@@ -49,15 +72,15 @@ struct ToolPrimaryButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.subheadline.weight(.semibold))
+            .font(.appSubheadline)
             .foregroundStyle(.white)
             .padding(.horizontal, horizontalPadding)
             .frame(minHeight: height)
             .background(
                 Color.creatorViolet.opacity(configuration.isPressed ? 0.78 : 1),
-                in: RoundedRectangle(cornerRadius: 9, style: .continuous)
+                in: RoundedRectangle(cornerRadius: 16, style: .continuous)
             )
-            .contentShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -67,19 +90,19 @@ struct ToolSecondaryButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.subheadline.weight(.semibold))
+            .font(.appSubheadline)
             .foregroundStyle(.primary)
             .padding(.horizontal, horizontalPadding)
             .frame(minHeight: height)
             .background(
                 Color(uiColor: .tertiarySystemFill).opacity(configuration.isPressed ? 0.72 : 1),
-                in: RoundedRectangle(cornerRadius: 9, style: .continuous)
+                in: RoundedRectangle(cornerRadius: 16, style: .continuous)
             )
             .overlay {
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .stroke(Color(uiColor: .separator).opacity(0.38), lineWidth: 0.5)
             }
-            .contentShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -92,7 +115,7 @@ struct GlassIconButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 15, weight: .semibold))
+                .font(.appSubheadline)
                 .frame(width: 38, height: 38)
         }
         .buttonStyle(ToolSecondaryButtonStyle(height: 38, horizontalPadding: 0))
@@ -112,9 +135,54 @@ struct VioletGlassButtonLabel: View {
             }
             Text(title)
         }
-        .font(.headline)
+        .font(.appHeadline)
         .frame(maxWidth: .infinity)
         .frame(minHeight: 48)
+    }
+}
+
+extension View {
+    /// Hides the system navigation bar entirely so a screen can render its own
+    /// header row (see `AppHeaderRow`) instead of fighting the system title's
+    /// layout and iOS 26's automatic "glass" toolbar-item chrome.
+    func hidesSystemNavigationBar() -> some View {
+        self
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar)
+    }
+}
+
+/// A custom nav-bar replacement: a left-aligned 28pt title plus optional trailing
+/// content, both in one row, inset by the app's standard screen margin.
+struct AppHeaderRow<Trailing: View>: View {
+    let title: String
+    var onTitleTap: (() -> Void)?
+    var tapCount: Int = 5
+    @ViewBuilder var trailing: () -> Trailing
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+            Text(title)
+                .font(.appTitle)
+                .foregroundStyle(.primary)
+                .contentShape(Rectangle())
+                .onTapGesture(count: tapCount) { onTitleTap?() }
+
+            Spacer(minLength: 8)
+
+            trailing()
+        }
+        .padding(.horizontal, AppLayout.screenHorizontalPadding)
+        .padding(.vertical, 8)
+    }
+}
+
+extension AppHeaderRow where Trailing == EmptyView {
+    init(title: String, onTitleTap: (() -> Void)? = nil, tapCount: Int = 5) {
+        self.title = title
+        self.onTitleTap = onTitleTap
+        self.tapCount = tapCount
+        self.trailing = { EmptyView() }
     }
 }
 
@@ -123,8 +191,8 @@ struct SectionEyebrow: View {
 
     var body: some View {
         Text(title.uppercased())
-            .font(.caption2.weight(.semibold))
-            .tracking(0.65)
+            .font(.appCaptionEmphasis)
+            .tracking(1)
             .foregroundStyle(.secondary)
     }
 }

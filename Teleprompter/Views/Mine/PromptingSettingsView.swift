@@ -11,7 +11,6 @@ struct PromptingSettingsView: View {
     @AppStorage("defaultPromptApplyMarginToRecordScreen") private var applyMarginToRecordScreen = true
     @AppStorage("defaultPromptTimingMode") private var timingModeRaw = PromptScrollTimingMode.fixed.rawValue
     @AppStorage("defaultPromptTargetMinutes") private var targetMinutes = 2.0
-    @AppStorage("defaultPromptFontStyle") private var fontStyleRaw = PromptFontStyle.standard.rawValue
     @AppStorage("defaultPromptLineSpacing") private var lineSpacing = 0.0
     @AppStorage("defaultPromptUppercase") private var uppercase = false
     @AppStorage("defaultPromptMirrorHorizontal") private var mirrorHorizontal = false
@@ -23,10 +22,6 @@ struct PromptingSettingsView: View {
     @State private var showsPaywall = false
 
     private let sampleText = "Welcome to your teleprompter! [pause and smile] This is how your text will appear on the teleprompter screen."
-
-    private var fontStyle: PromptFontStyle {
-        PromptFontStyle(rawValue: fontStyleRaw) ?? .standard
-    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -40,7 +35,7 @@ struct PromptingSettingsView: View {
 
             Form {
             Section {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Label("Default speed", systemImage: "speedometer")
                         Spacer()
@@ -63,7 +58,7 @@ struct PromptingSettingsView: View {
                 }
 
                 if timingModeRaw == PromptScrollTimingMode.timed.rawValue {
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             Label("Target duration", systemImage: "timer")
                             Spacer()
@@ -85,7 +80,7 @@ struct PromptingSettingsView: View {
             }
 
             Section {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Label("Default text size", systemImage: "textformat.size")
                         Spacer()
@@ -98,14 +93,6 @@ struct PromptingSettingsView: View {
                 }
                 .padding(.vertical, 4)
 
-                NavigationLink {
-                    FontStyleSettingsView(selection: $fontStyleRaw)
-                } label: {
-                    Text("Change Font")
-                }
-                .disabled(useOpenDyslexicFont || useLexendFont)
-                .foregroundStyle((useOpenDyslexicFont || useLexendFont) ? .secondary : .primary)
-
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text("Line Spacing")
@@ -117,7 +104,7 @@ struct PromptingSettingsView: View {
                     Slider(value: $lineSpacing, in: 0...20, step: 1)
                         .tint(.creatorViolet)
                 }
-                .padding(.vertical, 2)
+                .padding(.vertical, 4)
 
                 Toggle("Uppercase", isOn: $uppercase)
             } header: {
@@ -125,7 +112,7 @@ struct PromptingSettingsView: View {
             }
 
             Section {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Label("Side margins", systemImage: "arrow.left.and.right")
                         Spacer()
@@ -225,41 +212,12 @@ struct PromptingSettingsView: View {
             topPadding: 20,
             lineSpacing: CGFloat(lineSpacing),
             uppercase: uppercase,
-            fontStyle: fontStyle,
             useOpenDyslexicFont: useOpenDyslexicFont,
             useLexendFont: useLexendFont
         )
         .scaleEffect(x: mirrorHorizontal && purchaseManager.isPro ? -1 : 1, y: mirrorVertical && purchaseManager.isPro ? -1 : 1)
         .frame(height: 220)
         .background(Color.promptBlack)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-    }
-}
-
-private struct FontStyleSettingsView: View {
-    @Binding var selection: String
-
-    var body: some View {
-        Form {
-            Section {
-                ForEach(PromptFontStyle.allCases) { style in
-                    Button {
-                        selection = style.rawValue
-                    } label: {
-                        HStack {
-                            Text(style.title)
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            if style.rawValue == selection {
-                                Image(systemName: "checkmark")
-                                    .foregroundStyle(Color.creatorViolet)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .navigationTitle("Change Font")
-        .navigationBarTitleDisplayMode(.inline)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }

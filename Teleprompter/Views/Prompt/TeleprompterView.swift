@@ -20,7 +20,6 @@ struct TeleprompterView: View {
     @AppStorage("defaultPromptAreaHeight") private var promptAreaHeight = 430.0
     @AppStorage("defaultPromptLineSpacing") private var lineSpacing = 0.0
     @AppStorage("defaultPromptUppercase") private var uppercase = false
-    @AppStorage("defaultPromptFontStyle") private var fontStyleRaw = PromptFontStyle.standard.rawValue
     @AppStorage("defaultPromptUseOpenDyslexicFont") private var useOpenDyslexicFont = false
     @AppStorage("defaultPromptUseLexendFont") private var useLexendFont = false
     @AppStorage("defaultPromptShowCueIndicator") private var showCueIndicator = true
@@ -48,10 +47,6 @@ struct TeleprompterView: View {
         )
     }
 
-    private var fontStyle: PromptFontStyle {
-        PromptFontStyle(rawValue: fontStyleRaw) ?? .standard
-    }
-
     private var effectiveMargin: Double {
         applyMarginToRecordScreen ? promptMargin : 24.0
     }
@@ -73,7 +68,7 @@ struct TeleprompterView: View {
                     Spacer(minLength: 14)
                     bottomControls
                 }
-                .padding(.horizontal, 14)
+                .padding(.horizontal, 16)
                 .padding(.top, 8)
                 .padding(.bottom, 8)
             }
@@ -198,7 +193,7 @@ struct TeleprompterView: View {
     }
 
     private var topBar: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 12) {
             PromptGlassButton(icon: "xmark", label: "Close") {
                 if camera.isRecording {
                     camera.stopRecordingSession()
@@ -208,14 +203,14 @@ struct TeleprompterView: View {
                 }
             }
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(script.displayTitle)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.appSubheadline)
                     .foregroundStyle(.white)
                     .lineLimit(1)
 
                 Text("\(script.wordCount) words")
-                    .font(.caption2)
+                    .font(.appCaption)
                     .foregroundStyle(.white.opacity(0.64))
             }
 
@@ -223,13 +218,13 @@ struct TeleprompterView: View {
 
             if camera.isRecording {
                 TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    HStack(spacing: 7) {
+                    HStack(spacing: 8) {
                         Circle()
                             .fill(camera.isPaused ? .yellow : .red)
                             .frame(width: 8, height: 8)
 
                         Text(camera.isPaused ? "PAUSED" : recordingDuration(camera.elapsedRecordingTime))
-                            .font(.caption.monospacedDigit().weight(.semibold))
+                            .font(.appCaptionEmphasis.monospacedDigit())
                     }
                     .foregroundStyle(.white)
                     .padding(.horizontal, 12)
@@ -250,10 +245,10 @@ struct TeleprompterView: View {
 
     private var promptArea: some View {
         ZStack(alignment: .trailing) {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(.black.opacity(0.38))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .stroke(.white.opacity(0.12), lineWidth: 0.75)
                 }
 
@@ -269,12 +264,11 @@ struct TeleprompterView: View {
                 topPadding: focusNearLens ? 72 : 170,
                 lineSpacing: CGFloat(lineSpacing),
                 uppercase: uppercase,
-                fontStyle: fontStyle,
                 useOpenDyslexicFont: useOpenDyslexicFont,
                 useLexendFont: useLexendFont
             )
             .scaleEffect(x: isMirrored ? -1 : 1, y: isMirroredVertical ? -1 : 1)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
             if showCueIndicator {
                 VStack(spacing: 0) {
@@ -308,7 +302,7 @@ struct TeleprompterView: View {
 
     private var resizeHandle: some View {
         Image(systemName: "arrow.up.and.down")
-            .font(.system(size: 13, weight: .bold))
+            .font(.appCaptionEmphasis)
             .foregroundStyle(.white.opacity(0.85))
             .frame(width: 32, height: 32)
             .background(.black.opacity(0.45), in: Circle())
@@ -348,7 +342,7 @@ struct TeleprompterView: View {
                         camera.isPaused ? "Resume recording" : "Pause recording",
                         systemImage: camera.isPaused ? "play.fill" : "pause.fill"
                     )
-                    .font(.subheadline.weight(.semibold))
+                    .font(.appSubheadline)
                     .frame(maxWidth: .infinity)
                     .frame(height: 44)
                 }
@@ -358,7 +352,7 @@ struct TeleprompterView: View {
             }
 
             GlassEffectContainer(spacing: 12) {
-                HStack(spacing: 10) {
+                HStack(spacing: 12) {
                     PromptGlassButton(icon: "backward.end.fill", label: "Restart") {
                         resetToken += 1
                         isPlaying = false
@@ -390,7 +384,7 @@ struct TeleprompterView: View {
                     .overlay(alignment: .topTrailing) {
                         if !purchaseManager.isPro {
                             Image(systemName: "crown.fill")
-                                .font(.system(size: 8, weight: .black))
+                                .font(.appMicro)
                                 .foregroundStyle(.white)
                                 .frame(width: 18, height: 18)
                                 .background(Color.creatorViolet, in: Circle())
@@ -415,7 +409,7 @@ struct TeleprompterView: View {
     private var adjustmentPanel: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 18) {
+                VStack(spacing: 20) {
                     Picker("Timing", selection: timingMode) {
                         ForEach(PromptScrollTimingMode.allCases) { mode in
                             Text(mode.title).tag(mode)
@@ -459,15 +453,15 @@ struct TeleprompterView: View {
                     )
 
                     Toggle("3-second countdown", isOn: $countdownEnabled)
-                        .font(.subheadline.weight(.semibold))
+                        .font(.appSubheadline)
                         .tint(.creatorViolet)
 
                     Toggle("Keep reading line near camera", isOn: $focusNearLens)
-                        .font(.subheadline.weight(.semibold))
+                        .font(.appSubheadline)
                         .tint(.creatorViolet)
 
                     Text("You can drag the script at any time. Automatic scrolling resumes after you release it.")
-                        .font(.caption)
+                        .font(.appCaption)
                         .foregroundStyle(.white.opacity(0.58))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -519,22 +513,22 @@ struct TeleprompterView: View {
     }
 
     private var permissionView: some View {
-        VStack(spacing: 18) {
+        VStack(spacing: 20) {
             Image(systemName: "camera.fill")
-                .font(.system(size: 34, weight: .semibold))
+                .font(.appHero)
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 84, height: 84)
                 .glassEffect(.regular.tint(Color.creatorViolet.opacity(0.18)), in: Circle())
 
             Text("Camera access is off")
-                .font(.title.bold())
+                .font(.appTitle)
                 .foregroundStyle(.white)
 
             Text("Enable camera and microphone access in Settings to record while reading your script.")
-                .font(.body)
+                .font(.appBody)
                 .foregroundStyle(.white.opacity(0.65))
                 .multilineTextAlignment(.center)
-                .lineSpacing(3)
+                .lineSpacing(4)
                 .padding(.horizontal, 32)
 
             Button("Open Settings") {
@@ -552,17 +546,17 @@ struct TeleprompterView: View {
             Color.black.opacity(0.30)
                 .ignoresSafeArea()
 
-            VStack(spacing: 14) {
+            VStack(spacing: 16) {
                 Text("Get ready")
-                    .font(.headline)
+                    .font(.appHeadline)
                     .foregroundStyle(.white.opacity(0.78))
 
                 Text("\(value)")
-                    .font(.system(size: 104, weight: .bold))
+                    .font(.appHero)
                     .foregroundStyle(.white)
                     .contentTransition(.numericText())
             }
-            .padding(38)
+            .padding(40)
             .glassEffect(.regular.tint(Color.black.opacity(0.18)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .allowsHitTesting(true)
@@ -571,22 +565,22 @@ struct TeleprompterView: View {
     private var finalizingOverlay: some View {
         ZStack {
             Color.black.opacity(0.42).ignoresSafeArea()
-            VStack(spacing: 14) {
+            VStack(spacing: 16) {
                 ProgressView()
                     .controlSize(.large)
                     .tint(.white)
                 Text("Checking your recording...")
-                    .font(.headline)
+                    .font(.appHeadline)
                     .foregroundStyle(.white)
             }
             .padding(28)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
     }
 
     private func warningBanner(_ text: String) -> some View {
         Label(text, systemImage: "exclamationmark.triangle.fill")
-            .font(.caption.weight(.semibold))
+            .font(.appCaptionEmphasis)
             .foregroundStyle(.white)
             .padding(.horizontal, 16)
             .frame(minHeight: 44)
@@ -598,13 +592,13 @@ struct TeleprompterView: View {
 
     private var savedToast: some View {
         Label("Saved to Photos", systemImage: "checkmark.circle.fill")
-            .font(.subheadline.weight(.semibold))
+            .font(.appSubheadline)
             .foregroundStyle(.white)
             .padding(.horizontal, 16)
             .frame(height: 46)
             .glassEffect(.regular.tint(Color.creatorViolet.opacity(0.25)), in: Capsule())
             .frame(maxHeight: .infinity, alignment: .top)
-            .padding(.top, 18)
+            .padding(.top, 20)
     }
 
     private var targetDurationText: String {
@@ -681,11 +675,11 @@ private struct RecordingPreflightSheet: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 20) {
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text("Ready to record?")
-                        .font(.title2.bold())
+                        .font(.appTitle)
                     Text("A quick check helps avoid a silent, incomplete, or unsaved take.")
-                        .font(.subheadline)
+                        .font(.appSecondary)
                         .foregroundStyle(.secondary)
                 }
 
@@ -715,7 +709,7 @@ private struct RecordingPreflightSheet: View {
 
                 if !snapshot.microphoneAuthorized {
                     Label("You can continue, but the video will be recorded without microphone audio.", systemImage: "speaker.slash.fill")
-                        .font(.caption)
+                        .font(.appCaption)
                         .foregroundStyle(.secondary)
                 }
 
@@ -760,18 +754,18 @@ private struct PreflightRow: View {
     let isReady: Bool
 
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 16) {
             Image(systemName: icon)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.appHeadline)
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 42, height: 42)
-                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.headline)
+                    .font(.appHeadline)
                 Text(detail)
-                    .font(.caption)
+                    .font(.appCaption)
                     .foregroundStyle(.secondary)
             }
 
@@ -827,7 +821,7 @@ private struct RecordingReviewView: View {
             ZStack {
                 Color.black.ignoresSafeArea()
 
-                VStack(spacing: 18) {
+                VStack(spacing: 20) {
                     ZStack {
                         if let player {
                             VideoPlayer(player: player)
@@ -836,19 +830,19 @@ private struct RecordingReviewView: View {
                         if isPreparingAsset {
                             ZStack {
                                 Color.black.opacity(0.55)
-                                VStack(spacing: 10) {
+                                VStack(spacing: 12) {
                                     ProgressView()
                                         .tint(.white)
                                     Text("Preparing preview...")
-                                        .font(.caption.weight(.semibold))
+                                        .font(.appCaptionEmphasis)
                                         .foregroundStyle(.white.opacity(0.8))
                                 }
                             }
                         }
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .overlay {
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .stroke(.white.opacity(0.14), lineWidth: 0.75)
                     }
 
@@ -856,7 +850,7 @@ private struct RecordingReviewView: View {
 
                     if watermarkFailed {
                         Label("Couldn't prepare the watermark. Saving the original recording instead.", systemImage: "exclamationmark.triangle.fill")
-                            .font(.caption)
+                            .font(.appCaption)
                             .foregroundStyle(.orange)
                     }
 
@@ -887,7 +881,7 @@ private struct RecordingReviewView: View {
                             showsPaywall = true
                         } label: {
                             Label("Remove Watermark", systemImage: "seal")
-                                .font(.subheadline.weight(.semibold))
+                                .font(.appSubheadline)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 46)
                         }
@@ -967,7 +961,7 @@ private struct RecordingReviewView: View {
     }
 
     private var verificationCard: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 16) {
             VerificationItem(
                 icon: "checkmark.seal.fill",
                 title: "Video",
@@ -987,8 +981,8 @@ private struct RecordingReviewView: View {
                 isReady: true
             )
         }
-        .padding(14)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .padding(16)
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -999,14 +993,14 @@ private struct VerificationItem: View {
     let isReady: Bool
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 8) {
             Image(systemName: icon)
                 .foregroundStyle(isReady ? Color.green : Color.orange)
             Text(title)
-                .font(.caption.weight(.semibold))
+                .font(.appCaptionEmphasis)
                 .foregroundStyle(.white)
             Text(value)
-                .font(.caption2)
+                .font(.appCaption)
                 .foregroundStyle(.white.opacity(0.62))
                 .lineLimit(1)
         }
@@ -1023,7 +1017,7 @@ private struct PromptGlassButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.appHeadline)
                 .frame(width: 46, height: 46)
         }
         .buttonStyle(.glass)
@@ -1045,13 +1039,13 @@ private struct ControlSlider: View {
         VStack(spacing: 8) {
             HStack {
                 Label(title, systemImage: icon)
-                    .font(.caption.weight(.semibold))
+                    .font(.appCaptionEmphasis)
                     .foregroundStyle(.white.opacity(0.82))
 
                 Spacer()
 
                 Text(valueText)
-                    .font(.caption.monospacedDigit().weight(.semibold))
+                    .font(.appCaptionEmphasis.monospacedDigit())
                     .foregroundStyle(.white.opacity(0.72))
             }
 

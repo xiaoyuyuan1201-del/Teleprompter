@@ -39,15 +39,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             mainContent
-                .navigationTitle("Teleprompter")
-                .navigationBarTitleDisplayMode(.large)
-                .toolbar {
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                        if !purchaseManager.isPro {
-                            proButton
-                        }
-                    }
-                }
+                .hidesSystemNavigationBar()
                 .navigationDestination(item: $openedFolder) { folder in
                     FolderDetailView(folder: folder)
                         .environmentObject(scriptStore)
@@ -160,18 +152,23 @@ struct HomeView: View {
         ZStack {
             AppBackground()
 
-            ScrollView(showsIndicators: false) {
-                LazyVStack(alignment: .leading, spacing: 32) {
-                    quickStartCard
-                    libraryList
+            VStack(spacing: 0) {
+                AppHeaderRow(title: "Teleprompter", onTitleTap: { hasCompletedOnboarding = false }) {
+                    if !purchaseManager.isPro {
+                        proButton
+                    }
                 }
-                .padding(.horizontal, AppLayout.screenHorizontalPadding)
-                .padding(.top, 8)
-                .padding(.bottom, 32)
+
+                ScrollView(showsIndicators: false) {
+                    LazyVStack(alignment: .leading, spacing: 32) {
+                        quickStartCard
+                        libraryList
+                    }
+                    .padding(.horizontal, AppLayout.screenHorizontalPadding)
+                    .padding(.top, 8)
+                    .padding(.bottom, 32)
+                }
             }
-        }
-        .onTitleTapped("Teleprompter", taps: 5) {
-            hasCompletedOnboarding = false
         }
     }
 
@@ -179,19 +176,23 @@ struct HomeView: View {
         Button {
             showsPaywall = true
         } label: {
-            HStack(spacing: 5) {
+            HStack(spacing: 4) {
                 Image(systemName: "crown.fill")
                 Text("Pro")
-                    .font(.caption.weight(.semibold))
+                    .font(.appCaptionEmphasis)
             }
+            .foregroundStyle(Color.creatorViolet)
+            .padding(.horizontal, 12)
+            .frame(height: 32)
+            .background(Color.creatorViolet.opacity(0.10), in: Capsule(style: .continuous))
         }
-        .tint(.creatorViolet)
+        .buttonStyle(.plain)
         .accessibilityLabel("Teleprompter Pro")
     }
 
     private var quickStartCard: some View {
         ZStack(alignment: .bottomLeading) {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(
                     LinearGradient(
                         colors: [.creatorViolet, .creatorVioletLight],
@@ -210,22 +211,16 @@ struct HomeView: View {
                 .frame(width: 116, height: 116)
                 .offset(x: 286, y: 92)
 
-            VStack(alignment: .leading, spacing: 18) {
-                Label("QUICK START", systemImage: "video.fill")
-                    .font(.caption.bold())
-                    .tracking(0.8)
-                    .foregroundStyle(.white.opacity(0.84))
-
-                VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text("Ready for your next take?")
-                        .font(.title.bold())
+                        .font(.appTitle)
                         .foregroundStyle(.white)
 
                     Text(latestScriptDescription)
-                        .font(.subheadline)
+                        .font(.appSecondary)
                         .foregroundStyle(.white.opacity(0.80))
-                        .lineLimit(2)
-                        .lineSpacing(2)
+                        .lineLimit(1)
                 }
 
                 Button {
@@ -236,23 +231,23 @@ struct HomeView: View {
                     }
                 } label: {
                     Label("Start prompting", systemImage: "play.fill")
-                        .font(.headline)
+                        .font(.appHeadline)
                         .foregroundStyle(Color.creatorViolet)
                         .padding(.horizontal, 16)
-                        .frame(height: 46)
+                        .frame(height: 40)
                         .background(
                             Color.white,
-                            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            in: Capsule(style: .continuous)
                         )
                 }
                 .buttonStyle(.plain)
             }
-            .padding(20)
+            .padding(16)
         }
-        .frame(height: 228)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .frame(height: 180)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(.white.opacity(0.14), lineWidth: 0.5)
         }
         .shadow(color: Color.creatorViolet.opacity(0.14), radius: 14, y: 8)
@@ -274,8 +269,21 @@ struct HomeView: View {
         }
     }
 
+    private var quickActionsRow: some View {
+        HStack(spacing: 12) {
+            QuickActionButton(title: "Import", systemImage: "doc.text", action: importScript)
+            QuickActionButton(title: "AI Script", systemImage: "sparkles", action: createScript)
+            QuickActionButton(title: "New Folder", systemImage: "folder") {
+                newFolderName = ""
+                showsNewFolderAlert = true
+            }
+        }
+    }
+
     private var libraryList: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 16) {
+            quickActionsRow
+
             searchBar
 
             if scriptStore.scripts.isEmpty {
@@ -283,7 +291,7 @@ struct HomeView: View {
             } else if filteredScripts.isEmpty && visibleFolders.isEmpty {
                 emptyFilterState
             } else {
-                LazyVStack(spacing: 10) {
+                LazyVStack(spacing: 12) {
                     ForEach(visibleFolders) { folder in
                         FolderRow(
                             folder: folder,
@@ -327,7 +335,7 @@ struct HomeView: View {
     }
 
     private var searchBar: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
@@ -345,9 +353,9 @@ struct HomeView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 14)
+            .padding(.horizontal, 16)
             .frame(height: 46)
-            .contentCard(cornerRadius: 23)
+            .contentCard(cornerRadius: 16)
 
             Menu {
                 Section("Sort") {
@@ -368,10 +376,10 @@ struct HomeView: View {
                 }
             } label: {
                 Image(systemName: "line.3.horizontal.decrease")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.appSubheadline)
                     .foregroundStyle(Color.creatorViolet)
                     .frame(width: 46, height: 46)
-                    .contentCard(cornerRadius: 23)
+                    .contentCard(cornerRadius: 16)
             }
             .accessibilityLabel("Sort and filter")
         }
@@ -380,38 +388,38 @@ struct HomeView: View {
     private var emptyFilterState: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "folder")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.appHeadline)
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 38, height: 38)
-                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 8))
+                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16))
 
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("No scripts here")
-                    .font(.headline)
+                    .font(.appHeadline)
                 Text("Move a script into this folder from its menu, or create a new one.")
-                    .font(.subheadline)
+                    .font(.appSecondary)
                     .foregroundStyle(.secondary)
             }
 
             Spacer()
         }
-        .padding(14)
+        .padding(16)
         .contentCard()
     }
 
     private var emptyState: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "doc.text")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.appHeadline)
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 38, height: 38)
-                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 8))
+                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16))
 
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("No scripts")
-                    .font(.headline)
+                    .font(.appHeadline)
                 Text("Create or import a script to begin recording.")
-                    .font(.subheadline)
+                    .font(.appSecondary)
                     .foregroundStyle(.secondary)
             }
 
@@ -424,7 +432,7 @@ struct HomeView: View {
             }
             .buttonStyle(ToolSecondaryButtonStyle(height: 32, horizontalPadding: 10))
         }
-        .padding(14)
+        .padding(16)
         .contentCard()
     }
 
@@ -472,6 +480,35 @@ struct HomeView: View {
     }
 }
 
+struct QuickActionButton: View {
+    let title: String
+    let systemImage: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: systemImage)
+                    .font(.appHeadline)
+                    .foregroundStyle(Color.creatorViolet)
+                    .frame(width: 36, height: 36)
+                    .background(
+                        Color.creatorViolet.opacity(0.10),
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    )
+
+                Text(title)
+                    .font(.appSubheadline)
+                    .foregroundStyle(.primary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .contentCard()
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct ScriptRow: View {
     let script: PromptScript
     let folders: [ScriptFolder]
@@ -489,47 +526,47 @@ struct ScriptRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 11) {
+            HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "text.alignleft")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.appSubheadline)
                     .foregroundStyle(Color.creatorViolet)
                     .frame(width: 36, height: 36)
                     .background(
                         Color.creatorViolet.opacity(0.10),
-                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
                     )
 
-                VStack(alignment: .leading, spacing: 5) {
-                    HStack(spacing: 6) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
                         Text(script.displayTitle)
-                            .font(.headline)
+                            .font(.appHeadline)
                             .lineLimit(1)
 
                         if script.isFavorite {
                             Image(systemName: "star.fill")
-                                .font(.caption)
+                                .font(.appCaption)
                                 .foregroundStyle(Color.creatorViolet)
                         }
 
                         if script.isDraft {
                             Text("DRAFT")
-                                .font(.system(size: 9, weight: .bold))
-                                .tracking(0.35)
+                                .font(.appMicro)
+                                .tracking(1)
                                 .foregroundStyle(Color.creatorViolet)
-                                .padding(.horizontal, 5)
-                                .padding(.vertical, 2)
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 4)
                                 .background(
                                     Color.creatorViolet.opacity(0.10),
-                                    in: RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                    in: RoundedRectangle(cornerRadius: 16, style: .continuous)
                                 )
                         }
                     }
 
                     Text(script.body.isEmpty ? "No script text yet" : script.body)
-                        .font(.subheadline)
+                        .font(.appSecondary)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
-                        .lineSpacing(2)
+                        .lineSpacing(4)
                 }
 
                 Spacer(minLength: 4)
@@ -587,7 +624,7 @@ struct ScriptRow: View {
                     Label("\(script.wordCount) words", systemImage: "text.word.spacing")
                     Label("~\(script.estimatedMinutes) min", systemImage: "clock")
                 }
-                .font(.caption)
+                .font(.appCaption)
                 .foregroundStyle(.secondary)
 
                 Spacer()
@@ -599,9 +636,9 @@ struct ScriptRow: View {
                 .disabled(!canPrompt)
             }
         }
-        .padding(14)
+        .padding(16)
         .contentCard()
-        .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .onTapGesture(perform: onEdit)
     }
 }
@@ -614,27 +651,27 @@ struct FolderRow: View {
     let onDelete: () -> Void
 
     var body: some View {
-        HStack(alignment: .center, spacing: 11) {
+        HStack(alignment: .center, spacing: 12) {
             Image(systemName: "folder.fill")
-                .font(.system(size: 15, weight: .semibold))
+                .font(.appSubheadline)
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 36, height: 36)
-                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(folder.displayName)
-                    .font(.headline)
+                    .font(.appHeadline)
                     .lineLimit(1)
 
                 Text("\(count) script\(count == 1 ? "" : "s")")
-                    .font(.subheadline)
+                    .font(.appSecondary)
                     .foregroundStyle(.secondary)
             }
 
             Spacer(minLength: 4)
 
             Image(systemName: "chevron.right")
-                .font(.caption.weight(.semibold))
+                .font(.appCaptionEmphasis)
                 .foregroundStyle(.tertiary)
 
             Menu {
@@ -649,9 +686,9 @@ struct FolderRow: View {
                     .frame(width: 30, height: 30)
             }
         }
-        .padding(14)
+        .padding(16)
         .contentCard()
-        .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .onTapGesture(perform: onOpen)
     }
 }

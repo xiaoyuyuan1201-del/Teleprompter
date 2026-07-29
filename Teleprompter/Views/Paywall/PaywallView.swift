@@ -35,7 +35,7 @@ struct PaywallView: View {
                         legalCopy
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 18)
+                    .padding(.top, 20)
                     .padding(.bottom, 168)
                 }
             }
@@ -78,7 +78,7 @@ struct PaywallView: View {
     }
 
     private var hero: some View {
-        VStack(spacing: 18) {
+        VStack(spacing: 20) {
             ZStack {
                 Circle()
                     .fill(Color.creatorViolet.opacity(0.12))
@@ -96,28 +96,28 @@ struct PaywallView: View {
                     .shadow(color: Color.creatorViolet.opacity(0.28), radius: 24, y: 14)
 
                 Image(systemName: "crown.fill")
-                    .font(.system(size: 38, weight: .bold))
+                    .font(.appHero)
                     .foregroundStyle(.white)
             }
 
-            VStack(spacing: 9) {
+            VStack(spacing: 8) {
                 Text("Try every Pro tool free")
-                    .font(.largeTitle.bold())
+                    .font(.appHero)
                     .multilineTextAlignment(.center)
 
                 Text("Start with a 3-day trial, then keep Pro only if it helps your recordings.")
-                    .font(.body)
+                    .font(.appBody)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                    .lineSpacing(3)
-                    .padding(.horizontal, 14)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 16)
             }
         }
         .padding(.top, 8)
     }
 
     private var benefits: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 20) {
             SectionEyebrow(title: "Included with Pro")
 
             BenefitRow(
@@ -142,7 +142,7 @@ struct PaywallView: View {
             )
         }
         .padding(20)
-        .contentCard(cornerRadius: 12)
+        .contentCard(cornerRadius: 16)
     }
 
     private var plans: some View {
@@ -165,18 +165,18 @@ struct PaywallView: View {
     }
 
     private var trialDisclosure: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("Trial timeline")
-                    .font(.headline)
+                    .font(.appHeadline)
                 Spacer()
                 Text("3 DAYS FREE")
-                    .font(.caption2.bold())
-                    .tracking(0.5)
+                    .font(.appCaptionEmphasis)
+                    .tracking(1)
                     .foregroundStyle(Color.creatorViolet)
                     .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+                    .padding(.vertical, 4)
+                    .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
 
             DisclosureRow(title: "Today", value: "¥0")
@@ -184,16 +184,16 @@ struct PaywallView: View {
             DisclosureRow(title: "Then renews", value: renewalText)
 
             Text("The App Store confirms your exact offer before purchase. Trial eligibility can vary by Apple ID. Cancel at least 24 hours before renewal to avoid being charged.")
-                .font(.caption2)
+                .font(.appCaption)
                 .foregroundStyle(.secondary)
-                .lineSpacing(2)
+                .lineSpacing(4)
         }
-        .padding(18)
-        .contentCard(cornerRadius: 12)
+        .padding(20)
+        .contentCard(cornerRadius: 16)
     }
 
     private var purchaseArea: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 12) {
             Button {
                 Task {
                     let success = await purchaseManager.purchase(plan: selectedPlan)
@@ -210,7 +210,7 @@ struct PaywallView: View {
                     if purchaseManager.isLoading {
                         ProgressView()
                             .tint(.white)
-                            .padding(.leading, 18)
+                            .padding(.leading, 20)
                     }
                 }
             }
@@ -219,14 +219,14 @@ struct PaywallView: View {
             .disabled(purchaseManager.isLoading)
 
             Text("\(renewalText) after the trial · auto-renews · cancel anytime")
-                .font(.caption2)
+                .font(.appCaption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
 
             Button("Restore previous purchase") {
                 Task { await purchaseManager.restorePurchases() }
             }
-            .font(.caption.weight(.semibold))
+            .font(.appCaptionEmphasis)
             .foregroundStyle(Color.creatorViolet)
         }
         .padding(.horizontal, 20)
@@ -237,16 +237,16 @@ struct PaywallView: View {
     private var legalCopy: some View {
         VStack(spacing: 12) {
             Text("Payment is charged to your Apple ID after any eligible trial. Subscriptions renew automatically unless cancelled in App Store settings.")
-                .font(.caption2)
+                .font(.appCaption)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
-                .lineSpacing(2)
+                .lineSpacing(4)
 
             HStack(spacing: 20) {
                 Button("Terms") { }
                 Button("Privacy") { }
             }
-            .font(.caption.weight(.semibold))
+            .font(.appCaptionEmphasis)
             .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 12)
@@ -282,11 +282,11 @@ private struct DisclosureRow: View {
     var body: some View {
         HStack {
             Text(title)
-                .font(.subheadline)
+                .font(.appSecondary)
                 .foregroundStyle(.secondary)
             Spacer()
             Text(value)
-                .font(.subheadline.weight(.semibold))
+                .font(.appSubheadline)
         }
     }
 }
@@ -299,46 +299,46 @@ private struct PlanCard: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 14) {
+            HStack(spacing: 16) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
+                    .font(.appHeadline)
                     .foregroundStyle(isSelected ? Color.creatorViolet : Color.secondary.opacity(0.55))
 
-                VStack(alignment: .leading, spacing: 5) {
+                VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
                         Text(plan.title)
-                            .font(.headline)
+                            .font(.appHeadline)
 
                         if plan == .yearly {
                             Text("BEST VALUE")
-                                .font(.caption2.bold())
+                                .font(.appCaptionEmphasis)
                                 .foregroundStyle(Color.creatorViolet)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Color.creatorViolet.opacity(0.12), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+                                .background(Color.creatorViolet.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                     }
 
                     Text(plan.note)
-                        .font(.subheadline)
+                        .font(.appSecondary)
                         .foregroundStyle(.secondary)
                 }
 
                 Spacer()
 
                 Text(price)
-                    .font(.headline)
+                    .font(.appHeadline)
                     .multilineTextAlignment(.trailing)
             }
-            .padding(18)
+            .padding(20)
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
             .background(
                 isSelected ? Color.creatorViolet.opacity(0.09) : Color.appSurface,
-                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                in: RoundedRectangle(cornerRadius: 16, style: .continuous)
             )
             .overlay {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .stroke(
                         isSelected ? Color.creatorViolet : Color.primary.opacity(0.055),
                         lineWidth: isSelected ? 1.5 : 0.75
@@ -356,19 +356,19 @@ private struct BenefitRow: View {
     let detail: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
+        HStack(alignment: .top, spacing: 16) {
             Image(systemName: icon)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.appHeadline)
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 38, height: 38)
-                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.headline)
+                    .font(.appHeadline)
 
                 Text(detail)
-                    .font(.subheadline)
+                    .font(.appSecondary)
                     .foregroundStyle(.secondary)
             }
 

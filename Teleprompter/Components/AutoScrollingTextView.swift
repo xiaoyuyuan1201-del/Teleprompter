@@ -15,33 +15,6 @@ enum PromptScrollTimingMode: String, CaseIterable, Identifiable {
     }
 }
 
-enum PromptFontStyle: String, CaseIterable, Identifiable {
-    case standard
-    case rounded
-    case serif
-    case monospaced
-
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .standard: "Default"
-        case .rounded: "Rounded"
-        case .serif: "Serif"
-        case .monospaced: "Monospaced"
-        }
-    }
-
-    var design: UIFontDescriptor.SystemDesign {
-        switch self {
-        case .standard: .default
-        case .rounded: .rounded
-        case .serif: .serif
-        case .monospaced: .monospaced
-        }
-    }
-}
-
 struct AutoScrollingTextView: UIViewRepresentable {
     let text: String
     let fontSize: CGFloat
@@ -54,13 +27,12 @@ struct AutoScrollingTextView: UIViewRepresentable {
     let topPadding: CGFloat
     var lineSpacing: CGFloat = 0
     var uppercase: Bool = false
-    var fontStyle: PromptFontStyle = .standard
     var useOpenDyslexicFont: Bool = false
     var useLexendFont: Bool = false
 
     private func makeFont() -> UIFont {
         let base = UIFont.systemFont(ofSize: fontSize, weight: .semibold)
-        let design: UIFontDescriptor.SystemDesign = useLexendFont || useOpenDyslexicFont ? .rounded : fontStyle.design
+        let design: UIFontDescriptor.SystemDesign = useLexendFont || useOpenDyslexicFont ? .rounded : .default
         guard let descriptor = base.fontDescriptor.withDesign(design) else { return base }
         return UIFont(descriptor: descriptor, size: fontSize)
     }

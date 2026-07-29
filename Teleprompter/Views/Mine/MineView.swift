@@ -8,15 +8,18 @@ struct MineView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                profileSection
-                proSection
-                promptingSection
-                supportSection
-                aboutSection
+            VStack(spacing: 0) {
+                AppHeaderRow(title: "Mine")
+
+                Form {
+                    profileSection
+                    proSection
+                    promptingSection
+                    supportSection
+                    aboutSection
+                }
             }
-            .navigationTitle("Mine")
-            .navigationBarTitleDisplayMode(.large)
+            .hidesSystemNavigationBar()
         }
         .fullScreenCover(isPresented: $showsPaywall) {
             PaywallView(source: .inApp)
@@ -26,16 +29,16 @@ struct MineView: View {
 
     private var profileSection: some View {
         Section {
-            HStack(spacing: 14) {
+            HStack(spacing: 16) {
                 Image(systemName: "person.crop.circle.fill")
-                    .font(.system(size: 42, weight: .regular))
+                    .font(.appHero)
                     .foregroundStyle(Color.creatorViolet)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Teleprompter")
-                        .font(.headline)
+                        .font(.appHeadline)
                     Text(purchaseManager.isPro ? "Pro member" : "Free plan")
-                        .font(.caption)
+                        .font(.appCaption)
                         .foregroundStyle(.secondary)
                 }
 
@@ -60,27 +63,27 @@ struct MineView: View {
                 Button {
                     showsPaywall = true
                 } label: {
-                    HStack(spacing: 14) {
+                    HStack(spacing: 16) {
                         Image(systemName: "crown.fill")
-                            .font(.title3)
+                            .font(.appHeadline)
                             .foregroundStyle(Color.creatorViolet)
                             .frame(width: 40, height: 40)
-                            .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                            .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-                        VStack(alignment: .leading, spacing: 3) {
+                        VStack(alignment: .leading, spacing: 4) {
                             Text("Upgrade to Pro")
-                                .font(.headline)
+                                .font(.appHeadline)
                                 .foregroundStyle(.primary)
 
                             Text("AI polish, unlimited scripts and mirror mode")
-                                .font(.caption)
+                                .font(.appCaption)
                                 .foregroundStyle(.secondary)
                         }
 
                         Spacer()
 
                         Image(systemName: "chevron.right")
-                            .font(.caption.weight(.semibold))
+                            .font(.appCaptionEmphasis)
                             .foregroundStyle(.tertiary)
                     }
                     .padding(.vertical, 4)

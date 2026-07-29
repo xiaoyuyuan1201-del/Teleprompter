@@ -15,34 +15,37 @@ struct VideosView: View {
             ZStack {
                 AppBackground()
 
-                if recordingStore.recordings.isEmpty {
-                    emptyState
-                } else {
-                    ScrollView(showsIndicators: false) {
-                        LazyVStack(spacing: 14) {
-                            summaryHeader
+                VStack(spacing: 0) {
+                    AppHeaderRow(title: "Videos")
 
-                            ForEach(recordingStore.recordings) { recording in
-                                RecordingCard(
-                                    recording: recording,
-                                    url: recordingStore.fileURL(for: recording),
-                                    onOpen: { selectedRecording = recording },
-                                    onRename: {
-                                        renameText = recording.title
-                                        renameTarget = recording
-                                    },
-                                    onDelete: { recordingStore.delete(recording) }
-                                )
+                    if recordingStore.recordings.isEmpty {
+                        emptyState
+                    } else {
+                        ScrollView(showsIndicators: false) {
+                            LazyVStack(spacing: 16) {
+                                summaryHeader
+
+                                ForEach(recordingStore.recordings) { recording in
+                                    RecordingCard(
+                                        recording: recording,
+                                        url: recordingStore.fileURL(for: recording),
+                                        onOpen: { selectedRecording = recording },
+                                        onRename: {
+                                            renameText = recording.title
+                                            renameTarget = recording
+                                        },
+                                        onDelete: { recordingStore.delete(recording) }
+                                    )
+                                }
                             }
+                            .padding(.horizontal, AppLayout.screenHorizontalPadding)
+                            .padding(.top, 8)
+                            .padding(.bottom, 36)
                         }
-                        .padding(.horizontal, AppLayout.screenHorizontalPadding)
-                        .padding(.top, 8)
-                        .padding(.bottom, 36)
                     }
                 }
             }
-            .navigationTitle("Videos")
-            .navigationBarTitleDisplayMode(.large)
+            .hidesSystemNavigationBar()
         }
         .sheet(item: $selectedRecording) { recording in
             RecordingPlayerView(
@@ -70,18 +73,18 @@ struct VideosView: View {
     }
 
     private var summaryHeader: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 16) {
             Image(systemName: "play.rectangle.on.rectangle.fill")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.appHeadline)
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 50, height: 50)
-                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("Your recordings")
-                    .font(.headline)
+                    .font(.appHeadline)
                 Text("\(recordingStore.recordings.count) saved in Teleprompter")
-                    .font(.caption)
+                    .font(.appCaption)
                     .foregroundStyle(.secondary)
             }
 
@@ -92,22 +95,22 @@ struct VideosView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 18) {
+        VStack(spacing: 20) {
             Image(systemName: "video.badge.plus")
-                .font(.system(size: 34, weight: .semibold))
+                .font(.appHero)
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 76, height: 76)
-                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-            VStack(spacing: 7) {
+            VStack(spacing: 8) {
                 Text("No recordings yet")
-                    .font(.title3.bold())
+                    .font(.appTitle)
 
                 Text("Videos you record with Teleprompter will appear here automatically.")
-                    .font(.subheadline)
+                    .font(.appSecondary)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                    .lineSpacing(2)
+                    .lineSpacing(4)
             }
         }
         .padding(.horizontal, 36)
@@ -124,21 +127,21 @@ private struct RecordingCard: View {
     @State private var showsShare = false
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 12) {
             Button(action: onOpen) {
-                HStack(spacing: 14) {
+                HStack(spacing: 16) {
                     VideoThumbnailView(url: url)
                         .frame(width: 112, height: 82)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-                    VStack(alignment: .leading, spacing: 7) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text(recording.title)
-                            .font(.headline)
+                            .font(.appHeadline)
                             .foregroundStyle(.primary)
                             .lineLimit(2)
 
                         Text(recording.createdAt.formatted(date: .abbreviated, time: .shortened))
-                            .font(.caption)
+                            .font(.appCaption)
                             .foregroundStyle(.secondary)
 
                         HStack(spacing: 8) {
@@ -149,7 +152,7 @@ private struct RecordingCard: View {
                                     .foregroundStyle(.orange)
                             }
                         }
-                        .font(.caption2)
+                        .font(.appCaption)
                         .foregroundStyle(.secondary)
                     }
 
@@ -173,7 +176,7 @@ private struct RecordingCard: View {
                 }
             } label: {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.appSubheadline)
                     .frame(width: 38, height: 38)
             }
             .buttonStyle(ToolSecondaryButtonStyle(height: 36, horizontalPadding: 0))
@@ -201,7 +204,7 @@ private struct VideoThumbnailView: View {
                     .scaledToFill()
             } else {
                 Image(systemName: "video.fill")
-                    .font(.title2)
+                    .font(.appHeadline)
                     .foregroundStyle(.white.opacity(0.72))
             }
 
@@ -210,7 +213,7 @@ private struct VideoThumbnailView: View {
                 .frame(width: 34, height: 34)
                 .overlay {
                     Image(systemName: "play.fill")
-                        .font(.caption.weight(.bold))
+                        .font(.appCaptionEmphasis)
                         .foregroundStyle(.white)
                         .offset(x: 1)
                 }
@@ -254,28 +257,28 @@ private struct RecordingPlayerView: View {
             ZStack {
                 Color.black.ignoresSafeArea()
 
-                VStack(spacing: 18) {
+                VStack(spacing: 20) {
                     VideoPlayer(player: player)
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(recording.title)
-                                .font(.headline)
+                                .font(.appHeadline)
                                 .foregroundStyle(.white)
                             Text(recording.createdAt.formatted(date: .abbreviated, time: .shortened))
-                                .font(.caption)
+                                .font(.appCaption)
                                 .foregroundStyle(.white.opacity(0.62))
                         }
 
                         Spacer()
 
                         Text(recording.durationText)
-                            .font(.caption.monospacedDigit().weight(.semibold))
+                            .font(.appCaptionEmphasis.monospacedDigit())
                             .foregroundStyle(.white)
                     }
                     .padding(16)
-                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
                     Button {
                         showsShare = true

@@ -134,7 +134,7 @@ struct ScriptEditorView: View {
     private var statusRow: some View {
         let preview = PromptScript(title: title, body: bodyText)
 
-        return HStack(spacing: 10) {
+        return HStack(spacing: 12) {
             StatPill(icon: "text.word.spacing", text: "\(preview.wordCount) words")
             StatPill(icon: "clock", text: "About \(preview.estimatedMinutes) min")
 
@@ -142,7 +142,7 @@ struct ScriptEditorView: View {
 
             if !autosaveLabel.isEmpty {
                 Label(autosaveLabel, systemImage: autosaveLabel == "Saved" ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
-                    .font(.caption.weight(.semibold))
+                    .font(.appCaptionEmphasis)
                     .foregroundStyle(.secondary)
                     .transition(.opacity)
             }
@@ -151,26 +151,26 @@ struct ScriptEditorView: View {
     }
 
     private var titleSection: some View {
-        VStack(alignment: .leading, spacing: 9) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 SectionEyebrow(title: "Title")
                 Spacer()
                 if existingScript?.isDraft == true || existingScript == nil {
                     Text("DRAFT")
-                        .font(.caption2.bold())
-                        .tracking(0.5)
+                        .font(.appCaptionEmphasis)
+                        .tracking(1)
                         .foregroundStyle(Color.creatorViolet)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+                        .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
             }
 
             TextField("Give your script a name", text: $title)
-                .font(.title3.weight(.semibold))
+                .font(.appHeadline)
                 .textInputAutocapitalization(.sentences)
                 .focused($focusedField, equals: .title)
-                .padding(18)
+                .padding(20)
                 .contentCard()
                 .submitLabel(.next)
                 .onSubmit {
@@ -180,8 +180,8 @@ struct ScriptEditorView: View {
     }
 
     private var scriptSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
                 SectionEyebrow(title: "Script")
 
                 Spacer()
@@ -201,7 +201,7 @@ struct ScriptEditorView: View {
                     }
                 } label: {
                     Label("Import", systemImage: "plus")
-                        .font(.caption.weight(.semibold))
+                        .font(.appCaptionEmphasis)
                 }
                 .buttonStyle(ToolSecondaryButtonStyle())
 
@@ -213,19 +213,19 @@ struct ScriptEditorView: View {
                         showsPaywall = true
                     }
                 } label: {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 8) {
                         Image(systemName: "sparkles")
                         Text("AI Polish")
                         if !purchaseManager.isPro {
                             Text("PRO")
-                                .font(.system(size: 9, weight: .bold))
-                                .tracking(0.4)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 3)
-                                .background(Color.creatorViolet.opacity(0.14), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+                                .font(.appMicro)
+                                .tracking(1)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.creatorViolet.opacity(0.14), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                     }
-                    .font(.caption.weight(.semibold))
+                    .font(.appCaptionEmphasis)
                 }
                 .buttonStyle(ToolSecondaryButtonStyle())
                 .tint(.creatorViolet)
@@ -236,15 +236,15 @@ struct ScriptEditorView: View {
 
             if let sourceFileName {
                 Label(sourceFileName, systemImage: "doc")
-                    .font(.caption)
+                    .font(.appCaption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
 
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $bodyText)
-                    .font(.body)
-                    .lineSpacing(5)
+                    .font(.appBody)
+                    .lineSpacing(4)
                     .scrollContentBackground(.hidden)
                     .focused($focusedField, equals: .body)
                     .padding(12)
@@ -253,10 +253,10 @@ struct ScriptEditorView: View {
 
                 if bodyText.isEmpty {
                     Text("Paste, import, or write what you want to say...")
-                        .font(.body)
+                        .font(.appBody)
                         .foregroundStyle(.tertiary)
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 22)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 24)
                         .allowsHitTesting(false)
                 }
             }
@@ -380,31 +380,31 @@ private struct AIPolishSheet: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 32) {
-                        VStack(alignment: .leading, spacing: 6) {
+                        VStack(alignment: .leading, spacing: 8) {
                             Text("Choose how to improve it")
-                                .font(.title2.bold())
+                                .font(.appTitle)
                             Text("Your original text stays available until you apply the result.")
-                                .font(.subheadline)
+                                .font(.appSecondary)
                                 .foregroundStyle(.secondary)
                         }
 
-                        HStack(spacing: 10) {
+                        HStack(spacing: 12) {
                             ForEach(PolishStyle.allCases) { style in
                                 Button {
                                     selectedStyle = style
                                 } label: {
                                     VStack(spacing: 8) {
                                         Image(systemName: style.systemImage)
-                                            .font(.title3)
+                                            .font(.appHeadline)
                                         Text(style.title)
-                                            .font(.caption.weight(.semibold))
+                                            .font(.appCaptionEmphasis)
                                     }
                                     .foregroundStyle(selectedStyle == style ? Color.white : Color.primary)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 78)
                                     .background(
                                         selectedStyle == style ? Color.creatorViolet : Color.appSurface,
-                                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
                                     )
                                 }
                                 .buttonStyle(.plain)
@@ -421,11 +421,11 @@ private struct AIPolishSheet: View {
                         }
 
                         Text(previewMode == .polished && !polishedText.isEmpty ? polishedText : originalText)
-                            .font(.body)
-                            .lineSpacing(5)
+                            .font(.appBody)
+                            .lineSpacing(4)
                             .textSelection(.enabled)
                             .frame(maxWidth: .infinity, minHeight: 280, alignment: .topLeading)
-                            .padding(18)
+                            .padding(20)
                             .contentCard()
 
                         Button {
@@ -444,7 +444,7 @@ private struct AIPolishSheet: View {
                                 if service.isProcessing {
                                     ProgressView()
                                         .tint(.white)
-                                        .padding(.leading, 18)
+                                        .padding(.leading, 20)
                                 }
                             }
                         }
@@ -458,7 +458,7 @@ private struct AIPolishSheet: View {
                                 dismiss()
                             } label: {
                                 Label("Use polished version", systemImage: "checkmark")
-                                    .font(.headline)
+                                    .font(.appHeadline)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 52)
                             }
@@ -498,10 +498,10 @@ private struct StatPill: View {
 
     var body: some View {
         Label(text, systemImage: icon)
-            .font(.caption.weight(.semibold))
+            .font(.appCaptionEmphasis)
             .foregroundStyle(Color.creatorViolet)
             .padding(.horizontal, 12)
             .frame(height: 34)
-            .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+            .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
