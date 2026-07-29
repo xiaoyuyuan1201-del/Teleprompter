@@ -20,6 +20,7 @@ struct VideosView: View {
 
                     if recordingStore.recordings.isEmpty {
                         emptyState
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         ScrollView(showsIndicators: false) {
                             LazyVStack(spacing: 16) {

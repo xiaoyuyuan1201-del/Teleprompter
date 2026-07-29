@@ -191,7 +191,7 @@ struct HomeView: View {
     }
 
     private var quickStartCard: some View {
-        ZStack(alignment: .bottomLeading) {
+        ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(
                     LinearGradient(
