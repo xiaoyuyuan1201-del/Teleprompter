@@ -18,6 +18,7 @@ struct HomeView: View {
     @State private var folderRenameTarget: ScriptFolder?
     @State private var folderRenameText = ""
     @State private var folderDeleteTarget: ScriptFolder?
+    @State private var searchText = ""
 
     private enum EditorMode: Identifiable {
         case new
@@ -48,8 +49,7 @@ struct HomeView: View {
                     LazyVStack(alignment: .leading, spacing: 32) {
                         welcomeHeader
                         quickStartCard
-                        foldersSection
-                        scriptsSection
+                        libraryList
                     }
                     .padding(.horizontal, AppLayout.screenHorizontalPadding)
                     .padding(.top, 8)
@@ -261,64 +261,6 @@ struct HomeView: View {
         .shadow(color: Color.creatorViolet.opacity(0.14), radius: 14, y: 8)
     }
 
-    private var foldersSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Folders")
-                .font(.title3.bold())
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    FolderChip(
-                        title: "All scripts",
-                        count: scriptStore.scripts.count,
-                        isSelected: folderFilter == .all
-                    ) {
-                        folderFilter = .all
-                    }
-
-                    FolderChip(
-                        title: "No folder",
-                        count: scriptStore.scripts(in: nil).count,
-                        isSelected: folderFilter == .unfiled
-                    ) {
-                        folderFilter = .unfiled
-                    }
-
-                    ForEach(scriptStore.folders) { folder in
-                        FolderChip(
-                            title: folder.displayName,
-                            count: scriptStore.scripts(in: folder.id).count,
-                            isSelected: folderFilter == .folder(folder.id)
-                        ) {
-                            folderFilter = .folder(folder.id)
-                        }
-                        .contextMenu {
-                            Button {
-                                folderRenameText = folder.displayName
-                                folderRenameTarget = folder
-                            } label: {
-                                Label("Rename", systemImage: "character.cursor.ibeam")
-                            }
-                            Button(role: .destructive) {
-                                folderDeleteTarget = folder
-                            } label: {
-                                Label("Delete", systemImage: "trash")
-                            }
-                        }
-                    }
-
-                    Button {
-                        newFolderName = ""
-                        showsNewFolderAlert = true
-                    } label: {
-                        Label("New folder", systemImage: "folder.badge.plus")
-                    }
-                    .buttonStyle(ToolSecondaryButtonStyle(height: 32, horizontalPadding: 12))
-                }
-            }
-        }
-    }
-
     private var currentFolderID: UUID? {
         if case .folder(let id) = folderFilter {
             return id
@@ -326,70 +268,66 @@ struct HomeView: View {
         return nil
     }
 
+    private var currentFolder: ScriptFolder? {
+        guard let currentFolderID else { return nil }
+        return scriptStore.folders.first { $0.id == currentFolderID }
+    }
+
     private var filteredScripts: [PromptScript] {
+        let base: [PromptScript]
         switch folderFilter {
         case .all:
-            scriptStore.scripts
+            base = scriptStore.scripts
         case .unfiled:
-            scriptStore.scripts(in: nil)
+            base = scriptStore.scripts(in: nil)
         case .folder(let id):
-            scriptStore.scripts(in: id)
+            base = scriptStore.scripts(in: id)
+        }
+
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return base }
+        return base.filter {
+            $0.displayTitle.localizedCaseInsensitiveContains(query) ||
+            $0.body.localizedCaseInsensitiveContains(query)
         }
     }
 
-    private var scriptsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Scripts")
-                        .font(.title3.bold())
-                    Text(scriptCountDescription)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+    private var visibleFolders: [ScriptFolder] {
+        guard folderFilter == .all else { return [] }
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return scriptStore.folders }
+        return scriptStore.folders.filter { $0.displayName.localizedCaseInsensitiveContains(query) }
+    }
 
-                Spacer()
+    private var libraryList: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            searchBar
 
-                Menu {
-                    ForEach(ScriptSortOption.allCases) { option in
-                        Button {
-                            scriptStore.sortOption = option
-                        } label: {
-                            Label(option.title, systemImage: option.systemImage)
-                        }
-                    }
-                } label: {
-                    Image(systemName: "arrow.up.arrow.down")
-                        .frame(width: 36, height: 36)
-                }
-                .buttonStyle(ToolSecondaryButtonStyle(height: 36, horizontalPadding: 0))
-                .accessibilityLabel("Sort scripts")
-
-                Button {
-                    importScript()
-                } label: {
-                    Image(systemName: "square.and.arrow.down")
-                        .frame(width: 36, height: 36)
-                }
-                .buttonStyle(ToolSecondaryButtonStyle(height: 36, horizontalPadding: 0))
-                .accessibilityLabel("Import script")
-
-                Button {
-                    createScript()
-                } label: {
-                    Label("New", systemImage: "plus")
-                }
-                .buttonStyle(ToolPrimaryButtonStyle(height: 36, horizontalPadding: 12))
+            if let currentFolder {
+                breadcrumbRow(for: currentFolder)
             }
 
             if scriptStore.scripts.isEmpty {
                 emptyState
-            } else if filteredScripts.isEmpty {
+            } else if filteredScripts.isEmpty && visibleFolders.isEmpty {
                 emptyFilterState
             } else {
-                LazyVStack(spacing: 10) {
+                LazyVStack(spacing: 20) {
+                    ForEach(visibleFolders) { folder in
+                        FolderRow(
+                            folder: folder,
+                            count: scriptStore.scripts(in: folder.id).count,
+                            onOpen: { folderFilter = .folder(folder.id) },
+                            onRename: {
+                                folderRenameText = folder.displayName
+                                folderRenameTarget = folder
+                            },
+                            onDelete: { folderDeleteTarget = folder }
+                        )
+                    }
+
                     ForEach(filteredScripts) { script in
-                        ScriptCard(
+                        ScriptRow(
                             script: script,
                             folders: scriptStore.folders,
                             onEdit: { editorMode = .edit(script) },
@@ -413,6 +351,113 @@ struct HomeView: View {
                         )
                     }
                 }
+            }
+        }
+    }
+
+    private var searchBar: some View {
+        HStack(spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+                TextField("Search scripts", text: $searchText)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+
+                if !searchText.isEmpty {
+                    Button {
+                        searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.tertiary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 14)
+            .frame(height: 46)
+            .contentCard(cornerRadius: 23)
+
+            Menu {
+                Section("Sort") {
+                    ForEach(ScriptSortOption.allCases) { option in
+                        Button {
+                            scriptStore.sortOption = option
+                        } label: {
+                            Label(option.title, systemImage: option.systemImage)
+                        }
+                    }
+                }
+
+                Section("Go to") {
+                    Button {
+                        folderFilter = .all
+                    } label: {
+                        Label("All scripts", systemImage: "tray.full")
+                    }
+                    Button {
+                        folderFilter = .unfiled
+                    } label: {
+                        Label("No folder", systemImage: "doc")
+                    }
+                    ForEach(scriptStore.folders) { folder in
+                        Button {
+                            folderFilter = .folder(folder.id)
+                        } label: {
+                            Label(folder.displayName, systemImage: "folder")
+                        }
+                    }
+                }
+
+                Button {
+                    newFolderName = ""
+                    showsNewFolderAlert = true
+                } label: {
+                    Label("New Folder", systemImage: "folder.badge.plus")
+                }
+            } label: {
+                Image(systemName: "line.3.horizontal.decrease")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color.creatorViolet)
+                    .frame(width: 46, height: 46)
+                    .contentCard(cornerRadius: 23)
+            }
+            .accessibilityLabel("Sort and filter")
+        }
+    }
+
+    private func breadcrumbRow(for folder: ScriptFolder) -> some View {
+        HStack(spacing: 10) {
+            Button {
+                folderFilter = .all
+            } label: {
+                Label("All", systemImage: "chevron.left")
+                    .font(.subheadline.weight(.semibold))
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(Color.creatorViolet)
+
+            Text(folder.displayName)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            Spacer()
+
+            Menu {
+                Button {
+                    folderRenameText = folder.displayName
+                    folderRenameTarget = folder
+                } label: {
+                    Label("Rename", systemImage: "character.cursor.ibeam")
+                }
+                Button(role: .destructive) {
+                    folderDeleteTarget = folder
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .frame(width: 30, height: 30)
             }
         }
     }
@@ -478,14 +523,6 @@ struct HomeView: View {
         latestUsableScript.map { "Continue: \($0.displayTitle)" } ?? "Create a script before recording"
     }
 
-    private var scriptCountDescription: String {
-        let draftCount = scriptStore.scripts.filter(\.isDraft).count
-        let draftText = draftCount == 0 ? "" : " · \(draftCount) draft\(draftCount == 1 ? "" : "s")"
-        return purchaseManager.isPro
-            ? "\(scriptStore.scripts.count) scripts" + draftText
-            : "\(scriptStore.scripts.count) of \(scriptStore.freeScriptLimit) free scripts" + draftText
-    }
-
     private func createScript() {
         if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
             editorMode = .new
@@ -521,7 +558,7 @@ struct HomeView: View {
     }
 }
 
-private struct ScriptCard: View {
+private struct ScriptRow: View {
     let script: PromptScript
     let folders: [ScriptFolder]
     let onEdit: () -> Void
@@ -532,148 +569,160 @@ private struct ScriptCard: View {
     let onMove: (UUID?) -> Void
     let onDelete: () -> Void
 
+    private var canPrompt: Bool {
+        !script.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 11) {
-                Image(systemName: "text.alignleft")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(Color.creatorViolet)
-                    .frame(width: 36, height: 36)
-                    .background(
-                        Color.creatorViolet.opacity(0.10),
-                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    )
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: "doc.text.fill")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(Color.creatorViolet)
+                .frame(width: 46, height: 46)
+                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-                VStack(alignment: .leading, spacing: 5) {
-                    HStack(spacing: 6) {
-                        Text(script.displayTitle)
-                            .font(.headline)
-                            .lineLimit(1)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(script.displayTitle)
+                        .font(.headline)
+                        .lineLimit(1)
 
-                        if script.isFavorite {
-                            Image(systemName: "star.fill")
-                                .font(.caption)
-                                .foregroundStyle(Color.creatorViolet)
-                        }
-
-                        if script.isDraft {
-                            Text("DRAFT")
-                                .font(.system(size: 9, weight: .bold))
-                                .tracking(0.35)
-                                .foregroundStyle(Color.creatorViolet)
-                                .padding(.horizontal, 5)
-                                .padding(.vertical, 2)
-                                .background(
-                                    Color.creatorViolet.opacity(0.10),
-                                    in: RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                )
-                        }
+                    if script.isFavorite {
+                        Image(systemName: "star.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Color.creatorViolet)
                     }
 
-                    Text(script.body.isEmpty ? "No script text yet" : script.body)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .lineSpacing(2)
+                    if script.isDraft {
+                        Text("DRAFT")
+                            .font(.system(size: 9, weight: .bold))
+                            .tracking(0.35)
+                            .foregroundStyle(Color.creatorViolet)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+                    }
                 }
 
-                Spacer(minLength: 4)
-
-                Menu {
-                    Button(action: onFavorite) {
-                        Label(script.isFavorite ? "Remove favorite" : "Favorite", systemImage: script.isFavorite ? "star.slash" : "star")
-                    }
-                    Button(action: onEdit) {
-                        Label("Edit", systemImage: "pencil")
-                    }
-                    Button(action: onRename) {
-                        Label("Rename", systemImage: "character.cursor.ibeam")
-                    }
-                    Button(action: onDuplicate) {
-                        Label("Duplicate", systemImage: "doc.on.doc")
-                    }
-                    Menu {
-                        if script.folderID != nil {
-                            Button {
-                                onMove(nil)
-                            } label: {
-                                Label("No Folder", systemImage: "circle.slash")
-                            }
-                            Divider()
-                        }
-                        ForEach(folders) { folder in
-                            Button {
-                                onMove(folder.id)
-                            } label: {
-                                if script.folderID == folder.id {
-                                    Label(folder.displayName, systemImage: "checkmark")
-                                } else {
-                                    Text(folder.displayName)
-                                }
-                            }
-                        }
-                    } label: {
-                        Label("Move to Folder", systemImage: "folder")
-                    }
-                    Divider()
-                    Button(role: .destructive, action: onDelete) {
-                        Label("Delete", systemImage: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .frame(width: 30, height: 30)
-                }
+                Text("\(script.wordCount) words · \(script.updatedAt.formatted(.relative(presentation: .named)))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
             }
 
-            Divider()
+            Spacer(minLength: 4)
 
-            HStack {
-                HStack(spacing: 12) {
-                    Label("\(script.wordCount) words", systemImage: "text.word.spacing")
-                    Label("~\(script.estimatedMinutes) min", systemImage: "clock")
+            if canPrompt {
+                Button(action: onPrompt) {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 34, height: 34)
+                        .background(Color.creatorViolet, in: Circle())
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .buttonStyle(.plain)
+            }
 
-                Spacer()
-
+            Menu {
                 Button(action: onPrompt) {
                     Label("Prompt", systemImage: "play.fill")
                 }
-                .buttonStyle(ToolPrimaryButtonStyle(height: 36, horizontalPadding: 12))
-                .disabled(script.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(!canPrompt)
+                Button(action: onFavorite) {
+                    Label(script.isFavorite ? "Remove favorite" : "Favorite", systemImage: script.isFavorite ? "star.slash" : "star")
+                }
+                Button(action: onEdit) {
+                    Label("Edit", systemImage: "pencil")
+                }
+                Button(action: onRename) {
+                    Label("Rename", systemImage: "character.cursor.ibeam")
+                }
+                Button(action: onDuplicate) {
+                    Label("Duplicate", systemImage: "doc.on.doc")
+                }
+                Menu {
+                    if script.folderID != nil {
+                        Button {
+                            onMove(nil)
+                        } label: {
+                            Label("No Folder", systemImage: "circle.slash")
+                        }
+                        Divider()
+                    }
+                    ForEach(folders) { folder in
+                        Button {
+                            onMove(folder.id)
+                        } label: {
+                            if script.folderID == folder.id {
+                                Label(folder.displayName, systemImage: "checkmark")
+                            } else {
+                                Text(folder.displayName)
+                            }
+                        }
+                    }
+                } label: {
+                    Label("Move to Folder", systemImage: "folder")
+                }
+                Divider()
+                Button(role: .destructive, action: onDelete) {
+                    Label("Delete", systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .foregroundStyle(.secondary)
+                    .frame(width: 30, height: 44)
             }
         }
-        .padding(14)
-        .contentCard()
-        .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .contentShape(Rectangle())
         .onTapGesture(perform: onEdit)
     }
 }
 
-private struct FolderChip: View {
-    let title: String
+private struct FolderRow: View {
+    let folder: ScriptFolder
     let count: Int
-    let isSelected: Bool
-    let action: () -> Void
+    let onOpen: () -> Void
+    let onRename: () -> Void
+    let onDelete: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 6) {
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                Text("\(count)")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(isSelected ? .white.opacity(0.8) : Color.creatorViolet.opacity(0.7))
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: "folder.fill")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(Color.creatorViolet)
+                .frame(width: 46, height: 46)
+                .background(Color.creatorViolet.opacity(0.14), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(folder.displayName)
+                    .font(.headline)
+                    .lineLimit(1)
+
+                Text("\(count) script\(count == 1 ? "" : "s")")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            .padding(.horizontal, 14)
-            .frame(height: 36)
-            .background(
-                isSelected ? Color.creatorViolet : Color.creatorViolet.opacity(0.10),
-                in: Capsule()
-            )
-            .foregroundStyle(isSelected ? .white : .primary)
+
+            Spacer(minLength: 4)
+
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.tertiary)
+
+            Menu {
+                Button(action: onRename) {
+                    Label("Rename", systemImage: "character.cursor.ibeam")
+                }
+                Button(role: .destructive, action: onDelete) {
+                    Label("Delete", systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .foregroundStyle(.secondary)
+                    .frame(width: 30, height: 44)
+            }
         }
-        .buttonStyle(.plain)
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onOpen)
     }
 }
