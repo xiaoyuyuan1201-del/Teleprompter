@@ -6,7 +6,6 @@ struct RootTabView: View {
     @EnvironmentObject private var recordingStore: RecordingStore
 
     @State private var selectedTab: AppTab = .home
-    @State private var lastRealTab: AppTab = .home
     @State private var showsQuickActions = false
     @State private var showsScriptEditor = false
     @State private var editingScript: PromptScript?
@@ -20,7 +19,6 @@ struct RootTabView: View {
     private enum AppTab: Hashable {
         case home
         case videos
-        case add
         case mine
     }
 
@@ -52,7 +50,7 @@ struct RootTabView: View {
     }
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             TabView(selection: $selectedTab) {
                 HomeView()
                     .tag(AppTab.home)
@@ -66,12 +64,6 @@ struct RootTabView: View {
                         Label("Videos", systemImage: selectedTab == .videos ? "play.rectangle.fill" : "play.rectangle")
                     }
 
-                Color.clear
-                    .tag(AppTab.add)
-                    .tabItem {
-                        Label("Add", systemImage: "plus.circle.fill")
-                    }
-
                 MineView()
                     .tag(AppTab.mine)
                     .tabItem {
@@ -79,14 +71,14 @@ struct RootTabView: View {
                     }
             }
             .tint(.creatorViolet)
-            .onChange(of: selectedTab) { _, newValue in
-                if newValue == .add {
-                    selectedTab = lastRealTab
-                    withAnimation(.snappy) { showsQuickActions = true }
-                } else {
-                    lastRealTab = newValue
-                }
+
+            HStack {
+                Spacer()
+                fabButton
+                    .padding(.trailing, 16)
             }
+            .padding(.bottom, 8)
+            .ignoresSafeArea(.container, edges: .bottom)
 
             if showsQuickActions {
                 Rectangle()
@@ -158,6 +150,29 @@ struct RootTabView: View {
         } message: {
             Text("Give your folder a name to help sort your scripts.")
         }
+    }
+
+    private var fabButton: some View {
+        Button {
+            withAnimation(.snappy) {
+                showsQuickActions.toggle()
+            }
+        } label: {
+            Image(systemName: showsQuickActions ? "xmark" : "plus")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 52, height: 52)
+                .background(
+                    LinearGradient(
+                        colors: [.creatorViolet, .creatorVioletLight],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    in: Circle()
+                )
+                .shadow(color: Color.creatorViolet.opacity(0.35), radius: 8, y: 3)
+        }
+        .accessibilityLabel(showsQuickActions ? "Close quick actions" : "Quick actions")
     }
 
     private var quickActionMenu: some View {
