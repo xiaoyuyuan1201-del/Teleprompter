@@ -61,7 +61,7 @@ struct FolderDetailView: View {
                     } else if filteredScripts.isEmpty {
                         emptySearchState
                     } else {
-                        LazyVStack(spacing: 20) {
+                        LazyVStack(spacing: 10) {
                             ForEach(filteredScripts) { script in
                                 ScriptRow(
                                     script: script,

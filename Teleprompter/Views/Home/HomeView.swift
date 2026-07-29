@@ -41,7 +41,6 @@ struct HomeView: View {
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: 32) {
-                        welcomeHeader
                         quickStartCard
                         libraryList
                     }
@@ -177,18 +176,6 @@ struct HomeView: View {
         }
     }
 
-    private var welcomeHeader: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text("Speak clearly. Stay natural.")
-                .font(.title2.bold())
-
-            Text("Create a script, set your pace and record without looking away from the lens.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .lineSpacing(2)
-        }
-    }
-
     private var quickStartCard: some View {
         ZStack(alignment: .bottomLeading) {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -283,7 +270,7 @@ struct HomeView: View {
             } else if filteredScripts.isEmpty && visibleFolders.isEmpty {
                 emptyFilterState
             } else {
-                LazyVStack(spacing: 20) {
+                LazyVStack(spacing: 10) {
                     ForEach(visibleFolders) { folder in
                         FolderRow(
                             folder: folder,
@@ -488,106 +475,120 @@ struct ScriptRow: View {
     }
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: "doc.text.fill")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(Color.creatorViolet)
-                .frame(width: 46, height: 46)
-                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 11) {
+                Image(systemName: "text.alignleft")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.creatorViolet)
+                    .frame(width: 36, height: 36)
+                    .background(
+                        Color.creatorViolet.opacity(0.10),
+                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    )
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(script.displayTitle)
-                        .font(.headline)
-                        .lineLimit(1)
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack(spacing: 6) {
+                        Text(script.displayTitle)
+                            .font(.headline)
+                            .lineLimit(1)
 
-                    if script.isFavorite {
-                        Image(systemName: "star.fill")
-                            .font(.caption2)
-                            .foregroundStyle(Color.creatorViolet)
+                        if script.isFavorite {
+                            Image(systemName: "star.fill")
+                                .font(.caption)
+                                .foregroundStyle(Color.creatorViolet)
+                        }
+
+                        if script.isDraft {
+                            Text("DRAFT")
+                                .font(.system(size: 9, weight: .bold))
+                                .tracking(0.35)
+                                .foregroundStyle(Color.creatorViolet)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(
+                                    Color.creatorViolet.opacity(0.10),
+                                    in: RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                )
+                        }
                     }
 
-                    if script.isDraft {
-                        Text("DRAFT")
-                            .font(.system(size: 9, weight: .bold))
-                            .tracking(0.35)
-                            .foregroundStyle(Color.creatorViolet)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+                    Text(script.body.isEmpty ? "No script text yet" : script.body)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .lineSpacing(2)
+                }
+
+                Spacer(minLength: 4)
+
+                Menu {
+                    Button(action: onFavorite) {
+                        Label(script.isFavorite ? "Remove favorite" : "Favorite", systemImage: script.isFavorite ? "star.slash" : "star")
                     }
+                    Button(action: onEdit) {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    Button(action: onRename) {
+                        Label("Rename", systemImage: "character.cursor.ibeam")
+                    }
+                    Button(action: onDuplicate) {
+                        Label("Duplicate", systemImage: "doc.on.doc")
+                    }
+                    Menu {
+                        if script.folderID != nil {
+                            Button {
+                                onMove(nil)
+                            } label: {
+                                Label("No Folder", systemImage: "circle.slash")
+                            }
+                            Divider()
+                        }
+                        ForEach(folders) { folder in
+                            Button {
+                                onMove(folder.id)
+                            } label: {
+                                if script.folderID == folder.id {
+                                    Label(folder.displayName, systemImage: "checkmark")
+                                } else {
+                                    Text(folder.displayName)
+                                }
+                            }
+                        }
+                    } label: {
+                        Label("Move to Folder", systemImage: "folder")
+                    }
+                    Divider()
+                    Button(role: .destructive, action: onDelete) {
+                        Label("Delete", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .frame(width: 30, height: 30)
                 }
-
-                Text("\(script.wordCount) words · \(script.updatedAt.formatted(.relative(presentation: .named)))")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
             }
 
-            Spacer(minLength: 4)
+            Divider()
 
-            if canPrompt {
-                Button(action: onPrompt) {
-                    Image(systemName: "play.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 34, height: 34)
-                        .background(Color.creatorViolet, in: Circle())
+            HStack {
+                HStack(spacing: 12) {
+                    Label("\(script.wordCount) words", systemImage: "text.word.spacing")
+                    Label("~\(script.estimatedMinutes) min", systemImage: "clock")
                 }
-                .buttonStyle(.plain)
-            }
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
-            Menu {
+                Spacer()
+
                 Button(action: onPrompt) {
                     Label("Prompt", systemImage: "play.fill")
                 }
+                .buttonStyle(ToolPrimaryButtonStyle(height: 36, horizontalPadding: 12))
                 .disabled(!canPrompt)
-                Button(action: onFavorite) {
-                    Label(script.isFavorite ? "Remove favorite" : "Favorite", systemImage: script.isFavorite ? "star.slash" : "star")
-                }
-                Button(action: onEdit) {
-                    Label("Edit", systemImage: "pencil")
-                }
-                Button(action: onRename) {
-                    Label("Rename", systemImage: "character.cursor.ibeam")
-                }
-                Button(action: onDuplicate) {
-                    Label("Duplicate", systemImage: "doc.on.doc")
-                }
-                Menu {
-                    if script.folderID != nil {
-                        Button {
-                            onMove(nil)
-                        } label: {
-                            Label("No Folder", systemImage: "circle.slash")
-                        }
-                        Divider()
-                    }
-                    ForEach(folders) { folder in
-                        Button {
-                            onMove(folder.id)
-                        } label: {
-                            if script.folderID == folder.id {
-                                Label(folder.displayName, systemImage: "checkmark")
-                            } else {
-                                Text(folder.displayName)
-                            }
-                        }
-                    }
-                } label: {
-                    Label("Move to Folder", systemImage: "folder")
-                }
-                Divider()
-                Button(role: .destructive, action: onDelete) {
-                    Label("Delete", systemImage: "trash")
-                }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .foregroundStyle(.secondary)
-                    .frame(width: 30, height: 44)
             }
         }
-        .contentShape(Rectangle())
+        .padding(14)
+        .contentCard()
+        .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .onTapGesture(perform: onEdit)
     }
 }
@@ -600,12 +601,12 @@ struct FolderRow: View {
     let onDelete: () -> Void
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .center, spacing: 11) {
             Image(systemName: "folder.fill")
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(Color.creatorViolet)
-                .frame(width: 46, height: 46)
-                .background(Color.creatorViolet.opacity(0.14), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .frame(width: 36, height: 36)
+                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(folder.displayName)
@@ -613,7 +614,7 @@ struct FolderRow: View {
                     .lineLimit(1)
 
                 Text("\(count) script\(count == 1 ? "" : "s")")
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
@@ -632,11 +633,12 @@ struct FolderRow: View {
                 }
             } label: {
                 Image(systemName: "ellipsis")
-                    .foregroundStyle(.secondary)
-                    .frame(width: 30, height: 44)
+                    .frame(width: 30, height: 30)
             }
         }
-        .contentShape(Rectangle())
+        .padding(14)
+        .contentCard()
+        .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .onTapGesture(perform: onOpen)
     }
 }
