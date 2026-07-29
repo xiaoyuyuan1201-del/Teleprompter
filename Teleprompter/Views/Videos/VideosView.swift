@@ -1,5 +1,6 @@
 import AVFoundation
 import AVKit
+import Photos
 import SwiftUI
 import UIKit
 
@@ -240,12 +241,19 @@ private struct VideoThumbnailView: View {
 
 private struct RecordingPlayerView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var recordingStore: RecordingStore
+    @EnvironmentObject private var purchaseManager: PurchaseManager
 
     let recording: RecordedVideo
     let url: URL
 
     @State private var player: AVPlayer
     @State private var showsShare = false
+    @State private var showsPaywall = false
+    @State private var showsDeleteConfirmation = false
+    @State private var isSavingToPhotos = false
+    @State private var savedToPhotos = false
+    @State private var saveError: String?
 
     init(recording: RecordedVideo, url: URL) {
         self.recording = recording
@@ -281,13 +289,38 @@ private struct RecordingPlayerView: View {
                     .padding(16)
                     .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-                    Button {
-                        showsShare = true
-                    } label: {
-                        VioletGlassButtonLabel(title: "Share video", systemImage: "square.and.arrow.up")
+                    if let saveError {
+                        Label(saveError, systemImage: "exclamationmark.triangle.fill")
+                            .font(.appCaption)
+                            .foregroundStyle(.orange)
                     }
-                    .buttonStyle(.glassProminent)
-                    .tint(.creatorViolet)
+
+                    HStack(spacing: 12) {
+                        RecordingActionButton(
+                            title: "Remove Watermark",
+                            systemImage: purchaseManager.isPro ? "checkmark.seal.fill" : "seal",
+                            badge: purchaseManager.isPro ? nil : "PRO"
+                        ) {
+                            showsPaywall = true
+                        }
+                        .disabled(purchaseManager.isPro)
+
+                        RecordingActionButton(title: "Share", systemImage: "square.and.arrow.up") {
+                            showsShare = true
+                        }
+
+                        RecordingActionButton(
+                            title: savedToPhotos ? "Saved" : "Save",
+                            systemImage: savedToPhotos ? "checkmark.circle.fill" : "square.and.arrow.down"
+                        ) {
+                            saveToPhotos()
+                        }
+                        .disabled(isSavingToPhotos || savedToPhotos)
+
+                        RecordingActionButton(title: "Delete", systemImage: "trash", tint: .red) {
+                            showsDeleteConfirmation = true
+                        }
+                    }
                 }
                 .padding(16)
             }
@@ -305,8 +338,86 @@ private struct RecordingPlayerView: View {
         .sheet(isPresented: $showsShare) {
             SystemShareSheet(items: [url])
         }
+        .fullScreenCover(isPresented: $showsPaywall) {
+            PaywallView(source: .inApp)
+                .environmentObject(purchaseManager)
+        }
+        .alert("Delete recording?", isPresented: $showsDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                recordingStore.delete(recording)
+                dismiss()
+            }
+        } message: {
+            Text("This video will be permanently deleted.")
+        }
         .onDisappear {
             player.pause()
         }
+    }
+
+    private func saveToPhotos() {
+        isSavingToPhotos = true
+        saveError = nil
+        PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+            guard status == .authorized || status == .limited else {
+                DispatchQueue.main.async {
+                    isSavingToPhotos = false
+                    saveError = "Allow photo access in Settings to save this video."
+                }
+                return
+            }
+
+            PHPhotoLibrary.shared().performChanges {
+                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+            } completionHandler: { success, error in
+                DispatchQueue.main.async {
+                    isSavingToPhotos = false
+                    if success {
+                        savedToPhotos = true
+                    } else {
+                        saveError = error?.localizedDescription ?? "Couldn't save this video."
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct RecordingActionButton: View {
+    let title: String
+    let systemImage: String
+    var badge: String?
+    var tint: Color = .creatorViolet
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: systemImage)
+                        .font(.appHeadline)
+
+                    if let badge {
+                        Text(badge)
+                            .font(.system(size: 8, weight: .bold))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(Color.creatorViolet, in: Capsule())
+                            .foregroundStyle(.white)
+                            .offset(x: 14, y: -10)
+                    }
+                }
+                .frame(height: 20)
+
+                Text(title)
+                    .font(.appCaption)
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 64)
+        }
+        .buttonStyle(.glass)
+        .tint(tint)
     }
 }
