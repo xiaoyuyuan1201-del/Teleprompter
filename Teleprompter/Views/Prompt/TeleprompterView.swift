@@ -410,32 +410,6 @@ struct TeleprompterView: View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
-                    Picker("Timing", selection: timingMode) {
-                        ForEach(PromptScrollTimingMode.allCases) { mode in
-                            Text(mode.title).tag(mode)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-
-                    if timingMode.wrappedValue == .fixed {
-                        ControlSlider(
-                            icon: "speedometer",
-                            title: "Speed",
-                            value: $speed,
-                            range: 18...110,
-                            valueText: "\(Int(speed))"
-                        )
-                    } else {
-                        ControlSlider(
-                            icon: "timer",
-                            title: "Target duration",
-                            value: $targetMinutes,
-                            range: 0.5...10,
-                            step: 0.5,
-                            valueText: targetDurationText
-                        )
-                    }
-
                     ControlSlider(
                         icon: "textformat.size",
                         title: "Text size",
@@ -445,25 +419,20 @@ struct TeleprompterView: View {
                     )
 
                     ControlSlider(
-                        icon: "arrow.left.and.right",
-                        title: "Side margins",
-                        value: $promptMargin,
-                        range: 16...76,
-                        valueText: "\(Int(promptMargin))"
+                        icon: "text.line.first.and.arrowtriangle.forward",
+                        title: "Line spacing",
+                        value: $lineSpacing,
+                        range: 0...20,
+                        valueText: "\(Int(lineSpacing))"
                     )
 
-                    Toggle("3-second countdown", isOn: $countdownEnabled)
-                        .font(.appSubheadline)
-                        .tint(.creatorViolet)
-
-                    Toggle("Keep reading line near camera", isOn: $focusNearLens)
-                        .font(.appSubheadline)
-                        .tint(.creatorViolet)
-
-                    Text("You can drag the script at any time. Automatic scrolling resumes after you release it.")
-                        .font(.appCaption)
-                        .foregroundStyle(.white.opacity(0.58))
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    ControlSlider(
+                        icon: "speedometer",
+                        title: "Speed",
+                        value: $speed,
+                        range: 18...110,
+                        valueText: "\(Int(speed))"
+                    )
                 }
                 .padding(20)
             }
