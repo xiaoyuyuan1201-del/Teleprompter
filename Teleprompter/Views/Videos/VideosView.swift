@@ -35,7 +35,7 @@ struct VideosView: View {
                                 )
                             }
                         }
-                        .padding(.horizontal, 18)
+                        .padding(.horizontal, AppLayout.screenHorizontalPadding)
                         .padding(.top, 8)
                         .padding(.bottom, 36)
                     }
@@ -75,7 +75,7 @@ struct VideosView: View {
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 50, height: 50)
-                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
             VStack(alignment: .leading, spacing: 3) {
                 Text("Your recordings")
@@ -88,7 +88,7 @@ struct VideosView: View {
             Spacer()
         }
         .padding(16)
-        .contentCard(cornerRadius: 22)
+        .contentCard(cornerRadius: 10)
     }
 
     private var emptyState: some View {
@@ -97,7 +97,7 @@ struct VideosView: View {
                 .font(.system(size: 34, weight: .semibold))
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 76, height: 76)
-                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             VStack(spacing: 7) {
                 Text("No recordings yet")
@@ -129,7 +129,7 @@ private struct RecordingCard: View {
                 HStack(spacing: 14) {
                     VideoThumbnailView(url: url)
                         .frame(width: 112, height: 82)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
 
                     VStack(alignment: .leading, spacing: 7) {
                         Text(recording.title)
@@ -176,11 +176,11 @@ private struct RecordingCard: View {
                     .font(.system(size: 16, weight: .semibold))
                     .frame(width: 38, height: 38)
             }
-            .buttonStyle(.glass)
+            .buttonStyle(ToolSecondaryButtonStyle(height: 36, horizontalPadding: 0))
             .foregroundStyle(.primary)
         }
         .padding(12)
-        .contentCard(cornerRadius: 22)
+        .contentCard(cornerRadius: 10)
         .sheet(isPresented: $showsShare) {
             SystemShareSheet(items: [url])
         }
@@ -256,7 +256,7 @@ private struct RecordingPlayerView: View {
 
                 VStack(spacing: 18) {
                     VideoPlayer(player: player)
-                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {

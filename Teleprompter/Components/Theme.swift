@@ -1,5 +1,9 @@
 import SwiftUI
 
+enum AppLayout {
+    static let screenHorizontalPadding: CGFloat = 20
+}
+
 extension Color {
     static let creatorViolet = Color(red: 108 / 255, green: 92 / 255, blue: 231 / 255)
     static let creatorVioletLight = Color(red: 168 / 255, green: 156 / 255, blue: 255 / 255)
@@ -12,43 +16,70 @@ extension Color {
 
 struct AppBackground: View {
     var body: some View {
-        ZStack {
-            Color.appCanvas
-
-            RadialGradient(
-                colors: [Color.creatorViolet.opacity(0.14), .clear],
-                center: .topTrailing,
-                startRadius: 20,
-                endRadius: 360
-            )
-
-            RadialGradient(
-                colors: [Color.creatorVioletLight.opacity(0.08), .clear],
-                center: .bottomLeading,
-                startRadius: 30,
-                endRadius: 420
-            )
-        }
-        .ignoresSafeArea()
+        Color.appCanvas
+            .ignoresSafeArea()
     }
 }
 
 struct ContentCardModifier: ViewModifier {
-    var cornerRadius: CGFloat = 24
+    var cornerRadius: CGFloat = 10
 
     func body(content: Content) -> some View {
         content
-            .background(Color.appSurface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .background(
+                Color.appSurface,
+                in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            )
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Color.primary.opacity(0.055), lineWidth: 0.75)
+                    .stroke(Color(uiColor: .separator).opacity(0.42), lineWidth: 0.5)
             }
     }
 }
 
 extension View {
-    func contentCard(cornerRadius: CGFloat = 24) -> some View {
+    func contentCard(cornerRadius: CGFloat = 10) -> some View {
         modifier(ContentCardModifier(cornerRadius: cornerRadius))
+    }
+}
+
+struct ToolPrimaryButtonStyle: ButtonStyle {
+    var height: CGFloat = 44
+    var horizontalPadding: CGFloat = 16
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, horizontalPadding)
+            .frame(minHeight: height)
+            .background(
+                Color.creatorViolet.opacity(configuration.isPressed ? 0.78 : 1),
+                in: RoundedRectangle(cornerRadius: 9, style: .continuous)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+    }
+}
+
+struct ToolSecondaryButtonStyle: ButtonStyle {
+    var height: CGFloat = 42
+    var horizontalPadding: CGFloat = 14
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.primary)
+            .padding(.horizontal, horizontalPadding)
+            .frame(minHeight: height)
+            .background(
+                Color(uiColor: .tertiarySystemFill).opacity(configuration.isPressed ? 0.72 : 1),
+                in: RoundedRectangle(cornerRadius: 9, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .stroke(Color(uiColor: .separator).opacity(0.38), lineWidth: 0.5)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
     }
 }
 
@@ -61,10 +92,10 @@ struct GlassIconButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 16, weight: .semibold))
-                .frame(width: 42, height: 42)
+                .font(.system(size: 15, weight: .semibold))
+                .frame(width: 38, height: 38)
         }
-        .buttonStyle(.glass)
+        .buttonStyle(ToolSecondaryButtonStyle(height: 38, horizontalPadding: 0))
         .tint(tint)
         .accessibilityLabel(accessibilityLabel)
     }
@@ -75,7 +106,7 @@ struct VioletGlassButtonLabel: View {
     var systemImage: String?
 
     var body: some View {
-        HStack(spacing: 9) {
+        HStack(spacing: 8) {
             if let systemImage {
                 Image(systemName: systemImage)
             }
@@ -83,7 +114,7 @@ struct VioletGlassButtonLabel: View {
         }
         .font(.headline)
         .frame(maxWidth: .infinity)
-        .frame(minHeight: 52)
+        .frame(minHeight: 48)
     }
 }
 
@@ -92,8 +123,8 @@ struct SectionEyebrow: View {
 
     var body: some View {
         Text(title.uppercased())
-            .font(.caption2.weight(.bold))
-            .tracking(0.8)
+            .font(.caption2.weight(.semibold))
+            .tracking(0.65)
             .foregroundStyle(.secondary)
     }
 }

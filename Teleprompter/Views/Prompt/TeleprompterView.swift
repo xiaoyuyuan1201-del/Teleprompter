@@ -217,10 +217,10 @@ struct TeleprompterView: View {
 
     private var promptArea: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(.black.opacity(0.38))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .stroke(.white.opacity(0.12), lineWidth: 0.75)
                 }
 
@@ -236,7 +236,7 @@ struct TeleprompterView: View {
                 topPadding: focusNearLens ? 72 : 170
             )
             .scaleEffect(x: isMirrored ? -1 : 1, y: 1)
-            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
             VStack(spacing: 0) {
                 if focusNearLens {
@@ -410,7 +410,7 @@ struct TeleprompterView: View {
             .padding(18)
         }
         .frame(maxHeight: 320)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     private var recordButton: some View {
@@ -489,7 +489,7 @@ struct TeleprompterView: View {
                     .contentTransition(.numericText())
             }
             .padding(38)
-            .glassEffect(.regular.tint(Color.black.opacity(0.18)), in: RoundedRectangle(cornerRadius: 34, style: .continuous))
+            .glassEffect(.regular.tint(Color.black.opacity(0.18)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .allowsHitTesting(true)
     }
@@ -506,7 +506,7 @@ struct TeleprompterView: View {
                     .foregroundStyle(.white)
             }
             .padding(28)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
         }
     }
 
@@ -637,7 +637,7 @@ private struct RecordingPreflightSheet: View {
                         isReady: snapshot.availableStorageBytes >= 250_000_000
                     )
                 }
-                .contentCard(cornerRadius: 24)
+                .contentCard(cornerRadius: 10)
 
                 if !snapshot.microphoneAuthorized {
                     Label("You can continue, but the video will be recorded without microphone audio.", systemImage: "speaker.slash.fill")
@@ -691,7 +691,7 @@ private struct PreflightRow: View {
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 42, height: 42)
-                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
@@ -832,7 +832,7 @@ private struct RecordingReviewView: View {
             )
         }
         .padding(14)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 

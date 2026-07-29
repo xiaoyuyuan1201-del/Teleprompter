@@ -31,14 +31,14 @@ struct HomeView: View {
                 AppBackground()
 
                 ScrollView(showsIndicators: false) {
-                    LazyVStack(alignment: .leading, spacing: 24) {
+                    LazyVStack(alignment: .leading, spacing: 20) {
                         welcomeHeader
                         quickStartCard
                         scriptsSection
                     }
-                    .padding(.horizontal, 18)
+                    .padding(.horizontal, AppLayout.screenHorizontalPadding)
                     .padding(.top, 8)
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 32)
                 }
             }
             .navigationTitle("Teleprompter")
@@ -58,7 +58,6 @@ struct HomeView: View {
                         .tint(.creatorViolet)
                         .accessibilityLabel("Teleprompter Pro")
                     }
-
                 }
             }
         }
@@ -116,7 +115,7 @@ struct HomeView: View {
 
     private var quickStartCard: some View {
         ZStack(alignment: .bottomLeading) {
-            RoundedRectangle(cornerRadius: 30, style: .continuous)
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(
                     LinearGradient(
                         colors: [.creatorViolet, .creatorVioletLight],
@@ -126,14 +125,14 @@ struct HomeView: View {
                 )
 
             Circle()
-                .fill(.white.opacity(0.11))
-                .frame(width: 220, height: 220)
-                .offset(x: 210, y: -80)
+                .fill(.white.opacity(0.10))
+                .frame(width: 210, height: 210)
+                .offset(x: 220, y: -86)
 
             Circle()
-                .fill(.white.opacity(0.08))
-                .frame(width: 120, height: 120)
-                .offset(x: 280, y: 90)
+                .fill(.white.opacity(0.07))
+                .frame(width: 116, height: 116)
+                .offset(x: 286, y: 92)
 
             VStack(alignment: .leading, spacing: 18) {
                 Label("QUICK START", systemImage: "video.fill")
@@ -146,14 +145,15 @@ struct HomeView: View {
                         .font(.title.bold())
                         .foregroundStyle(.white)
 
-                    Text("Open your latest script and start prompting instantly.")
+                    Text(latestScriptDescription)
                         .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.78))
+                        .foregroundStyle(.white.opacity(0.80))
+                        .lineLimit(2)
                         .lineSpacing(2)
                 }
 
                 Button {
-                    if let script = scriptStore.scripts.filter({ !$0.body.isEmpty }).max(by: { $0.updatedAt < $1.updatedAt }) {
+                    if let script = latestUsableScript {
                         activePrompt = script
                     } else {
                         createScript()
@@ -161,27 +161,33 @@ struct HomeView: View {
                 } label: {
                     Label("Start prompting", systemImage: "play.fill")
                         .font(.headline)
+                        .foregroundStyle(Color.creatorViolet)
                         .padding(.horizontal, 16)
-                        .frame(height: 48)
+                        .frame(height: 46)
+                        .background(
+                            Color.white,
+                            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        )
                 }
-                .buttonStyle(.glassProminent)
-                .tint(.white)
-                .foregroundStyle(Color.creatorViolet)
+                .buttonStyle(.plain)
             }
-            .padding(24)
+            .padding(20)
         }
-        .frame(height: 240)
-        .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
-        .shadow(color: Color.creatorViolet.opacity(0.20), radius: 24, y: 14)
+        .frame(height: 228)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(.white.opacity(0.14), lineWidth: 0.5)
+        }
+        .shadow(color: Color.creatorViolet.opacity(0.14), radius: 14, y: 8)
     }
 
     private var scriptsSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Your scripts")
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Scripts")
                         .font(.title3.bold())
-
                     Text(scriptCountDescription)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -199,25 +205,23 @@ struct HomeView: View {
                     }
                 } label: {
                     Image(systemName: "arrow.up.arrow.down")
-                        .frame(width: 38, height: 38)
+                        .frame(width: 36, height: 36)
                 }
-                .buttonStyle(.glass)
+                .buttonStyle(ToolSecondaryButtonStyle(height: 36, horizontalPadding: 0))
                 .accessibilityLabel("Sort scripts")
 
                 Button {
                     createScript()
                 } label: {
                     Label("New", systemImage: "plus")
-                        .font(.subheadline.weight(.semibold))
                 }
-                .buttonStyle(.glassProminent)
-                .tint(.creatorViolet)
+                .buttonStyle(ToolPrimaryButtonStyle(height: 36, horizontalPadding: 12))
             }
 
             if scriptStore.scripts.isEmpty {
                 emptyState
             } else {
-                LazyVStack(spacing: 12) {
+                LazyVStack(spacing: 10) {
                     ForEach(scriptStore.scripts) { script in
                         ScriptCard(
                             script: script,
@@ -244,35 +248,42 @@ struct HomeView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 14) {
+        HStack(alignment: .top, spacing: 12) {
             Image(systemName: "doc.text")
-                .font(.system(size: 34, weight: .semibold))
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(Color.creatorViolet)
+                .frame(width: 38, height: 38)
+                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 8))
 
-            Text("Create your first script")
-                .font(.headline)
-
-            Text("Paste or import what you want to say, then open the camera and start prompting.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-
-            Button("New script") {
-                createScript()
+            VStack(alignment: .leading, spacing: 5) {
+                Text("No scripts")
+                    .font(.headline)
+                Text("Create or import a script to begin recording.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
-            .buttonStyle(.glassProminent)
-            .tint(.creatorViolet)
+
+            Spacer()
         }
-        .frame(maxWidth: .infinity)
-        .padding(28)
-        .contentCard(cornerRadius: 26)
+        .padding(14)
+        .contentCard()
+    }
+
+    private var latestUsableScript: PromptScript? {
+        scriptStore.scripts
+            .filter { !$0.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            .max(by: { $0.updatedAt < $1.updatedAt })
+    }
+
+    private var latestScriptDescription: String {
+        latestUsableScript.map { "Continue: \($0.displayTitle)" } ?? "Create a script before recording"
     }
 
     private var scriptCountDescription: String {
         let draftCount = scriptStore.scripts.filter(\.isDraft).count
         let draftText = draftCount == 0 ? "" : " · \(draftCount) draft\(draftCount == 1 ? "" : "s")"
         return purchaseManager.isPro
-            ? "Unlimited scripts with Pro" + draftText
+            ? "\(scriptStore.scripts.count) scripts" + draftText
             : "\(scriptStore.scripts.count) of \(scriptStore.freeScriptLimit) free scripts" + draftText
     }
 
@@ -295,15 +306,18 @@ private struct ScriptCard: View {
     let onDelete: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .top, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 11) {
                 Image(systemName: "text.alignleft")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.creatorViolet)
-                    .frame(width: 46, height: 46)
-                    .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .frame(width: 36, height: 36)
+                    .background(
+                        Color.creatorViolet.opacity(0.10),
+                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    )
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 5) {
                     HStack(spacing: 6) {
                         Text(script.displayTitle)
                             .font(.headline)
@@ -318,11 +332,14 @@ private struct ScriptCard: View {
                         if script.isDraft {
                             Text("DRAFT")
                                 .font(.system(size: 9, weight: .bold))
-                                .tracking(0.4)
+                                .tracking(0.35)
                                 .foregroundStyle(Color.creatorViolet)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 3)
-                                .background(Color.creatorViolet.opacity(0.10), in: Capsule())
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(
+                                    Color.creatorViolet.opacity(0.10),
+                                    in: RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                )
                         }
                     }
 
@@ -354,34 +371,32 @@ private struct ScriptCard: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis")
-                        .frame(width: 32, height: 32)
+                        .frame(width: 30, height: 30)
                 }
             }
 
             Divider()
 
             HStack {
-                HStack(spacing: 13) {
+                HStack(spacing: 12) {
                     Label("\(script.wordCount) words", systemImage: "text.word.spacing")
                     Label("~\(script.estimatedMinutes) min", systemImage: "clock")
                 }
-                .font(.caption.weight(.medium))
+                .font(.caption)
                 .foregroundStyle(.secondary)
 
                 Spacer()
 
                 Button(action: onPrompt) {
                     Label("Prompt", systemImage: "play.fill")
-                        .font(.subheadline.weight(.semibold))
                 }
-                .buttonStyle(.glassProminent)
-                .tint(.creatorViolet)
+                .buttonStyle(ToolPrimaryButtonStyle(height: 36, horizontalPadding: 12))
                 .disabled(script.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
-        .padding(17)
-        .contentCard(cornerRadius: 24)
-        .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .padding(14)
+        .contentCard()
+        .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .onTapGesture(perform: onEdit)
     }
 }

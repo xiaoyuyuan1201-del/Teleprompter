@@ -95,7 +95,7 @@ struct OnboardingView: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
         }
-        .padding(.horizontal, 18)
+        .padding(.horizontal, AppLayout.screenHorizontalPadding)
         .padding(.top, 8)
         .padding(.bottom, 16)
         .background(Color.appCanvas)
@@ -221,7 +221,7 @@ struct OnboardingView: View {
                     systemImage: step == .ready ? "crown.fill" : "arrow.right"
                 )
             }
-            .buttonStyle(.glassProminent)
+            .buttonStyle(ToolPrimaryButtonStyle())
             .tint(.creatorViolet)
 
             if step == .ready {
@@ -379,7 +379,7 @@ private struct WelcomeStep: View {
             Spacer(minLength: 22)
 
             ZStack {
-                RoundedRectangle(cornerRadius: 44, style: .continuous)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(
                         LinearGradient(
                             colors: [
@@ -416,11 +416,11 @@ private struct WelcomeStep: View {
 private struct PromptPhoneMockup: View {
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 42, style: .continuous)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Color.promptBlack)
                 .frame(width: 214, height: 330)
                 .overlay {
-                    RoundedRectangle(cornerRadius: 42, style: .continuous)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .stroke(.white.opacity(0.18), lineWidth: 1)
                 }
 
@@ -487,7 +487,7 @@ private struct FeatureVisual: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 42, style: .continuous)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Color.appSurface)
 
             RadialGradient(
@@ -504,9 +504,9 @@ private struct FeatureVisual: View {
                 recordingVisual
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 42, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 42, style: .continuous)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(Color.primary.opacity(0.06), lineWidth: 0.75)
         }
     }
@@ -534,7 +534,7 @@ private struct FeatureVisual: View {
             .multilineTextAlignment(.center)
             .padding(22)
             .frame(maxWidth: 300)
-            .contentCard(cornerRadius: 24)
+            .contentCard(cornerRadius: 10)
 
             HStack(spacing: 7) {
                 Image(systemName: "eye.fill")
@@ -549,7 +549,7 @@ private struct FeatureVisual: View {
     private var recordingVisual: some View {
         VStack(spacing: 22) {
             ZStack {
-                RoundedRectangle(cornerRadius: 30, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(Color.promptBlack)
                     .frame(height: 220)
 
@@ -607,7 +607,7 @@ private struct MiniFeature: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
-        .contentCard(cornerRadius: 18)
+        .contentCard(cornerRadius: 10)
     }
 }
 
@@ -675,7 +675,7 @@ private struct FontSizeStep: View {
         ) {
             VStack(spacing: 18) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 30, style: .continuous)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(Color.promptBlack)
 
                     VStack(spacing: 16) {
@@ -717,7 +717,7 @@ private struct FontSizeStep: View {
                     .foregroundStyle(.secondary)
                 }
                 .padding(20)
-                .contentCard(cornerRadius: 24)
+                .contentCard(cornerRadius: 10)
             }
         }
     }
@@ -760,7 +760,7 @@ private struct PaceStep: View {
                     .foregroundStyle(.secondary)
                 }
                 .padding(20)
-                .contentCard(cornerRadius: 24)
+                .contentCard(cornerRadius: 10)
             }
         }
     }
@@ -787,7 +787,7 @@ private struct PacePreview: View {
                 let travel = proxy.size.height + 160
 
                 ZStack {
-                    RoundedRectangle(cornerRadius: 30, style: .continuous)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(Color.promptBlack)
 
                     VStack(spacing: 16) {
@@ -813,7 +813,7 @@ private struct PacePreview: View {
                                 .padding(.leading, 10)
                         }
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
         }
     }
@@ -856,7 +856,7 @@ private struct PreferencesStep: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
-                .contentCard(cornerRadius: 24)
+                .contentCard(cornerRadius: 10)
             }
         }
     }
@@ -910,7 +910,7 @@ private struct ReadyStep: View {
                     value: preferenceSummary
                 )
             }
-            .contentCard(cornerRadius: 26)
+            .contentCard(cornerRadius: 12)
         }
     }
 
@@ -970,7 +970,7 @@ private struct ChoiceCard: View {
                     .frame(width: 48, height: 48)
                     .background(
                         isSelected ? Color.creatorViolet : Color.creatorViolet.opacity(0.11),
-                        in: RoundedRectangle(cornerRadius: 15, style: .continuous)
+                        in: RoundedRectangle(cornerRadius: 7, style: .continuous)
                     )
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -992,10 +992,10 @@ private struct ChoiceCard: View {
             .frame(maxWidth: .infinity)
             .background(
                 isSelected ? Color.creatorViolet.opacity(0.08) : Color.appSurface,
-                in: RoundedRectangle(cornerRadius: 24, style: .continuous)
+                in: RoundedRectangle(cornerRadius: 10, style: .continuous)
             )
             .overlay {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .stroke(
                         isSelected ? Color.creatorViolet : Color.primary.opacity(0.055),
                         lineWidth: isSelected ? 1.5 : 0.75
@@ -1018,7 +1018,7 @@ private struct PreferenceCard: View {
                 .font(.system(size: 19, weight: .semibold))
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 48, height: 48)
-                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
@@ -1035,7 +1035,7 @@ private struct PreferenceCard: View {
                 .tint(.creatorViolet)
         }
         .padding(17)
-        .contentCard(cornerRadius: 24)
+        .contentCard(cornerRadius: 10)
     }
 }
 

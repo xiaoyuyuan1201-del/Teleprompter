@@ -142,7 +142,7 @@ struct PaywallView: View {
             )
         }
         .padding(20)
-        .contentCard(cornerRadius: 26)
+        .contentCard(cornerRadius: 12)
     }
 
     private var plans: some View {
@@ -176,7 +176,7 @@ struct PaywallView: View {
                     .foregroundStyle(Color.creatorViolet)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 5)
-                    .background(Color.creatorViolet.opacity(0.11), in: Capsule())
+                    .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
             }
 
             DisclosureRow(title: "Today", value: "¥0")
@@ -189,7 +189,7 @@ struct PaywallView: View {
                 .lineSpacing(2)
         }
         .padding(18)
-        .contentCard(cornerRadius: 24)
+        .contentCard(cornerRadius: 12)
     }
 
     private var purchaseArea: some View {
@@ -214,7 +214,7 @@ struct PaywallView: View {
                     }
                 }
             }
-            .buttonStyle(.glassProminent)
+            .buttonStyle(ToolPrimaryButtonStyle())
             .tint(.creatorViolet)
             .disabled(purchaseManager.isLoading)
 
@@ -315,7 +315,7 @@ private struct PlanCard: View {
                                 .foregroundStyle(Color.creatorViolet)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Color.creatorViolet.opacity(0.12), in: Capsule())
+                                .background(Color.creatorViolet.opacity(0.12), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
                         }
                     }
 
@@ -335,10 +335,10 @@ private struct PlanCard: View {
             .contentShape(Rectangle())
             .background(
                 isSelected ? Color.creatorViolet.opacity(0.09) : Color.appSurface,
-                in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
             )
             .overlay {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .stroke(
                         isSelected ? Color.creatorViolet : Color.primary.opacity(0.055),
                         lineWidth: isSelected ? 1.5 : 0.75
@@ -361,7 +361,7 @@ private struct BenefitRow: View {
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(Color.creatorViolet)
                 .frame(width: 38, height: 38)
-                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)

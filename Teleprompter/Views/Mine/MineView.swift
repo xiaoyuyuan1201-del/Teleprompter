@@ -72,7 +72,7 @@ struct MineView: View {
                             .font(.title3)
                             .foregroundStyle(Color.creatorViolet)
                             .frame(width: 40, height: 40)
-                            .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text("Upgrade to Pro")

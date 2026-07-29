@@ -48,7 +48,7 @@ struct ScriptEditorView: View {
                     titleSection
                     scriptSection
                 }
-                .padding(.horizontal, 18)
+                .padding(.horizontal, AppLayout.screenHorizontalPadding)
                 .padding(.top, 12)
                 .padding(.bottom, 40)
             }
@@ -159,7 +159,7 @@ struct ScriptEditorView: View {
                         .foregroundStyle(Color.creatorViolet)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.creatorViolet.opacity(0.10), in: Capsule())
+                        .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
                 }
             }
 
@@ -168,7 +168,7 @@ struct ScriptEditorView: View {
                 .textInputAutocapitalization(.sentences)
                 .focused($focusedField, equals: .title)
                 .padding(18)
-                .contentCard(cornerRadius: 20)
+                .contentCard(cornerRadius: 10)
                 .submitLabel(.next)
                 .onSubmit {
                     focusedField = .body
@@ -200,7 +200,7 @@ struct ScriptEditorView: View {
                     Label("Import", systemImage: "plus")
                         .font(.caption.weight(.semibold))
                 }
-                .buttonStyle(.glass)
+                .buttonStyle(ToolSecondaryButtonStyle())
 
                 Button {
                     focusedField = nil
@@ -219,12 +219,12 @@ struct ScriptEditorView: View {
                                 .tracking(0.4)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 3)
-                                .background(Color.creatorViolet.opacity(0.14), in: Capsule())
+                                .background(Color.creatorViolet.opacity(0.14), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
                         }
                     }
                     .font(.caption.weight(.semibold))
                 }
-                .buttonStyle(.glass)
+                .buttonStyle(ToolSecondaryButtonStyle())
                 .tint(.creatorViolet)
                 .disabled(bodyText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 .accessibilityLabel("AI Polish")
@@ -246,7 +246,7 @@ struct ScriptEditorView: View {
                     .focused($focusedField, equals: .body)
                     .padding(12)
                     .frame(minHeight: 430)
-                    .contentCard(cornerRadius: 24)
+                    .contentCard(cornerRadius: 10)
 
                 if bodyText.isEmpty {
                     Text("Paste, import, or write what you want to say...")
@@ -392,7 +392,7 @@ private struct AIPolishSheet: View {
                                     .frame(height: 78)
                                     .background(
                                         selectedStyle == style ? Color.creatorViolet : Color.appSurface,
-                                        in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
                                     )
                                 }
                                 .buttonStyle(.plain)
@@ -414,7 +414,7 @@ private struct AIPolishSheet: View {
                             .textSelection(.enabled)
                             .frame(maxWidth: .infinity, minHeight: 280, alignment: .topLeading)
                             .padding(18)
-                            .contentCard(cornerRadius: 24)
+                            .contentCard(cornerRadius: 10)
 
                         Button {
                             Task {
@@ -436,7 +436,7 @@ private struct AIPolishSheet: View {
                                 }
                             }
                         }
-                        .buttonStyle(.glassProminent)
+                        .buttonStyle(ToolPrimaryButtonStyle())
                         .tint(.creatorViolet)
                         .disabled(service.isProcessing)
 
@@ -450,7 +450,7 @@ private struct AIPolishSheet: View {
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 52)
                             }
-                            .buttonStyle(.glass)
+                            .buttonStyle(ToolSecondaryButtonStyle())
                             .tint(.creatorViolet)
                         }
                     }
@@ -490,6 +490,6 @@ private struct StatPill: View {
             .foregroundStyle(Color.creatorViolet)
             .padding(.horizontal, 12)
             .frame(height: 34)
-            .background(Color.creatorViolet.opacity(0.10), in: Capsule())
+            .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
     }
 }
