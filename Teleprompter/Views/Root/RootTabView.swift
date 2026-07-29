@@ -6,6 +6,7 @@ struct RootTabView: View {
     @EnvironmentObject private var recordingStore: RecordingStore
 
     @State private var selectedTab: AppTab = .home
+    @State private var lastRealTab: AppTab = .home
     @State private var showsQuickActions = false
     @State private var showsScriptEditor = false
     @State private var editingScript: PromptScript?
@@ -19,6 +20,7 @@ struct RootTabView: View {
     private enum AppTab: Hashable {
         case home
         case videos
+        case add
         case mine
     }
 
@@ -50,7 +52,7 @@ struct RootTabView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
+        ZStack {
             TabView(selection: $selectedTab) {
                 HomeView()
                     .tag(AppTab.home)
@@ -64,6 +66,12 @@ struct RootTabView: View {
                         Label("Videos", systemImage: selectedTab == .videos ? "play.rectangle.fill" : "play.rectangle")
                     }
 
+                Color.clear
+                    .tag(AppTab.add)
+                    .tabItem {
+                        Label("Add", systemImage: "plus.circle.fill")
+                    }
+
                 MineView()
                     .tag(AppTab.mine)
                     .tabItem {
@@ -71,23 +79,32 @@ struct RootTabView: View {
                     }
             }
             .tint(.creatorViolet)
+            .onChange(of: selectedTab) { _, newValue in
+                if newValue == .add {
+                    selectedTab = lastRealTab
+                    withAnimation(.snappy) { showsQuickActions = true }
+                } else {
+                    lastRealTab = newValue
+                }
+            }
 
             if showsQuickActions {
-                Color.black.opacity(0.001)
+                Rectangle()
+                    .fill(.ultraThinMaterial)
                     .ignoresSafeArea()
                     .onTapGesture {
                         withAnimation(.snappy) { showsQuickActions = false }
                     }
+                    .transition(.opacity)
 
-                quickActionMenu
-                    .padding(.trailing, 16)
-                    .padding(.bottom, 108)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                VStack(spacing: 14) {
+                    Spacer()
+                    quickActionMenu
+                    Spacer()
+                }
+                .padding(.bottom, 60)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
-
-            fabButton
-                .padding(.trailing, 16)
-                .padding(.bottom, 54)
         }
         .sheet(isPresented: $showsScriptEditor) {
             NavigationStack {
@@ -143,46 +160,33 @@ struct RootTabView: View {
         }
     }
 
-    private var fabButton: some View {
-        Button {
-            withAnimation(.snappy) {
-                showsQuickActions.toggle()
-            }
-        } label: {
-            Image(systemName: showsQuickActions ? "xmark" : "plus")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: 58, height: 58)
-                .background(
-                    LinearGradient(
-                        colors: [.creatorViolet, .creatorVioletLight],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    in: Circle()
-                )
-                .shadow(color: Color.creatorViolet.opacity(0.35), radius: 10, y: 4)
-        }
-        .accessibilityLabel(showsQuickActions ? "Close quick actions" : "Quick actions")
-    }
-
     private var quickActionMenu: some View {
-        VStack(alignment: .trailing, spacing: 10) {
+        VStack(spacing: 10) {
             ForEach(QuickAction.allCases) { action in
                 Button {
                     perform(action)
                 } label: {
-                    Label(action.title, systemImage: action.systemImage)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.primary)
-                        .padding(.horizontal, 18)
-                        .frame(height: 52)
-                        .background(Color.appSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .shadow(color: .black.opacity(0.12), radius: 8, y: 3)
+                    HStack(spacing: 14) {
+                        Image(systemName: action.systemImage)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Color.creatorViolet)
+                            .frame(width: 34, height: 34)
+                            .background(Color.creatorViolet.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+                        Text(action.title)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .frame(height: 56)
+                    .background(Color.appSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
                 .buttonStyle(.plain)
             }
         }
+        .padding(.horizontal, AppLayout.screenHorizontalPadding)
     }
 
     private func perform(_ action: QuickAction) {
