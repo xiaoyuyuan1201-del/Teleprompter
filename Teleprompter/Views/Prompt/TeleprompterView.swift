@@ -103,6 +103,12 @@ struct TeleprompterView: View {
             PaywallView(source: .inApp)
                 .environmentObject(purchaseManager)
         }
+        .sheet(isPresented: $showsControls) {
+            adjustmentPanel
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .preferredColorScheme(.dark)
+        }
         .sheet(isPresented: $showsPreflight) {
             RecordingPreflightSheet(snapshot: camera.preflightSnapshot()) {
                 showsPreflight = false
@@ -266,11 +272,6 @@ struct TeleprompterView: View {
 
     private var bottomControls: some View {
         VStack(spacing: 12) {
-            if showsControls {
-                adjustmentPanel
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-
             if camera.isRecording {
                 Button {
                     if camera.isPaused {
@@ -350,67 +351,78 @@ struct TeleprompterView: View {
     }
 
     private var adjustmentPanel: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 16) {
-                Picker("Timing", selection: timingMode) {
-                    ForEach(PromptScrollTimingMode.allCases) { mode in
-                        Text(mode.title).tag(mode)
+        NavigationStack {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 18) {
+                    Picker("Timing", selection: timingMode) {
+                        ForEach(PromptScrollTimingMode.allCases) { mode in
+                            Text(mode.title).tag(mode)
+                        }
                     }
-                }
-                .pickerStyle(.segmented)
+                    .pickerStyle(.segmented)
 
-                if timingMode.wrappedValue == .fixed {
+                    if timingMode.wrappedValue == .fixed {
+                        ControlSlider(
+                            icon: "speedometer",
+                            title: "Speed",
+                            value: $speed,
+                            range: 18...110,
+                            valueText: "\(Int(speed))"
+                        )
+                    } else {
+                        ControlSlider(
+                            icon: "timer",
+                            title: "Target duration",
+                            value: $targetMinutes,
+                            range: 0.5...10,
+                            step: 0.5,
+                            valueText: targetDurationText
+                        )
+                    }
+
                     ControlSlider(
-                        icon: "speedometer",
-                        title: "Speed",
-                        value: $speed,
-                        range: 18...110,
-                        valueText: "\(Int(speed))"
+                        icon: "textformat.size",
+                        title: "Text size",
+                        value: $fontSize,
+                        range: 28...72,
+                        valueText: "\(Int(fontSize))"
                     )
-                } else {
+
                     ControlSlider(
-                        icon: "timer",
-                        title: "Target duration",
-                        value: $targetMinutes,
-                        range: 0.5...10,
-                        step: 0.5,
-                        valueText: targetDurationText
+                        icon: "arrow.left.and.right",
+                        title: "Side margins",
+                        value: $promptMargin,
+                        range: 16...76,
+                        valueText: "\(Int(promptMargin))"
                     )
+
+                    Toggle("3-second countdown", isOn: $countdownEnabled)
+                        .font(.subheadline.weight(.semibold))
+                        .tint(.creatorViolet)
+
+                    Toggle("Keep reading line near camera", isOn: $focusNearLens)
+                        .font(.subheadline.weight(.semibold))
+                        .tint(.creatorViolet)
+
+                    Text("You can drag the script at any time. Automatic scrolling resumes after you release it.")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.58))
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-
-                ControlSlider(
-                    icon: "textformat.size",
-                    title: "Text size",
-                    value: $fontSize,
-                    range: 28...72,
-                    valueText: "\(Int(fontSize))"
-                )
-
-                ControlSlider(
-                    icon: "arrow.left.and.right",
-                    title: "Side margins",
-                    value: $promptMargin,
-                    range: 16...76,
-                    valueText: "\(Int(promptMargin))"
-                )
-
-                Toggle("3-second countdown", isOn: $countdownEnabled)
-                    .font(.caption.weight(.semibold))
-                    .tint(.creatorViolet)
-
-                Toggle("Keep reading line near camera", isOn: $focusNearLens)
-                    .font(.caption.weight(.semibold))
-                    .tint(.creatorViolet)
-
-                Text("You can drag the script at any time. Automatic scrolling resumes after you release it.")
-                    .font(.caption2)
-                    .foregroundStyle(.white.opacity(0.58))
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
             }
-            .padding(18)
+            .background(Color.promptBlack.ignoresSafeArea())
+            .navigationTitle("Prompt settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        showsControls = false
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
         }
-        .frame(maxHeight: 320)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     private var recordButton: some View {

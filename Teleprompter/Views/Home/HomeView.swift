@@ -10,6 +10,8 @@ struct HomeView: View {
     @State private var showsPaywall = false
     @State private var renameTarget: PromptScript?
     @State private var renameText = ""
+    @State private var showsFileImporter = false
+    @State private var importError: String?
 
     private enum EditorMode: Identifiable {
         case new
@@ -98,6 +100,23 @@ struct HomeView: View {
             }
         } message: {
             Text("Choose a clear name so the script is easy to find later.")
+        }
+        .fileImporter(
+            isPresented: $showsFileImporter,
+            allowedContentTypes: DocumentImportService.allowedContentTypes,
+            allowsMultipleSelection: false
+        ) { result in
+            handleImport(result)
+        }
+        .alert("Import failed", isPresented: Binding(
+            get: { importError != nil },
+            set: { if !$0 { importError = nil } }
+        )) {
+            Button("OK", role: .cancel) {
+                importError = nil
+            }
+        } message: {
+            Text(importError ?? "")
         }
     }
 
@@ -211,6 +230,15 @@ struct HomeView: View {
                 .accessibilityLabel("Sort scripts")
 
                 Button {
+                    importScript()
+                } label: {
+                    Image(systemName: "square.and.arrow.down")
+                        .frame(width: 36, height: 36)
+                }
+                .buttonStyle(ToolSecondaryButtonStyle(height: 36, horizontalPadding: 0))
+                .accessibilityLabel("Import script")
+
+                Button {
                     createScript()
                 } label: {
                     Label("New", systemImage: "plus")
@@ -264,6 +292,13 @@ struct HomeView: View {
             }
 
             Spacer()
+
+            Button {
+                importScript()
+            } label: {
+                Label("Import", systemImage: "square.and.arrow.down")
+            }
+            .buttonStyle(ToolSecondaryButtonStyle(height: 32, horizontalPadding: 10))
         }
         .padding(14)
         .contentCard()
@@ -292,6 +327,31 @@ struct HomeView: View {
             editorMode = .new
         } else {
             showsPaywall = true
+        }
+    }
+
+    private func importScript() {
+        if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
+            showsFileImporter = true
+        } else {
+            showsPaywall = true
+        }
+    }
+
+    private func handleImport(_ result: Result<[URL], Error>) {
+        do {
+            guard let url = try result.get().first else { return }
+            let imported = try DocumentImportService.read(from: url)
+            let script = PromptScript(
+                title: imported.title,
+                body: imported.text,
+                isDraft: true,
+                sourceFileName: imported.fileName
+            )
+            scriptStore.upsert(script)
+            editorMode = .edit(script)
+        } catch {
+            importError = error.localizedDescription
         }
     }
 }
