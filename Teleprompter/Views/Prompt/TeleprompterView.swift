@@ -123,7 +123,9 @@ struct TeleprompterView: View {
                     url: url,
                     verification: camera.verification,
                     isSaved: camera.savedVideo,
-                    onSave: camera.saveCompletedRecording,
+                    onSave: { deliveredURL in
+                        camera.saveCompletedRecording(from: deliveredURL)
+                    },
                     onRetake: {
                         showsReview = false
                         if let libraryRecordingID,
@@ -140,6 +142,7 @@ struct TeleprompterView: View {
                         libraryRecordingID = nil
                     }
                 )
+                .environmentObject(purchaseManager)
             }
         }
         .alert("Teleprompter", isPresented: Binding(
@@ -723,33 +726,41 @@ private struct PreflightRow: View {
 }
 
 private struct RecordingReviewView: View {
+    @EnvironmentObject private var purchaseManager: PurchaseManager
     @Environment(\.dismiss) private var dismiss
 
-    let url: URL
+    let sourceURL: URL
     let verification: RecordingVerification?
     let isSaved: Bool
-    let onSave: () -> Void
+    let onSave: (URL) -> Void
     let onRetake: () -> Void
     let onDone: () -> Void
 
-    @State private var player: AVPlayer
+    @State private var player: AVPlayer?
+    @State private var exportedURL: URL?
+    @State private var isPreparingAsset = true
+    @State private var watermarkFailed = false
     @State private var showsShare = false
+    @State private var showsPaywall = false
 
     init(
         url: URL,
         verification: RecordingVerification?,
         isSaved: Bool,
-        onSave: @escaping () -> Void,
+        onSave: @escaping (URL) -> Void,
         onRetake: @escaping () -> Void,
         onDone: @escaping () -> Void
     ) {
-        self.url = url
+        self.sourceURL = url
         self.verification = verification
         self.isSaved = isSaved
         self.onSave = onSave
         self.onRetake = onRetake
         self.onDone = onDone
-        _player = State(initialValue: AVPlayer(url: url))
+    }
+
+    private var deliveredURL: URL {
+        exportedURL ?? sourceURL
     }
 
     var body: some View {
@@ -758,14 +769,37 @@ private struct RecordingReviewView: View {
                 Color.black.ignoresSafeArea()
 
                 VStack(spacing: 18) {
-                    VideoPlayer(player: player)
-                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                .stroke(.white.opacity(0.14), lineWidth: 0.75)
+                    ZStack {
+                        if let player {
+                            VideoPlayer(player: player)
                         }
 
+                        if isPreparingAsset {
+                            ZStack {
+                                Color.black.opacity(0.55)
+                                VStack(spacing: 10) {
+                                    ProgressView()
+                                        .tint(.white)
+                                    Text("Preparing preview...")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.white.opacity(0.8))
+                                }
+                            }
+                        }
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .stroke(.white.opacity(0.14), lineWidth: 0.75)
+                    }
+
                     verificationCard
+
+                    if watermarkFailed {
+                        Label("Couldn't prepare the watermark. Saving the original recording instead.", systemImage: "exclamationmark.triangle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
 
                     HStack(spacing: 12) {
                         Button {
@@ -786,10 +820,24 @@ private struct RecordingReviewView: View {
                                 .frame(height: 50)
                         }
                         .buttonStyle(.glass)
+                        .disabled(isPreparingAsset)
+                    }
+
+                    if !purchaseManager.isPro {
+                        Button {
+                            showsPaywall = true
+                        } label: {
+                            Label("Remove Watermark", systemImage: "seal")
+                                .font(.subheadline.weight(.semibold))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 46)
+                        }
+                        .buttonStyle(.glass)
+                        .tint(.creatorViolet)
                     }
 
                     Button {
-                        onSave()
+                        onSave(deliveredURL)
                     } label: {
                         VioletGlassButtonLabel(
                             title: isSaved ? "Saved to Photos" : "Save to Photos",
@@ -798,7 +846,7 @@ private struct RecordingReviewView: View {
                     }
                     .buttonStyle(.glassProminent)
                     .tint(.creatorViolet)
-                    .disabled(isSaved)
+                    .disabled(isSaved || isPreparingAsset)
                 }
                 .padding(16)
             }
@@ -815,10 +863,47 @@ private struct RecordingReviewView: View {
         }
         .preferredColorScheme(.dark)
         .sheet(isPresented: $showsShare) {
-            SystemShareSheet(items: [url])
+            SystemShareSheet(items: [deliveredURL])
+        }
+        .fullScreenCover(isPresented: $showsPaywall) {
+            PaywallView(source: .inApp)
+                .environmentObject(purchaseManager)
+        }
+        .task(id: purchaseManager.isPro) {
+            await prepareAsset()
         }
         .onDisappear {
-            player.pause()
+            player?.pause()
+            if let exportedURL, exportedURL != sourceURL {
+                try? FileManager.default.removeItem(at: exportedURL)
+            }
+        }
+    }
+
+    private func prepareAsset() async {
+        if purchaseManager.isPro {
+            exportedURL = nil
+            isPreparingAsset = false
+            player = AVPlayer(url: sourceURL)
+            return
+        }
+
+        isPreparingAsset = true
+        watermarkFailed = false
+
+        await withCheckedContinuation { continuation in
+            VideoWatermarkService.export(sourceURL: sourceURL) { result in
+                switch result {
+                case .success(let url):
+                    exportedURL = url
+                case .failure:
+                    watermarkFailed = true
+                    exportedURL = nil
+                }
+                isPreparingAsset = false
+                player = AVPlayer(url: deliveredURL)
+                continuation.resume()
+            }
         }
     }
 

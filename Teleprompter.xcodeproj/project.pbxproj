@@ -28,6 +28,7 @@
 		B20000000000000000000001 /* Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* Recording.swift */; };
 		B30000000000000000000001 /* RecordingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000001 /* RecordingStore.swift */; };
 		B40000000000000000000001 /* VideosView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000001 /* VideosView.swift */; };
+		F50000000000000000000001 /* VideoWatermarkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60000000000000000000001 /* VideoWatermarkService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		83EE1AB73FA9EAEC45FA2720 /* ScriptStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Stores/ScriptStore.swift; sourceTree = "<group>"; };
 		1605DFFC8CF85B2F7BCF9BEA /* PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/PurchaseManager.swift; sourceTree = "<group>"; };
 		84E6094AE633683D99C3B172 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/CameraManager.swift; sourceTree = "<group>"; };
+		F60000000000000000000001 /* VideoWatermarkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Services/VideoWatermarkService.swift; sourceTree = "<group>"; };
 		C7655349DDD3BEE5EB2C1685 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Onboarding/OnboardingView.swift; sourceTree = "<group>"; };
 		53F2DE1E16DC3233A2FBAD4D /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Paywall/PaywallView.swift; sourceTree = "<group>"; };
 		3DB96C0B6BF96036D3FD34C4 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Teleprompter/Views/Home/HomeView.swift; sourceTree = "<group>"; };
@@ -82,6 +84,7 @@
 				83EE1AB73FA9EAEC45FA2720 /* ScriptStore.swift */,
 				1605DFFC8CF85B2F7BCF9BEA /* PurchaseManager.swift */,
 				84E6094AE633683D99C3B172 /* CameraManager.swift */,
+				F60000000000000000000001 /* VideoWatermarkService.swift */,
 				C7655349DDD3BEE5EB2C1685 /* OnboardingView.swift */,
 				53F2DE1E16DC3233A2FBAD4D /* PaywallView.swift */,
 				3DB96C0B6BF96036D3FD34C4 /* HomeView.swift */,
@@ -186,6 +189,7 @@
 				2B5C9F97C4CFC096F3AABB75 /* ScriptStore.swift in Sources */,
 				E74D7E2597299F54CAC14E3C /* PurchaseManager.swift in Sources */,
 				A29A0B8CF80BFBF32E6F89FF /* CameraManager.swift in Sources */,
+				F50000000000000000000001 /* VideoWatermarkService.swift in Sources */,
 				660174956340BEA9958B8EEE /* OnboardingView.swift in Sources */,
 				9194B0479A92186C8DFFDEFE /* PaywallView.swift in Sources */,
 				B36537D0ECF7D9AF7F2B5A46 /* HomeView.swift in Sources */,

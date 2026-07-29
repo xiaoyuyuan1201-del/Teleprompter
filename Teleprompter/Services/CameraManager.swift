@@ -165,8 +165,8 @@ final class CameraManager: NSObject, ObservableObject {
         )
     }
 
-    func saveCompletedRecording() {
-        guard let completedRecordingURL else { return }
+    func saveCompletedRecording(from url: URL? = nil) {
+        guard let saveURL = url ?? completedRecordingURL else { return }
         PHPhotoLibrary.requestAuthorization(for: .addOnly) { [weak self] status in
             guard status == .authorized || status == .limited else {
                 DispatchQueue.main.async {
@@ -176,7 +176,7 @@ final class CameraManager: NSObject, ObservableObject {
             }
 
             PHPhotoLibrary.shared().performChanges {
-                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: completedRecordingURL)
+                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: saveURL)
             } completionHandler: { success, error in
                 DispatchQueue.main.async {
                     self?.savedVideo = success
