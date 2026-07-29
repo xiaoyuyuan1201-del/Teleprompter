@@ -267,27 +267,36 @@ private struct RecordingPlayerView: View {
                 Color.black.ignoresSafeArea()
 
                 VStack(spacing: 20) {
-                    VideoPlayer(player: player)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    ZStack(alignment: .bottomLeading) {
+                        VideoPlayer(player: player)
 
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(recording.title)
-                                .font(.appHeadline)
+                        LinearGradient(
+                            colors: [.clear, .black.opacity(0.65)],
+                            startPoint: .center,
+                            endPoint: .bottom
+                        )
+                        .allowsHitTesting(false)
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(recording.title)
+                                    .font(.appHeadline)
+                                    .foregroundStyle(.white)
+                                Text(recording.createdAt.formatted(date: .abbreviated, time: .shortened))
+                                    .font(.appCaption)
+                                    .foregroundStyle(.white.opacity(0.72))
+                            }
+
+                            Spacer()
+
+                            Text(recording.durationText)
+                                .font(.appCaptionEmphasis.monospacedDigit())
                                 .foregroundStyle(.white)
-                            Text(recording.createdAt.formatted(date: .abbreviated, time: .shortened))
-                                .font(.appCaption)
-                                .foregroundStyle(.white.opacity(0.62))
                         }
-
-                        Spacer()
-
-                        Text(recording.durationText)
-                            .font(.appCaptionEmphasis.monospacedDigit())
-                            .foregroundStyle(.white)
+                        .padding(16)
+                        .allowsHitTesting(false)
                     }
-                    .padding(16)
-                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
                     if let saveError {
                         Label(saveError, systemImage: "exclamationmark.triangle.fill")
