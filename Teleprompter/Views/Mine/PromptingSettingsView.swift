@@ -29,13 +29,16 @@ struct PromptingSettingsView: View {
     }
 
     var body: some View {
-        Form {
-            Section {
-                previewBox
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
-            }
+        VStack(spacing: 0) {
+            previewBox
+                .padding(.horizontal, AppLayout.screenHorizontalPadding)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
+                .background(Color.appCanvas)
 
+            Divider()
+
+            Form {
             Section {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
@@ -184,6 +187,7 @@ struct PromptingSettingsView: View {
                 Text("Having trouble reading?")
             } footer: {
                 Text("These use the closest built-in system typeface until dedicated font files are added to the app. These defaults remain adjustable from the recording screen.")
+            }
             }
         }
         .navigationTitle("Prompting")
