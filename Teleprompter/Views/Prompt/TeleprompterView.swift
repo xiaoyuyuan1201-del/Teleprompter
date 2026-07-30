@@ -351,33 +351,29 @@ struct TeleprompterView: View {
     private var bottomControls: some View {
         VStack(spacing: 12) {
             if camera.isRecording {
-                Button {
-                    if camera.isPaused {
-                        camera.resumeRecording()
-                        isPlaying = true
-                    } else {
-                        camera.pauseRecording()
-                        isPlaying = false
-                    }
-                } label: {
-                    Label(
-                        camera.isPaused ? "Resume recording" : "Pause recording",
-                        systemImage: camera.isPaused ? "play.fill" : "pause.fill"
-                    )
-                    .font(.appSubheadline)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 44)
-                }
-                .buttonStyle(.glass)
-                .tint(camera.isPaused ? .creatorViolet : .white)
-                .disabled(camera.isTransitioning)
-            }
+                GlassEffectContainer(spacing: 20) {
+                    HStack(spacing: 20) {
+                        Spacer()
 
-            if camera.isRecording {
-                HStack {
-                    Spacer()
-                    recordButton
-                    Spacer()
+                        PromptGlassButton(
+                            icon: camera.isPaused ? "play.fill" : "pause.fill",
+                            label: camera.isPaused ? "Resume recording" : "Pause recording",
+                            tint: camera.isPaused ? .creatorViolet : .white
+                        ) {
+                            if camera.isPaused {
+                                camera.resumeRecording()
+                                isPlaying = true
+                            } else {
+                                camera.pauseRecording()
+                                isPlaying = false
+                            }
+                        }
+                        .disabled(camera.isTransitioning)
+
+                        recordButton
+
+                        Spacer()
+                    }
                 }
             } else {
                 GlassEffectContainer(spacing: 12) {
