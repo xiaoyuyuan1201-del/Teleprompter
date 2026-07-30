@@ -291,6 +291,9 @@ struct HomeView: View {
             } else if filteredScripts.isEmpty && visibleFolders.isEmpty {
                 emptyFilterState
             } else {
+                Text("My Scripts")
+                    .font(.appHeadline)
+
                 LazyVStack(spacing: 12) {
                     ForEach(visibleFolders) { folder in
                         FolderRow(

@@ -1,3 +1,4 @@
+import StoreKit
 import SwiftUI
 
 struct MineView: View {
@@ -16,6 +17,7 @@ struct MineView: View {
                     proSection
                     promptingSection
                     supportSection
+                    legalSection
                     aboutSection
                 }
             }
@@ -112,37 +114,75 @@ struct MineView: View {
     }
 
     private var supportSection: some View {
-        Section("Help") {
+        Section("Support & Feedback") {
+            Link(destination: URL(string: "mailto:support@example.com")!) {
+                MineDisclosureRow(title: "Feedback", systemImage: "bubble.left")
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                requestReview()
+            } label: {
+                MineDisclosureRow(title: "Love the app? Rate us!", systemImage: "star")
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var legalSection: some View {
+        Section("Legal") {
+            Button { } label: {
+                MineDisclosureRow(title: "Privacy Policy", systemImage: "hand.raised")
+            }
+            .buttonStyle(.plain)
+
+            Button { } label: {
+                MineDisclosureRow(title: "Terms of Use", systemImage: "doc.text")
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var aboutSection: some View {
+        Section("About") {
             Button {
                 hasCompletedOnboarding = false
             } label: {
                 Label("Replay Onboarding", systemImage: "sparkles.rectangle.stack")
             }
 
-            Link(destination: URL(string: "mailto:support@example.com")!) {
-                Label("Contact Support", systemImage: "envelope")
-            }
-
-            Button { } label: {
-                Label("Privacy Policy", systemImage: "hand.raised")
-            }
-
-            Button { } label: {
-                Label("Terms of Use", systemImage: "doc.text")
-            }
-        }
-    }
-
-    private var aboutSection: some View {
-        Section("About") {
             LabeledContent("App", value: "Teleprompter")
             LabeledContent("Version", value: appVersion)
         }
+    }
+
+    private func requestReview() {
+        guard let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else { return }
+        AppStore.requestReview(in: scene)
     }
 
     private var appVersion: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
         return "\(version) (\(build))"
+    }
+}
+
+private struct MineDisclosureRow: View {
+    let title: String
+    let systemImage: String
+
+    var body: some View {
+        HStack {
+            Label(title, systemImage: systemImage)
+                .foregroundStyle(.primary)
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.appCaption)
+                .foregroundStyle(.tertiary)
+        }
+        .contentShape(Rectangle())
     }
 }
