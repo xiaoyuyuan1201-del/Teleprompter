@@ -22,6 +22,7 @@ struct HomeView: View {
     @State private var libraryTab: LibraryTab = .scripts
     @State private var openedFolder: ScriptFolder?
     @State private var showsAIScript = false
+    @State private var showsAIScriptWriter = false
     @FocusState private var isSearchFieldFocused: Bool
     private let searchFieldScrollID = "homeSearchField"
 
@@ -71,6 +72,12 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showsAIScript) {
             AIScriptSheet { title, finalText, wasPolished in
+                let script = PromptScript(title: title, body: finalText, isDraft: false, isAIPolished: wasPolished)
+                scriptStore.upsert(script)
+            }
+        }
+        .sheet(isPresented: $showsAIScriptWriter) {
+            AIScriptWriterSheet { title, finalText, wasPolished in
                 let script = PromptScript(title: title, body: finalText, isDraft: false, isAIPolished: wasPolished)
                 scriptStore.upsert(script)
             }
@@ -251,24 +258,24 @@ struct HomeView: View {
 
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Ready for your next take?")
+                    Text("Write a New Script")
                         .font(.appTitle)
                         .foregroundStyle(.white)
 
-                    Text(latestScriptDescription)
+                    Text("Let AI help you draft the perfect script")
                         .font(.appSecondary)
                         .foregroundStyle(.white.opacity(0.80))
                         .lineLimit(1)
                 }
 
                 Button {
-                    if let script = latestUsableScript {
-                        activePrompt = script
+                    if purchaseManager.isPro {
+                        showsAIScriptWriter = true
                     } else {
-                        createScript()
+                        showsPaywall = true
                     }
                 } label: {
-                    Label("Start prompting", systemImage: "play.fill")
+                    Label("Get Started", systemImage: "sparkles")
                         .font(.appHeadline)
                         .foregroundStyle(Color.creatorViolet)
                         .padding(.horizontal, 16)
@@ -365,11 +372,7 @@ struct HomeView: View {
                                         renameTarget = script
                                     },
                                     onDuplicate: {
-                                        if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
-                                            scriptStore.duplicate(script)
-                                        } else {
-                                            showsPaywall = true
-                                        }
+                                        scriptStore.duplicate(script)
                                     },
                                     onMove: { folderID in
                                         scriptStore.move(script, toFolder: folderID)
@@ -433,8 +436,8 @@ struct HomeView: View {
                         }
                     } label: {
                         Image(systemName: "magnifyingglass")
-                            .font(.appHeadline)
-                            .foregroundStyle(.secondary)
+                            .font(.system(size: 22, weight: .medium))
+                            .foregroundStyle(Color.black.opacity(0.5))
                     }
 
                     Menu {
@@ -447,19 +450,12 @@ struct HomeView: View {
                                 }
                             }
                         }
-
-                        Button {
-                            newFolderName = ""
-                            showsNewFolderAlert = true
-                        } label: {
-                            Label("New Folder", systemImage: "folder.badge.plus")
-                        }
                     } label: {
                         Image(systemName: "line.3.horizontal.decrease")
-                            .font(.appHeadline)
-                            .foregroundStyle(.secondary)
+                            .font(.system(size: 22, weight: .medium))
+                            .foregroundStyle(Color.black.opacity(0.5))
                     }
-                    .accessibilityLabel("Sort and filter")
+                    .accessibilityLabel("Sort")
                 }
             }
 
@@ -560,30 +556,8 @@ struct HomeView: View {
         .padding(.bottom, 20)
     }
 
-    private var latestUsableScript: PromptScript? {
-        scriptStore.scripts
-            .filter { !$0.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-            .max(by: { $0.updatedAt < $1.updatedAt })
-    }
-
-    private var latestScriptDescription: String {
-        latestUsableScript.map { "Continue: \($0.displayTitle)" } ?? "Create a script before recording"
-    }
-
-    private func createScript() {
-        if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
-            editorMode = .new
-        } else {
-            showsPaywall = true
-        }
-    }
-
     private func importScript() {
-        if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
-            showsFileImporter = true
-        } else {
-            showsPaywall = true
-        }
+        showsFileImporter = true
     }
 
     private func handleImport(_ result: Result<[URL], Error>) {
@@ -683,6 +657,8 @@ struct ScriptRow: View {
     let onMove: (UUID?) -> Void
     let onDelete: () -> Void
 
+    @State private var showsDeleteConfirm = false
+
     private var canPrompt: Bool {
         !script.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
@@ -709,19 +685,6 @@ struct ScriptRow: View {
                             Image(systemName: "star.fill")
                                 .font(.appCaption)
                                 .foregroundStyle(Color.creatorViolet)
-                        }
-
-                        if script.isDraft {
-                            Text("DRAFT")
-                                .font(.appMicro)
-                                .tracking(1)
-                                .foregroundStyle(Color.creatorViolet)
-                                .padding(.horizontal, 4)
-                                .padding(.vertical, 4)
-                                .background(
-                                    Color.creatorViolet.opacity(0.10),
-                                    in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                )
                         }
                     }
 
@@ -771,12 +734,21 @@ struct ScriptRow: View {
                         Label("Move to Folder", systemImage: "folder")
                     }
                     Divider()
-                    Button(role: .destructive, action: onDelete) {
+                    Button(role: .destructive) {
+                        showsDeleteConfirm = true
+                    } label: {
                         Label("Delete", systemImage: "trash")
                     }
                 } label: {
                     Image(systemName: "ellipsis")
                         .frame(width: 30, height: 30)
+                }
+                .tint(.primary)
+                .alert("Delete script?", isPresented: $showsDeleteConfirm) {
+                    Button("Cancel", role: .cancel) {}
+                    Button("Delete", role: .destructive, action: onDelete)
+                } message: {
+                    Text("This will permanently delete \"\(script.displayTitle)\". This can't be undone.")
                 }
             }
 
@@ -848,6 +820,7 @@ struct FolderRow: View {
                 Image(systemName: "ellipsis")
                     .frame(width: 30, height: 30)
             }
+            .tint(.primary)
         }
         .padding(16)
         .contentCard()

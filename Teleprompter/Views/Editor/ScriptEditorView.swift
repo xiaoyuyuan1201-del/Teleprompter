@@ -50,7 +50,6 @@ struct ScriptEditorView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 32) {
                     statusRow
-                    titleSection
                     scriptSection
                 }
                 .padding(.horizontal, AppLayout.screenHorizontalPadding)
@@ -153,35 +152,6 @@ struct ScriptEditorView: View {
         .animation(.easeInOut(duration: 0.18), value: autosaveLabel)
     }
 
-    private var titleSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                SectionEyebrow(title: "Title")
-                Spacer()
-                if existingScript?.isDraft == true || existingScript == nil {
-                    Text("DRAFT")
-                        .font(.appCaptionEmphasis)
-                        .tracking(1)
-                        .foregroundStyle(Color.creatorViolet)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                }
-            }
-
-            TextField("Give your script a name", text: $title)
-                .font(.appHeadline)
-                .textInputAutocapitalization(.sentences)
-                .focused($focusedField, equals: .title)
-                .padding(20)
-                .contentCard()
-                .submitLabel(.next)
-                .onSubmit {
-                    focusedField = .body
-                }
-        }
-    }
-
     private var scriptSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
@@ -244,25 +214,38 @@ struct ScriptEditorView: View {
                     .lineLimit(1)
             }
 
-            ZStack(alignment: .topLeading) {
-                TextEditor(text: $bodyText)
-                    .font(.appBody)
-                    .lineSpacing(4)
-                    .scrollContentBackground(.hidden)
-                    .focused($focusedField, equals: .body)
-                    .padding(12)
-                    .frame(minHeight: 430)
-                    .contentCard()
+            // A single note-style card: title flows straight into the body,
+            // like Apple Notes, instead of two separate boxes.
+            VStack(alignment: .leading, spacing: 4) {
+                TextField("Give your script a name", text: $title)
+                    .font(.appHeadline)
+                    .textInputAutocapitalization(.sentences)
+                    .focused($focusedField, equals: .title)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        focusedField = .body
+                    }
 
-                if bodyText.isEmpty {
-                    Text("Paste, import, or write what you want to say...")
+                ZStack(alignment: .topLeading) {
+                    TextEditor(text: $bodyText)
                         .font(.appBody)
-                        .foregroundStyle(.tertiary)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 24)
-                        .allowsHitTesting(false)
+                        .lineSpacing(4)
+                        .scrollContentBackground(.hidden)
+                        .focused($focusedField, equals: .body)
+                        .frame(minHeight: 400)
+                        .padding(.leading, -5)
+
+                    if bodyText.isEmpty {
+                        Text("Paste, import, or write what you want to say...")
+                            .font(.appBody)
+                            .foregroundStyle(.tertiary)
+                            .padding(.top, 8)
+                            .allowsHitTesting(false)
+                    }
                 }
             }
+            .padding(16)
+            .contentCard()
         }
     }
 

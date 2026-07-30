@@ -4,13 +4,43 @@ import Foundation
 @MainActor
 final class RecordingStore: ObservableObject {
     @Published private(set) var recordings: [RecordedVideo] = []
+    @Published private(set) var folders: [VideoFolder] = []
 
     private let fileManager = FileManager.default
 
     init() {
         createDirectoryIfNeeded()
         load()
+        loadFolders()
         removeMissingEntries()
+    }
+
+    @discardableResult
+    func createFolder(name: String) -> VideoFolder {
+        let folder = VideoFolder(name: name)
+        folders.append(folder)
+        folders.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        saveFolders()
+        return folder
+    }
+
+    func renameFolder(_ folder: VideoFolder, to name: String) {
+        guard let index = folders.firstIndex(where: { $0.id == folder.id }) else { return }
+        folders[index].name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        folders.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        saveFolders()
+    }
+
+    func deleteFolder(_ folder: VideoFolder) {
+        folders.removeAll { $0.id == folder.id }
+        saveFolders()
+        clearFolder(folder.id)
+    }
+
+    func move(_ recording: RecordedVideo, toFolder folderID: UUID?) {
+        guard let index = recordings.firstIndex(where: { $0.id == recording.id }) else { return }
+        recordings[index].folderID = folderID
+        save()
     }
 
     func fileURL(for recording: RecordedVideo) -> URL {
@@ -59,7 +89,7 @@ final class RecordingStore: ObservableObject {
     }
 
     /// Clears the folder tag from any recordings pointing at a folder that
-    /// was just deleted on the scripts side (folders are owned by ScriptStore).
+    /// was just deleted.
     func clearFolder(_ folderID: UUID) {
         var didChange = false
         for index in recordings.indices where recordings[index].folderID == folderID {
@@ -106,6 +136,21 @@ final class RecordingStore: ObservableObject {
 
     private var metadataURL: URL {
         appDirectory.appendingPathComponent("recordings.json", isDirectory: false)
+    }
+
+    private var foldersStorageURL: URL {
+        appDirectory.appendingPathComponent("videoFolders.json", isDirectory: false)
+    }
+
+    private func loadFolders() {
+        guard let data = try? Data(contentsOf: foldersStorageURL) else { return }
+        folders = (try? JSONDecoder().decode([VideoFolder].self, from: data)) ?? []
+    }
+
+    private func saveFolders() {
+        guard let data = try? JSONEncoder().encode(folders) else { return }
+        createDirectoryIfNeeded()
+        try? data.write(to: foldersStorageURL, options: .atomic)
     }
 
     private func createDirectoryIfNeeded() {

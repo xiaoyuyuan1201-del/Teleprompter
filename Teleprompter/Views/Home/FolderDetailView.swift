@@ -74,11 +74,7 @@ struct FolderDetailView: View {
                                         renameTarget = script
                                     },
                                     onDuplicate: {
-                                        if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
-                                            scriptStore.duplicate(script)
-                                        } else {
-                                            showsPaywall = true
-                                        }
+                                        scriptStore.duplicate(script)
                                     },
                                     onMove: { folderID in
                                         scriptStore.move(script, toFolder: folderID)
@@ -125,6 +121,7 @@ struct FolderDetailView: View {
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
+                .tint(.primary)
             }
         }
         .sheet(item: $editorMode) { mode in
@@ -269,19 +266,11 @@ struct FolderDetailView: View {
     }
 
     private func createScript() {
-        if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
-            editorMode = .new
-        } else {
-            showsPaywall = true
-        }
+        editorMode = .new
     }
 
     private func importScript() {
-        if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
-            showsFileImporter = true
-        } else {
-            showsPaywall = true
-        }
+        showsFileImporter = true
     }
 
     private func handleImport(_ result: Result<[URL], Error>) {

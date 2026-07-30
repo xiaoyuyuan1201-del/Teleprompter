@@ -191,30 +191,15 @@ struct AIScriptSheet: View {
     private var inputStep: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Write with AI")
-                        .font(.appTitle)
-                    Text("Paste or write your script, then let AI clean it up. Your original stays one tap away.")
-                        .font(.appSecondary)
-                        .foregroundStyle(.secondary)
-                }
-
                 HStack(spacing: 12) {
                     StatPill(icon: "text.word.spacing", text: "\(wordCount) words")
                     StatPill(icon: "clock", text: "About \(estimatedMinutes) min")
                 }
 
-                TextField("Script title", text: $scriptTitle)
-                    .font(.appHeadline)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
-                    .contentCard(cornerRadius: 16)
-                    .focused($focusedField, equals: .title)
-
                 VStack(alignment: .leading, spacing: 12) {
                     SectionEyebrow(title: "Script")
 
-                    scriptBodyEditor
+                    noteCard
                 }
 
                 tipCallout
@@ -242,25 +227,38 @@ struct AIScriptSheet: View {
         .onTapGesture { focusedField = nil }
     }
 
-    private var scriptBodyEditor: some View {
-        TextEditor(text: $rawText)
-            .font(.appBody)
-            .lineSpacing(4)
-            .scrollContentBackground(.hidden)
-            .frame(minHeight: 220)
-            .padding(12)
-            .contentCard()
-            .focused($focusedField, equals: .body)
-            .overlay(alignment: .topLeading) {
+    // A single note-style card: title flows straight into the body, like
+    // Apple Notes, instead of separate title/body boxes.
+    private var noteCard: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            TextField("Script title", text: $scriptTitle)
+                .font(.appHeadline)
+                .focused($focusedField, equals: .title)
+                .submitLabel(.next)
+                .onSubmit {
+                    focusedField = .body
+                }
+
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $rawText)
+                    .font(.appBody)
+                    .lineSpacing(4)
+                    .scrollContentBackground(.hidden)
+                    .frame(minHeight: 200)
+                    .padding(.leading, -5)
+                    .focused($focusedField, equals: .body)
+
                 if rawText.isEmpty {
                     Text("Paste or write your script here...")
                         .font(.appBody)
                         .foregroundStyle(.tertiary)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 20)
+                        .padding(.top, 8)
                         .allowsHitTesting(false)
                 }
             }
+        }
+        .padding(16)
+        .contentCard()
     }
 
     private var tipCallout: some View {
@@ -420,7 +418,7 @@ struct AIScriptSheet: View {
 }
 
 /// A modal style picker: pick the tone AI should polish toward, then confirm.
-private struct StyleSelectSheet: View {
+struct StyleSelectSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedStyle: PolishStyle
     let onConfirm: () -> Void
@@ -510,7 +508,7 @@ private struct StyleSelectSheet: View {
 
 /// A centered, looping sparkles glyph orbited by three small dots — the
 /// "AI is thinking" moment between submitting text and seeing a result.
-private struct PolishingAnimationView: View {
+struct PolishingAnimationView: View {
     @State private var isAnimating = false
 
     var body: some View {
@@ -551,7 +549,7 @@ private struct PolishingAnimationView: View {
 }
 
 /// Three dots that bounce in sequence beneath the polishing message.
-private struct BouncingDotsView: View {
+struct BouncingDotsView: View {
     @State private var isAnimating = false
 
     var body: some View {

@@ -467,10 +467,11 @@ struct TeleprompterView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
+                    Button {
                         showsControls = false
+                    } label: {
+                        Image(systemName: "xmark")
                     }
-                    .fontWeight(.semibold)
                 }
             }
         }
@@ -613,8 +614,7 @@ struct TeleprompterView: View {
             let recording = try recordingStore.importRecording(
                 from: url,
                 title: script.displayTitle,
-                verification: camera.verification,
-                folderID: script.folderID
+                verification: camera.verification
             )
             libraryRecordingID = recording.id
         } catch {
@@ -903,9 +903,11 @@ private struct RecordingReviewView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
+                    Button {
                         onDone()
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
                     }
                 }
             }

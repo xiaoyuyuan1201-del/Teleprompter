@@ -14,8 +14,10 @@ struct RootTabView: View {
     @State private var importError: String?
     @State private var showsNewFolderAlert = false
     @State private var newFolderName = ""
+    @State private var showsNewVideoFolderAlert = false
+    @State private var newVideoFolderName = ""
     @State private var showsAIScript = false
-    @State private var freeformScript: PromptScript?
+    @State private var showsAIScriptWriter = false
 
     private enum AppTab: Hashable {
         case home
@@ -24,8 +26,9 @@ struct RootTabView: View {
     }
 
     private enum QuickAction: String, CaseIterable, Identifiable {
-        case record
+        case newVideoFolder
         case newFolder
+        case aiScriptWriter
         case aiScript
         case importFile
         case newScript
@@ -34,8 +37,9 @@ struct RootTabView: View {
 
         var title: String {
             switch self {
-            case .record: "Record Without Script"
+            case .newVideoFolder: "New Video Folder"
             case .newFolder: "New Folder"
+            case .aiScriptWriter: "Write a New Script"
             case .aiScript: "AI Script"
             case .importFile: "Import File"
             case .newScript: "New Script"
@@ -44,8 +48,9 @@ struct RootTabView: View {
 
         var systemImage: String {
             switch self {
-            case .record: "video.fill"
+            case .newVideoFolder: "play.rectangle.fill"
             case .newFolder: "folder.fill"
+            case .aiScriptWriter: "wand.and.stars"
             case .aiScript: "sparkles"
             case .importFile: "square.and.arrow.up.fill"
             case .newScript: "pencil.and.scribble"
@@ -62,7 +67,7 @@ struct RootTabView: View {
                         Label("Home", systemImage: selectedTab == .home ? "house.fill" : "house")
                     }
 
-                VideosView()
+                VideosView(onGoToHome: { selectedTab = .home })
                     .tag(AppTab.videos)
                     .tabItem {
                         Label("Videos", systemImage: selectedTab == .videos ? "play.rectangle.fill" : "play.rectangle")
@@ -71,7 +76,7 @@ struct RootTabView: View {
                 MineView()
                     .tag(AppTab.mine)
                     .tabItem {
-                        Label("Mine", systemImage: selectedTab == .mine ? "person.crop.circle.fill" : "person.crop.circle")
+                        Label("Settings", systemImage: selectedTab == .mine ? "gearshape.fill" : "gearshape")
                     }
             }
             .tint(.creatorViolet)
@@ -133,10 +138,11 @@ struct RootTabView: View {
                 scriptStore.upsert(script)
             }
         }
-        .fullScreenCover(item: $freeformScript) { script in
-            TeleprompterView(script: script)
-                .environmentObject(purchaseManager)
-                .environmentObject(recordingStore)
+        .sheet(isPresented: $showsAIScriptWriter) {
+            AIScriptWriterSheet { title, finalText, wasPolished in
+                let script = PromptScript(title: title, body: finalText, isDraft: false, isAIPolished: wasPolished)
+                scriptStore.upsert(script)
+            }
         }
         .fullScreenCover(isPresented: $showsPaywall) {
             PaywallView(source: .inApp)
@@ -170,6 +176,18 @@ struct RootTabView: View {
             }
         } message: {
             Text("Give your folder a name to help sort your scripts.")
+        }
+        .alert("New video folder", isPresented: $showsNewVideoFolderAlert) {
+            TextField("Folder name", text: $newVideoFolderName)
+            Button("Cancel", role: .cancel) {
+                newVideoFolderName = ""
+            }
+            Button("Create") {
+                recordingStore.createFolder(name: newVideoFolderName)
+                newVideoFolderName = ""
+            }
+        } message: {
+            Text("Give your folder a name to help sort your videos.")
         }
     }
 
@@ -231,11 +249,18 @@ struct RootTabView: View {
         }
 
         switch action {
-        case .record:
-            freeformScript = PromptScript(title: "", body: "")
+        case .newVideoFolder:
+            newVideoFolderName = ""
+            showsNewVideoFolderAlert = true
         case .newFolder:
             newFolderName = ""
             showsNewFolderAlert = true
+        case .aiScriptWriter:
+            if purchaseManager.isPro {
+                showsAIScriptWriter = true
+            } else {
+                showsPaywall = true
+            }
         case .aiScript:
             if purchaseManager.isPro {
                 showsAIScript = true
@@ -243,17 +268,9 @@ struct RootTabView: View {
                 showsPaywall = true
             }
         case .importFile:
-            if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
-                showsFileImporter = true
-            } else {
-                showsPaywall = true
-            }
+            showsFileImporter = true
         case .newScript:
-            if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
-                showsScriptEditor = true
-            } else {
-                showsPaywall = true
-            }
+            showsScriptEditor = true
         }
     }
 

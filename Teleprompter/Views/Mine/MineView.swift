@@ -3,9 +3,9 @@ import SwiftUI
 
 struct MineView: View {
     @EnvironmentObject private var purchaseManager: PurchaseManager
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = true
 
     @State private var showsPaywall = false
+    @State private var showsManageSubscriptions = false
 
     var body: some View {
         NavigationStack {
@@ -13,16 +13,13 @@ struct MineView: View {
                 AppBackground()
 
                 VStack(spacing: 0) {
-                    AppHeaderRow(title: "Mine")
+                    AppHeaderRow(title: "Settings")
 
                     ScrollView(showsIndicators: false) {
-                        VStack(alignment: .leading, spacing: 28) {
-                            profileCard
+                        VStack(alignment: .leading, spacing: 24) {
                             planCard
-                            settingsCard
                             supportCard
                             legalCard
-                            aboutCard
                         }
                         .padding(.horizontal, AppLayout.screenHorizontalPadding)
                         .padding(.top, 8)
@@ -36,85 +33,31 @@ struct MineView: View {
             PaywallView(source: .inApp)
                 .environmentObject(purchaseManager)
         }
-    }
-
-    private var profileCard: some View {
-        HStack(spacing: 16) {
-            Image(systemName: "person.crop.circle.fill")
-                .font(.appHero)
-                .foregroundStyle(Color.creatorViolet)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Teleprompter")
-                    .font(.appHeadline)
-                Text(purchaseManager.isPro ? "Pro member" : "Free plan")
-                    .font(.appCaption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-        }
-        .padding(16)
-        .contentCard(cornerRadius: 20)
+        .manageSubscriptionsSheet(isPresented: $showsManageSubscriptions)
     }
 
     private var planCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionEyebrow(title: "Current Plan: \(purchaseManager.isPro ? "Pro" : "Free")")
+            MineGroupLabel(title: "Current plan: \(purchaseManager.isPro ? "Pro" : "Free")")
 
             VStack(spacing: 0) {
-                if purchaseManager.isPro {
-                    MineRow(title: "Teleprompter Pro", systemImage: "crown.fill", trailing: "Active", showsChevron: false)
-                } else {
-                    Button {
+                Button {
+                    if purchaseManager.isPro {
+                        showsManageSubscriptions = true
+                    } else {
                         showsPaywall = true
-                    } label: {
-                        MineRow(title: "Upgrade to Pro", systemImage: "crown.fill")
                     }
-                    .buttonStyle(.plain)
-
-                    MineDivider()
+                } label: {
+                    MineRow(title: "Manage my plan", systemImage: "diamond")
                 }
+                .buttonStyle(.plain)
+
+                MineDivider()
 
                 Button {
                     Task { await purchaseManager.restorePurchases() }
                 } label: {
-                    MineRow(title: "Restore Purchase", systemImage: "arrow.clockwise", showsChevron: false)
-                }
-                .buttonStyle(.plain)
-            }
-            .contentCard(cornerRadius: 20)
-        }
-    }
-
-    private var settingsCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            SectionEyebrow(title: "Settings")
-
-            VStack(spacing: 0) {
-                NavigationLink {
-                    PromptingSettingsView()
-                        .environmentObject(purchaseManager)
-                } label: {
-                    MineRow(title: "Prompting", systemImage: "text.alignleft")
-                }
-                .buttonStyle(.plain)
-
-                MineDivider()
-
-                NavigationLink {
-                    RecordingSettingsView()
-                } label: {
-                    MineRow(title: "Recording", systemImage: "video")
-                }
-                .buttonStyle(.plain)
-
-                MineDivider()
-
-                NavigationLink {
-                    PrivacySettingsView()
-                } label: {
-                    MineRow(title: "Privacy", systemImage: "hand.raised")
+                    MineRow(title: "Restore purchase", systemImage: "arrow.clockwise")
                 }
                 .buttonStyle(.plain)
             }
@@ -124,7 +67,7 @@ struct MineView: View {
 
     private var supportCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionEyebrow(title: "Support & Feedback")
+            MineGroupLabel(title: "Support & feedback")
 
             VStack(spacing: 0) {
                 Link(destination: URL(string: "mailto:support@example.com")!) {
@@ -147,48 +90,24 @@ struct MineView: View {
 
     private var legalCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionEyebrow(title: "Legal & Privacy")
+            MineGroupLabel(title: "Legal & privacy")
 
             VStack(spacing: 0) {
                 NavigationLink {
                     LegalDocumentView(title: "Privacy Policy")
                 } label: {
-                    MineRow(title: "Privacy Policy", systemImage: "lock")
+                    MineRow(title: "Privacy policy", systemImage: "lock")
                 }
                 .buttonStyle(.plain)
 
                 MineDivider()
 
                 NavigationLink {
-                    LegalDocumentView(title: "Terms of Use")
+                    LegalDocumentView(title: "Disclaimer")
                 } label: {
-                    MineRow(title: "Terms of Use", systemImage: "doc.text")
+                    MineRow(title: "Disclaimer", systemImage: "doc.text")
                 }
                 .buttonStyle(.plain)
-            }
-            .contentCard(cornerRadius: 20)
-        }
-    }
-
-    private var aboutCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            SectionEyebrow(title: "About")
-
-            VStack(spacing: 0) {
-                Button {
-                    hasCompletedOnboarding = false
-                } label: {
-                    MineRow(title: "Replay Onboarding", systemImage: "sparkles.rectangle.stack", showsChevron: false)
-                }
-                .buttonStyle(.plain)
-
-                MineDivider()
-
-                MineRow(title: "App", systemImage: "app", trailing: "Teleprompter", showsChevron: false)
-
-                MineDivider()
-
-                MineRow(title: "Version", systemImage: "number", trailing: appVersion, showsChevron: false)
             }
             .contentCard(cornerRadius: 20)
         }
@@ -197,12 +116,6 @@ struct MineView: View {
     private func requestReview() {
         guard let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else { return }
         AppStore.requestReview(in: scene)
-    }
-
-    private var appVersion: String {
-        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
-        return "\(version) (\(build))"
     }
 }
 
@@ -216,7 +129,7 @@ private struct MineRow: View {
         HStack(spacing: 14) {
             Image(systemName: systemImage)
                 .font(.appSubheadline)
-                .foregroundStyle(Color.creatorViolet)
+                .foregroundStyle(.primary)
                 .frame(width: 22)
 
             Text(title)
@@ -247,5 +160,15 @@ private struct MineDivider: View {
     var body: some View {
         Divider()
             .padding(.leading, 52)
+    }
+}
+
+private struct MineGroupLabel: View {
+    let title: String
+
+    var body: some View {
+        Text(title)
+            .font(.appCaptionEmphasis)
+            .foregroundStyle(.secondary)
     }
 }

@@ -6,8 +6,9 @@ import UIKit
 
 struct VideosView: View {
     @EnvironmentObject private var recordingStore: RecordingStore
-    @EnvironmentObject private var scriptStore: ScriptStore
     @EnvironmentObject private var purchaseManager: PurchaseManager
+
+    var onGoToHome: () -> Void = {}
 
     @State private var selectedRecording: RecordedVideo?
     @State private var renameTarget: RecordedVideo?
@@ -16,7 +17,7 @@ struct VideosView: View {
     @State private var showsSearchField = false
     @State private var videoTab: VideoTab = .videos
     @State private var sortNewestFirst = true
-    @State private var openedFolder: ScriptFolder?
+    @State private var openedFolder: VideoFolder?
     @FocusState private var isSearchFieldFocused: Bool
 
     private enum VideoTab: String, CaseIterable, Identifiable {
@@ -33,11 +34,10 @@ struct VideosView: View {
         }
     }
 
-    private var visibleFolders: [ScriptFolder] {
+    private var visibleFolders: [VideoFolder] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let folders = scriptStore.folders.filter { !recordingStore.recordings(in: $0.id).isEmpty }
-        guard !query.isEmpty else { return folders }
-        return folders.filter { $0.displayName.localizedCaseInsensitiveContains(query) }
+        guard !query.isEmpty else { return recordingStore.folders }
+        return recordingStore.folders.filter { $0.displayName.localizedCaseInsensitiveContains(query) }
     }
 
     private var filteredRecordings: [RecordedVideo] {
@@ -57,7 +57,7 @@ struct VideosView: View {
                 VStack(spacing: 0) {
                     videosTopBar
 
-                    if recordingStore.recordings.isEmpty {
+                    if recordingStore.recordings.isEmpty && recordingStore.folders.isEmpty {
                         emptyState
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
@@ -74,6 +74,7 @@ struct VideosView: View {
                                             ForEach(filteredRecordings) { recording in
                                                 RecordingCard(
                                                     recording: recording,
+                                                    folders: recordingStore.folders,
                                                     url: recordingStore.fileURL(for: recording),
                                                     onOpen: { selectedRecording = recording },
                                                     onRename: {
@@ -81,6 +82,9 @@ struct VideosView: View {
                                                         renameTarget = recording
                                                     },
                                                     onFavorite: { recordingStore.toggleFavorite(recording) },
+                                                    onMove: { folderID in
+                                                        recordingStore.move(recording, toFolder: folderID)
+                                                    },
                                                     onDelete: { recordingStore.delete(recording) }
                                                 )
                                             }
@@ -117,7 +121,6 @@ struct VideosView: View {
             .navigationDestination(item: $openedFolder) { folder in
                 VideoFolderDetailView(folder: folder)
                     .environmentObject(recordingStore)
-                    .environmentObject(scriptStore)
                     .environmentObject(purchaseManager)
             }
         }
@@ -195,8 +198,8 @@ struct VideosView: View {
                             }
                         } label: {
                             Image(systemName: "magnifyingglass")
-                                .font(.appHeadline)
-                                .foregroundStyle(.secondary)
+                                .font(.system(size: 22, weight: .medium))
+                                .foregroundStyle(Color.black.opacity(0.5))
                         }
 
                         Menu {
@@ -212,8 +215,8 @@ struct VideosView: View {
                             }
                         } label: {
                             Image(systemName: "line.3.horizontal.decrease")
-                                .font(.appHeadline)
-                                .foregroundStyle(.secondary)
+                                .font(.system(size: 22, weight: .medium))
+                                .foregroundStyle(Color.black.opacity(0.5))
                         }
                         .accessibilityLabel("Sort")
                     }
@@ -264,7 +267,7 @@ struct VideosView: View {
                     ? "No \(itemName) match \"\(searchText)\""
                     : (videoTab == .videos
                         ? "Videos you record without a folder will appear here."
-                        : "Record a script that's inside a folder to see it here.")
+                        : "Tap the folder icon above to create your first video folder.")
             )
             .font(.appSecondary)
             .foregroundStyle(.secondary)
@@ -292,13 +295,23 @@ struct VideosView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
             }
+
+            Button(action: onGoToHome) {
+                Text("Go to Home")
+                    .font(.appHeadline)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 20)
+                    .frame(height: 46)
+                    .background(Color.creatorViolet, in: Capsule(style: .continuous))
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 36)
     }
 }
 
 private struct VideoFolderRow: View {
-    let folder: ScriptFolder
+    let folder: VideoFolder
     let count: Int
     let onOpen: () -> Void
 
@@ -338,12 +351,20 @@ private struct VideoFolderRow: View {
 
 struct VideoFolderDetailView: View {
     @EnvironmentObject private var recordingStore: RecordingStore
+    @Environment(\.dismiss) private var dismiss
 
-    let folder: ScriptFolder
+    let folder: VideoFolder
 
     @State private var selectedRecording: RecordedVideo?
     @State private var renameTarget: RecordedVideo?
     @State private var renameText = ""
+    @State private var showsRenameFolderAlert = false
+    @State private var folderRenameText = ""
+    @State private var showsDeleteFolderAlert = false
+
+    private var currentFolder: VideoFolder {
+        recordingStore.folders.first { $0.id == folder.id } ?? folder
+    }
 
     private var recordings: [RecordedVideo] {
         recordingStore.recordings(in: folder.id)
@@ -353,30 +374,58 @@ struct VideoFolderDetailView: View {
         ZStack {
             AppBackground()
 
-            ScrollView(showsIndicators: false) {
-                LazyVStack(spacing: 12) {
-                    ForEach(recordings) { recording in
-                        RecordingCard(
-                            recording: recording,
-                            url: recordingStore.fileURL(for: recording),
-                            onOpen: { selectedRecording = recording },
-                            onRename: {
-                                renameText = recording.title
-                                renameTarget = recording
-                            },
-                            onFavorite: { recordingStore.toggleFavorite(recording) },
-                            onDelete: { recordingStore.delete(recording) }
-                        )
+            if recordings.isEmpty {
+                emptyState
+            } else {
+                ScrollView(showsIndicators: false) {
+                    LazyVStack(spacing: 12) {
+                        ForEach(recordings) { recording in
+                            RecordingCard(
+                                recording: recording,
+                                folders: recordingStore.folders,
+                                url: recordingStore.fileURL(for: recording),
+                                onOpen: { selectedRecording = recording },
+                                onRename: {
+                                    renameText = recording.title
+                                    renameTarget = recording
+                                },
+                                onFavorite: { recordingStore.toggleFavorite(recording) },
+                                onMove: { folderID in
+                                    recordingStore.move(recording, toFolder: folderID)
+                                },
+                                onDelete: { recordingStore.delete(recording) }
+                            )
+                        }
                     }
+                    .padding(.horizontal, AppLayout.screenHorizontalPadding)
+                    .padding(.top, 8)
+                    .padding(.bottom, 36)
                 }
-                .padding(.horizontal, AppLayout.screenHorizontalPadding)
-                .padding(.top, 8)
-                .padding(.bottom, 36)
             }
         }
-        .navigationTitle(folder.displayName)
+        .navigationTitle(currentFolder.displayName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button {
+                        folderRenameText = currentFolder.displayName
+                        showsRenameFolderAlert = true
+                    } label: {
+                        Label("Rename Folder", systemImage: "character.cursor.ibeam")
+                    }
+                    Button(role: .destructive) {
+                        showsDeleteFolderAlert = true
+                    } label: {
+                        Label("Delete Folder", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+                .tint(.primary)
+            }
+        }
         .sheet(item: $selectedRecording) { recording in
             RecordingPlayerView(
                 recording: recording,
@@ -400,18 +449,62 @@ struct VideoFolderDetailView: View {
         } message: {
             Text("Use a name that helps you find this take later.")
         }
+        .alert("Rename folder", isPresented: $showsRenameFolderAlert) {
+            TextField("Folder name", text: $folderRenameText)
+            Button("Cancel", role: .cancel) {}
+            Button("Rename") {
+                recordingStore.renameFolder(currentFolder, to: folderRenameText)
+            }
+        }
+        .alert("Delete folder?", isPresented: $showsDeleteFolderAlert) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                recordingStore.deleteFolder(currentFolder)
+                dismiss()
+            }
+        } message: {
+            Text("Videos inside will move back to \"No Folder\". This can't be undone.")
+        }
+    }
+
+    private var emptyState: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "folder")
+                .font(.appHeadline)
+                .foregroundStyle(Color.creatorViolet)
+                .frame(width: 38, height: 38)
+                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("No videos here yet")
+                    .font(.appHeadline)
+                Text("Move a video in from its menu on the Videos tab.")
+                    .font(.appSecondary)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+        }
+        .padding(16)
+        .contentCard()
+        .padding(.horizontal, AppLayout.screenHorizontalPadding)
+        .padding(.top, 20)
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 }
 
 private struct RecordingCard: View {
     let recording: RecordedVideo
+    let folders: [VideoFolder]
     let url: URL
     let onOpen: () -> Void
     let onRename: () -> Void
     let onFavorite: () -> Void
+    let onMove: (UUID?) -> Void
     let onDelete: () -> Void
 
     @State private var showsShare = false
+    @State private var showsDeleteConfirm = false
 
     var body: some View {
         HStack(spacing: 12) {
@@ -472,7 +565,32 @@ private struct RecordingCard: View {
                 } label: {
                     Label("Share", systemImage: "square.and.arrow.up")
                 }
-                Button(role: .destructive, action: onDelete) {
+                Menu {
+                    if recording.folderID != nil {
+                        Button {
+                            onMove(nil)
+                        } label: {
+                            Label("No Folder", systemImage: "circle.slash")
+                        }
+                        Divider()
+                    }
+                    ForEach(folders) { folder in
+                        Button {
+                            onMove(folder.id)
+                        } label: {
+                            if recording.folderID == folder.id {
+                                Label(folder.displayName, systemImage: "checkmark")
+                            } else {
+                                Text(folder.displayName)
+                            }
+                        }
+                    }
+                } label: {
+                    Label("Move to Folder", systemImage: "folder")
+                }
+                Button(role: .destructive) {
+                    showsDeleteConfirm = true
+                } label: {
                     Label("Delete", systemImage: "trash")
                 }
             } label: {
@@ -482,11 +600,18 @@ private struct RecordingCard: View {
             }
             .buttonStyle(ToolSecondaryButtonStyle(height: 36, horizontalPadding: 0))
             .foregroundStyle(.primary)
+            .tint(.primary)
         }
         .padding(12)
         .contentCard()
         .sheet(isPresented: $showsShare) {
             SystemShareSheet(items: [url])
+        }
+        .alert("Delete video?", isPresented: $showsDeleteConfirm) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive, action: onDelete)
+        } message: {
+            Text("This will permanently delete \"\(recording.title)\". This can't be undone.")
         }
     }
 }
@@ -629,8 +754,10 @@ private struct RecordingPlayerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
                     }
                 }
             }

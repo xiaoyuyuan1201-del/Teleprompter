@@ -15,7 +15,6 @@ final class ScriptStore: ObservableObject {
     private let storageKey = "teleprompter.savedScripts.v2"
     private let legacyStorageKey = "teleprompter.savedScripts.v1"
     private let sortKey = "teleprompter.scriptSortOption"
-    let freeScriptLimit = 3
 
     init() {
         let storedSort = UserDefaults.standard.string(forKey: sortKey)
@@ -99,10 +98,6 @@ final class ScriptStore: ObservableObject {
         scripts[index].isFavorite.toggle()
         scripts[index].updatedAt = .now
         sortAndSave()
-    }
-
-    func canCreateScript(isPro: Bool) -> Bool {
-        isPro || scripts.count < freeScriptLimit
     }
 
     func move(_ script: PromptScript, toFolder folderID: UUID?) {

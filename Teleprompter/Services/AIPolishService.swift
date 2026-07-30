@@ -80,6 +80,23 @@ enum AIPolishError: LocalizedError {
     }
 }
 
+enum AIScriptWriterError: LocalizedError {
+    case emptyTopic
+    case modelUnavailable
+    case emptyResponse
+
+    var errorDescription: String? {
+        switch self {
+        case .emptyTopic:
+            "Add a topic before generating a script."
+        case .modelUnavailable:
+            "Writing with AI requires an Apple Intelligence compatible device with Apple Intelligence enabled."
+        case .emptyResponse:
+            "AI did not return any text. Try again."
+        }
+    }
+}
+
 @MainActor
 final class AIPolishService: ObservableObject {
     @Published private(set) var isProcessing = false
@@ -118,6 +135,40 @@ final class AIPolishService: ObservableObject {
             let result = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !result.isEmpty else {
                 throw AIPolishError.emptyResponse
+            }
+            return result
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
+    }
+
+    func write(topic: String, style: PolishStyle) async -> String? {
+        let trimmed = topic.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            errorMessage = AIScriptWriterError.emptyTopic.localizedDescription
+            return nil
+        }
+        guard model.isAvailable else {
+            errorMessage = AIScriptWriterError.modelUnavailable.localizedDescription
+            return nil
+        }
+
+        isProcessing = true
+        defer { isProcessing = false }
+
+        do {
+            let session = LanguageModelSession(instructions: """
+                You write scripts for a teleprompter, meant to be read aloud on camera. Return only the finished script with no explanation, title, markdown, or quotation marks.
+                """)
+            let response = try await session.respond(to: """
+                Write a complete, ready-to-read teleprompter script about: \(trimmed)
+
+                Tone: \(style.instruction)
+                """)
+            let result = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !result.isEmpty else {
+                throw AIScriptWriterError.emptyResponse
             }
             return result
         } catch {

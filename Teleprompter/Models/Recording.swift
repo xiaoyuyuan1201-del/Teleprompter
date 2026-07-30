@@ -66,3 +66,22 @@ struct RecordedVideo: Identifiable, Codable, Hashable {
         ByteCountFormatter.string(fromByteCount: fileSizeBytes, countStyle: .file)
     }
 }
+
+/// A folder that groups recorded videos. Independent from `ScriptFolder` —
+/// videos and scripts are organized into two separate folder systems.
+struct VideoFolder: Identifiable, Codable, Hashable {
+    var id: UUID
+    var name: String
+    var createdAt: Date
+
+    init(id: UUID = UUID(), name: String, createdAt: Date = .now) {
+        self.id = id
+        self.name = name
+        self.createdAt = createdAt
+    }
+
+    var displayName: String {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? "Untitled folder" : trimmed
+    }
+}
