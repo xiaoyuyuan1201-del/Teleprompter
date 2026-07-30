@@ -21,6 +21,7 @@ struct HomeView: View {
     @State private var showsSearchField = false
     @State private var libraryTab: LibraryTab = .scripts
     @State private var openedFolder: ScriptFolder?
+    @State private var showsAIScript = false
     @FocusState private var isSearchFieldFocused: Bool
     private let searchFieldScrollID = "homeSearchField"
 
@@ -67,6 +68,13 @@ struct HomeView: View {
             TeleprompterView(script: scriptStore.script(with: script.id) ?? script)
                 .environmentObject(purchaseManager)
                 .environmentObject(recordingStore)
+        }
+        .sheet(isPresented: $showsAIScript) {
+            AIScriptSheet { finalText in
+                let script = PromptScript(title: "", body: finalText, isDraft: true)
+                scriptStore.upsert(script)
+                editorMode = .edit(script)
+            }
         }
         .fullScreenCover(isPresented: $showsPaywall) {
             PaywallView(source: .inApp)
@@ -298,7 +306,13 @@ struct HomeView: View {
     private var quickActionsRow: some View {
         HStack(spacing: 12) {
             QuickActionButton(title: "Import", systemImage: "doc.text", action: importScript)
-            QuickActionButton(title: "AI Script", systemImage: "sparkles", action: createScript)
+            QuickActionButton(title: "AI Script", systemImage: "sparkles") {
+                if purchaseManager.isPro {
+                    showsAIScript = true
+                } else {
+                    showsPaywall = true
+                }
+            }
             QuickActionButton(title: "New Folder", systemImage: "folder") {
                 newFolderName = ""
                 showsNewFolderAlert = true
@@ -311,10 +325,6 @@ struct HomeView: View {
             quickActionsRow
 
             libraryHeader
-
-            if showsSearchField {
-                searchField
-            }
 
             if scriptStore.scripts.isEmpty {
                 emptyState
@@ -377,50 +387,62 @@ struct HomeView: View {
 
     private var libraryHeader: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 16) {
-                Text("My Scripts")
-                    .font(.appTitle)
-                    .foregroundStyle(.primary)
+            if showsSearchField {
+                HStack(spacing: 12) {
+                    searchField
 
-                Spacer()
-
-                Button {
-                    withAnimation(.snappy) {
-                        showsSearchField.toggle()
-                        if !showsSearchField {
+                    Button("Cancel") {
+                        withAnimation(.snappy) {
+                            showsSearchField = false
                             searchText = ""
                             isSearchFieldFocused = false
                         }
                     }
-                } label: {
-                    Image(systemName: "magnifyingglass")
-                        .font(.appHeadline)
-                        .foregroundStyle(.secondary)
+                    .font(.appHeadline)
+                    .foregroundStyle(Color.creatorViolet)
                 }
+            } else {
+                HStack(spacing: 16) {
+                    Text("My Scripts")
+                        .font(.appTitle)
+                        .foregroundStyle(.primary)
 
-                Menu {
-                    Section("Sort") {
-                        ForEach(ScriptSortOption.allCases) { option in
-                            Button {
-                                scriptStore.sortOption = option
-                            } label: {
-                                Label(option.title, systemImage: option.systemImage)
-                            }
-                        }
-                    }
+                    Spacer()
 
                     Button {
-                        newFolderName = ""
-                        showsNewFolderAlert = true
+                        withAnimation(.snappy) {
+                            showsSearchField = true
+                        }
                     } label: {
-                        Label("New Folder", systemImage: "folder.badge.plus")
+                        Image(systemName: "magnifyingglass")
+                            .font(.appHeadline)
+                            .foregroundStyle(.secondary)
                     }
-                } label: {
-                    Image(systemName: "line.3.horizontal.decrease")
-                        .font(.appHeadline)
-                        .foregroundStyle(.secondary)
+
+                    Menu {
+                        Section("Sort") {
+                            ForEach(ScriptSortOption.allCases) { option in
+                                Button {
+                                    scriptStore.sortOption = option
+                                } label: {
+                                    Label(option.title, systemImage: option.systemImage)
+                                }
+                            }
+                        }
+
+                        Button {
+                            newFolderName = ""
+                            showsNewFolderAlert = true
+                        } label: {
+                            Label("New Folder", systemImage: "folder.badge.plus")
+                        }
+                    } label: {
+                        Image(systemName: "line.3.horizontal.decrease")
+                            .font(.appHeadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityLabel("Sort and filter")
                 }
-                .accessibilityLabel("Sort and filter")
             }
 
             HStack(spacing: 8) {
@@ -473,25 +495,32 @@ struct HomeView: View {
     }
 
     private var emptyFilterState: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "folder")
+        let isSearching = !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let itemName = libraryTab == .scripts ? "scripts" : "folders"
+
+        return VStack(spacing: 12) {
+            Image(systemName: isSearching ? "eye.slash" : "tray")
+                .font(.appTitle)
+                .foregroundStyle(.secondary)
+                .frame(width: 64, height: 64)
+                .background(Color.appSurface, in: Circle())
+
+            Text(isSearching ? "No Results" : "Nothing here yet")
                 .font(.appHeadline)
-                .foregroundStyle(Color.creatorViolet)
-                .frame(width: 38, height: 38)
-                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16))
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text("No scripts here")
-                    .font(.appHeadline)
-                Text("Move a script into this folder from its menu, or create a new one.")
-                    .font(.appSecondary)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
+            Text(
+                isSearching
+                    ? "No \(itemName) match \"\(searchText)\""
+                    : (libraryTab == .scripts
+                        ? "Create or import a script to get started."
+                        : "Create a folder to organize your scripts.")
+            )
+            .font(.appSecondary)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
         }
-        .padding(16)
-        .contentCard()
+        .frame(maxWidth: .infinity)
+        .padding(.top, 48)
     }
 
     private var emptyState: some View {
@@ -593,6 +622,161 @@ struct QuickActionButton: View {
             .contentCard()
         }
         .buttonStyle(.plain)
+    }
+}
+
+struct AIScriptSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var service = AIPolishService()
+
+    let onUse: (String) -> Void
+
+    @State private var rawText = ""
+    @State private var polishedText = ""
+    @State private var selectedStyle: PolishStyle = .conversational
+    @State private var previewMode = PreviewMode.original
+
+    private enum PreviewMode: String, CaseIterable, Identifiable {
+        case original = "Before"
+        case polished = "After"
+
+        var id: String { rawValue }
+    }
+
+    private var currentText: String {
+        previewMode == .polished && !polishedText.isEmpty ? polishedText : rawText
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                AppBackground()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 24) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Write with AI")
+                                .font(.appTitle)
+                            Text("Paste or write your script, then let AI clean it up. Your original stays one tap away.")
+                                .font(.appSecondary)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        TextEditor(text: $rawText)
+                            .font(.appBody)
+                            .lineSpacing(4)
+                            .scrollContentBackground(.hidden)
+                            .frame(minHeight: 180)
+                            .padding(12)
+                            .contentCard()
+                            .overlay(alignment: .topLeading) {
+                                if rawText.isEmpty {
+                                    Text("Paste or write your script here...")
+                                        .font(.appBody)
+                                        .foregroundStyle(.tertiary)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 20)
+                                        .allowsHitTesting(false)
+                                }
+                            }
+
+                        HStack(spacing: 12) {
+                            ForEach(PolishStyle.allCases) { style in
+                                Button {
+                                    selectedStyle = style
+                                } label: {
+                                    VStack(spacing: 8) {
+                                        Image(systemName: style.systemImage)
+                                            .font(.appHeadline)
+                                        Text(style.title)
+                                            .font(.appCaptionEmphasis)
+                                    }
+                                    .foregroundStyle(selectedStyle == style ? Color.white : Color.primary)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 78)
+                                    .background(
+                                        selectedStyle == style ? Color.creatorViolet : Color.appSurface,
+                                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+
+                        Button {
+                            Task {
+                                if let result = await service.polish(rawText, style: selectedStyle) {
+                                    polishedText = result
+                                    previewMode = .polished
+                                }
+                            }
+                        } label: {
+                            VioletGlassButtonLabel(
+                                title: service.isProcessing ? "Polishing..." : "Polish with AI",
+                                systemImage: service.isProcessing ? nil : "sparkles"
+                            )
+                            .overlay(alignment: .leading) {
+                                if service.isProcessing {
+                                    ProgressView()
+                                        .tint(.white)
+                                        .padding(.leading, 20)
+                                }
+                            }
+                        }
+                        .buttonStyle(ToolPrimaryButtonStyle())
+                        .tint(.creatorViolet)
+                        .disabled(rawText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || service.isProcessing)
+
+                        if let error = service.errorMessage {
+                            Text(error)
+                                .font(.appCaption)
+                                .foregroundStyle(.orange)
+                        }
+
+                        if !polishedText.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Picker("Preview", selection: $previewMode) {
+                                    ForEach(PreviewMode.allCases) { mode in
+                                        Text(mode.rawValue).tag(mode)
+                                    }
+                                }
+                                .pickerStyle(.segmented)
+
+                                Text(currentText)
+                                    .font(.appBody)
+                                    .lineSpacing(4)
+                                    .textSelection(.enabled)
+                                    .frame(maxWidth: .infinity, minHeight: 160, alignment: .topLeading)
+                                    .padding(16)
+                                    .contentCard()
+                            }
+                        }
+
+                        if !rawText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            Button {
+                                onUse(currentText)
+                                dismiss()
+                            } label: {
+                                Label("Use this version", systemImage: "checkmark")
+                                    .font(.appHeadline)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 52)
+                            }
+                            .buttonStyle(ToolSecondaryButtonStyle())
+                            .tint(.creatorViolet)
+                        }
+                    }
+                    .padding(20)
+                }
+            }
+            .navigationTitle("AI Script")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { dismiss() }
+                }
+            }
+        }
     }
 }
 
