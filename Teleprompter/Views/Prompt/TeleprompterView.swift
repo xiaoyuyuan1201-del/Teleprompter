@@ -373,54 +373,62 @@ struct TeleprompterView: View {
                 .disabled(camera.isTransitioning)
             }
 
-            GlassEffectContainer(spacing: 12) {
-                HStack(spacing: 12) {
-                    PromptGlassButton(icon: "backward.end.fill", label: "Restart") {
-                        resetToken += 1
-                        isPlaying = false
-                    }
-
-                    PromptGlassButton(
-                        icon: isPlaying ? "pause.fill" : "play.fill",
-                        label: isPlaying ? "Pause prompt" : "Play prompt",
-                        tint: .creatorViolet
-                    ) {
-                        withAnimation(.snappy) {
-                            isPlaying.toggle()
-                        }
-                    }
-
+            if camera.isRecording {
+                HStack {
+                    Spacer()
                     recordButton
-
-                    PromptGlassButton(
-                        icon: isMirrored ? "rectangle.on.rectangle.slash.fill" : "rectangle.on.rectangle.fill",
-                        label: "Mirror mode",
-                        tint: isMirrored ? .creatorViolet : .white
-                    ) {
-                        if purchaseManager.isPro {
-                            isMirrored.toggle()
-                        } else {
-                            showsPaywall = true
+                    Spacer()
+                }
+            } else {
+                GlassEffectContainer(spacing: 12) {
+                    HStack(spacing: 12) {
+                        PromptGlassButton(icon: "backward.end.fill", label: "Restart") {
+                            resetToken += 1
+                            isPlaying = false
                         }
-                    }
-                    .overlay(alignment: .topTrailing) {
-                        if !purchaseManager.isPro {
-                            Image(systemName: "crown.fill")
-                                .font(.appMicro)
-                                .foregroundStyle(.white)
-                                .frame(width: 18, height: 18)
-                                .background(Color.creatorViolet, in: Circle())
-                                .offset(x: 4, y: -4)
-                        }
-                    }
 
-                    PromptGlassButton(
-                        icon: "slider.horizontal.3",
-                        label: "Prompt settings",
-                        tint: showsControls ? .creatorViolet : .white
-                    ) {
-                        withAnimation(.snappy) {
-                            showsControls.toggle()
+                        PromptGlassButton(
+                            icon: isPlaying ? "pause.fill" : "play.fill",
+                            label: isPlaying ? "Pause prompt" : "Play prompt",
+                            tint: .creatorViolet
+                        ) {
+                            withAnimation(.snappy) {
+                                isPlaying.toggle()
+                            }
+                        }
+
+                        recordButton
+
+                        PromptGlassButton(
+                            icon: isMirrored ? "rectangle.on.rectangle.slash.fill" : "rectangle.on.rectangle.fill",
+                            label: "Mirror mode",
+                            tint: isMirrored ? .creatorViolet : .white
+                        ) {
+                            if purchaseManager.isPro {
+                                isMirrored.toggle()
+                            } else {
+                                showsPaywall = true
+                            }
+                        }
+                        .overlay(alignment: .topTrailing) {
+                            if !purchaseManager.isPro {
+                                Image(systemName: "crown.fill")
+                                    .font(.appMicro)
+                                    .foregroundStyle(.white)
+                                    .frame(width: 18, height: 18)
+                                    .background(Color.creatorViolet, in: Circle())
+                                    .offset(x: 4, y: -4)
+                            }
+                        }
+
+                        PromptGlassButton(
+                            icon: "slider.horizontal.3",
+                            label: "Prompt settings",
+                            tint: showsControls ? .creatorViolet : .white
+                        ) {
+                            withAnimation(.snappy) {
+                                showsControls.toggle()
+                            }
                         }
                     }
                 }
