@@ -69,6 +69,7 @@ extension View {
 }
 
 struct ToolPrimaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
     var height: CGFloat = 44
     var horizontalPadding: CGFloat = 16
 
@@ -79,7 +80,7 @@ struct ToolPrimaryButtonStyle: ButtonStyle {
             .padding(.horizontal, horizontalPadding)
             .frame(minHeight: height)
             .background(
-                Color.creatorViolet.opacity(configuration.isPressed ? 0.78 : 1),
+                Color.creatorViolet.opacity(isEnabled ? (configuration.isPressed ? 0.78 : 1) : 0.35),
                 in: RoundedRectangle(cornerRadius: 16, style: .continuous)
             )
             .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -217,6 +218,20 @@ struct AudioLevelMeter: View {
         }
         let ratio = CGFloat(level / step)
         return minHeight + (maxHeight - minHeight) * ratio
+    }
+}
+
+struct StatPill: View {
+    let icon: String
+    let text: String
+
+    var body: some View {
+        Label(text, systemImage: icon)
+            .font(.appCaptionEmphasis)
+            .foregroundStyle(Color.creatorViolet)
+            .padding(.horizontal, 12)
+            .frame(height: 34)
+            .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 

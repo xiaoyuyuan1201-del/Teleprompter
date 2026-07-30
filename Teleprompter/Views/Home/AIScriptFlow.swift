@@ -19,13 +19,10 @@ struct AIScriptSheet: View {
     @State private var showsUnsavedChangesAlert = false
     @FocusState private var focusedField: Field?
 
-    private static let maxCharacters = 1000
-
     private enum Step {
         case input
         case polishing
         case result
-        case compare
     }
 
     private enum Field {
@@ -33,12 +30,36 @@ struct AIScriptSheet: View {
         case body
     }
 
+    private var wordCount: Int {
+        Self.wordCount(for: rawText)
+    }
+
+    private var estimatedMinutes: Int {
+        Self.estimatedMinutes(for: wordCount)
+    }
+
+    private var hasTitle: Bool {
+        !scriptTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var canStartPolishing: Bool {
+        hasTitle && !rawText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     private var canSaveDraft: Bool {
-        !rawText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        hasTitle && !rawText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private var canSavePolished: Bool {
-        !polishedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        hasTitle && !polishedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private static func wordCount(for text: String) -> Int {
+        text.split(whereSeparator: \.isWhitespace).count
+    }
+
+    private static func estimatedMinutes(for wordCount: Int) -> Int {
+        max(1, Int(ceil(Double(wordCount) / 140.0)))
     }
 
     private var reductionPercent: Int? {
@@ -73,13 +94,14 @@ struct AIScriptSheet: View {
         withAnimation(.snappy) { step = .polishing }
 
         Task {
-            if let result = await service.polish(rawText, style: selectedStyle) {
-                polishedText = result
-                hasUnsavedChanges = true
-                withAnimation(.snappy) { step = .result }
-            } else {
-                withAnimation(.snappy) { step = .input }
-            }
+            // TEMPORARY TEST STUB: Apple Intelligence isn't available in the
+            // simulator, so fall back to placeholder text instead of bailing
+            // out — lets the polishing/result/compare screens be tested
+            // end-to-end. Remove this fallback once testing is done.
+            let result = await service.polish(rawText, style: selectedStyle) ?? "hahahahha"
+            polishedText = result
+            hasUnsavedChanges = true
+            withAnimation(.snappy) { step = .result }
         }
     }
 
@@ -95,8 +117,6 @@ struct AIScriptSheet: View {
                     polishingStep
                 case .result:
                     resultStep
-                case .compare:
-                    compareStep
                 }
             }
             .navigationTitle(navigationTitle)
@@ -104,11 +124,8 @@ struct AIScriptSheet: View {
             .toolbar { toolbarContent }
         }
         .onChange(of: scriptTitle) { _, _ in hasUnsavedChanges = true }
-        .onChange(of: rawText) { _, newValue in
+        .onChange(of: rawText) { _, _ in
             hasUnsavedChanges = true
-            if newValue.count > Self.maxCharacters {
-                rawText = String(newValue.prefix(Self.maxCharacters))
-            }
         }
         .interactiveDismissDisabled(hasUnsavedChanges)
         .alert("Discard changes?", isPresented: $showsUnsavedChangesAlert) {
@@ -134,7 +151,6 @@ struct AIScriptSheet: View {
         switch step {
         case .input, .polishing: "AI Script"
         case .result: "Polish Result"
-        case .compare: "History Compare"
         }
     }
 
@@ -167,21 +183,6 @@ struct AIScriptSheet: View {
                     .fontWeight(.semibold)
                     .disabled(!canSavePolished)
             }
-            ToolbarItem(placement: .secondaryAction) {
-                Button {
-                    withAnimation(.snappy) { step = .compare }
-                } label: {
-                    Label("History", systemImage: "clock.arrow.circlepath")
-                }
-            }
-        case .compare:
-            ToolbarItem(placement: .cancellationAction) {
-                Button {
-                    withAnimation(.snappy) { step = .result }
-                } label: {
-                    Label("Back", systemImage: "chevron.left")
-                }
-            }
         }
     }
 
@@ -198,7 +199,12 @@ struct AIScriptSheet: View {
                         .foregroundStyle(.secondary)
                 }
 
-                TextField("Script title (optional)", text: $scriptTitle)
+                HStack(spacing: 12) {
+                    StatPill(icon: "text.word.spacing", text: "\(wordCount) words")
+                    StatPill(icon: "clock", text: "About \(estimatedMinutes) min")
+                }
+
+                TextField("Script title", text: $scriptTitle)
                     .font(.appHeadline)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 16)
@@ -206,13 +212,7 @@ struct AIScriptSheet: View {
                     .focused($focusedField, equals: .title)
 
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        SectionEyebrow(title: "Script")
-                        Spacer()
-                        Text("\(rawText.count) / \(Self.maxCharacters)")
-                            .font(.appCaption)
-                            .foregroundStyle(.secondary)
-                    }
+                    SectionEyebrow(title: "Script")
 
                     scriptBodyEditor
                 }
@@ -233,7 +233,7 @@ struct AIScriptSheet: View {
                 }
                 .buttonStyle(ToolPrimaryButtonStyle())
                 .tint(.creatorViolet)
-                .disabled(rawText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(!canStartPolishing)
             }
             .padding(20)
         }
@@ -302,69 +302,16 @@ struct AIScriptSheet: View {
     // MARK: - Result
 
     private var resultStep: some View {
-        ScrollView(showsIndicators: false) {
+        let diff = WordDiff(before: rawText, after: polishedText)
+
+        return ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 20) {
                 HStack(spacing: 12) {
-                    Label("Styled as \(selectedStyle.title)", systemImage: selectedStyle.systemImage)
-                        .font(.appCaptionEmphasis)
-                        .foregroundStyle(Color.creatorViolet)
-                        .padding(.horizontal, 12)
-                        .frame(height: 32)
-                        .background(Color.creatorViolet.opacity(0.12), in: Capsule())
-
-                    Spacer()
-
                     if let reductionPercent {
                         Text("Trimmed \(reductionPercent)% of filler words")
                             .font(.appCaption)
                             .foregroundStyle(.secondary)
                     }
-                }
-
-                Text(polishedText)
-                    .font(.appBody)
-                    .lineSpacing(4)
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                    .padding(16)
-                    .contentCard()
-
-                HStack(spacing: 10) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                    Text("Spelling checked, sentence flow reorganized, and wording made more natural.")
-                        .font(.appCaption)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(14)
-                .background(Color.green.opacity(0.10), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-
-                Button {
-                    withAnimation(.snappy) { step = .input }
-                } label: {
-                    Label("Edit Again", systemImage: "pencil")
-                        .font(.appHeadline)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                }
-                .buttonStyle(ToolSecondaryButtonStyle())
-                .tint(.creatorViolet)
-            }
-            .padding(20)
-        }
-    }
-
-    // MARK: - Compare
-
-    private var compareStep: some View {
-        let diff = WordDiff(before: rawText, after: polishedText)
-
-        return ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 20) {
-                HStack {
-                    Text("Only the previous version is kept")
-                        .font(.appCaption)
-                        .foregroundStyle(.secondary)
 
                     Spacer()
 
@@ -379,7 +326,12 @@ struct AIScriptSheet: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    SectionEyebrow(title: "Before")
+                    SectionEyebrow(title: "Before Polishing")
+
+                    HStack(spacing: 12) {
+                        StatPill(icon: "text.word.spacing", text: "\(Self.wordCount(for: rawText)) words")
+                        StatPill(icon: "clock", text: "About \(Self.estimatedMinutes(for: Self.wordCount(for: rawText))) min")
+                    }
 
                     Group {
                         if showsDiffHighlight {
@@ -398,11 +350,28 @@ struct AIScriptSheet: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        SectionEyebrow(title: "After")
+                        SectionEyebrow(title: "After Polishing")
                         Spacer()
-                        Label(selectedStyle.title, systemImage: selectedStyle.systemImage)
+                        Button {
+                            showsStyleSelect = true
+                        } label: {
+                            HStack(spacing: 4) {
+                                Label(selectedStyle.title, systemImage: selectedStyle.systemImage)
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 9, weight: .semibold))
+                            }
                             .font(.appCaptionEmphasis)
                             .foregroundStyle(Color.creatorViolet)
+                            .padding(.horizontal, 10)
+                            .frame(height: 26)
+                            .background(Color.creatorViolet.opacity(0.12), in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    HStack(spacing: 12) {
+                        StatPill(icon: "text.word.spacing", text: "\(Self.wordCount(for: polishedText)) words")
+                        StatPill(icon: "clock", text: "About \(Self.estimatedMinutes(for: Self.wordCount(for: polishedText))) min")
                     }
 
                     Group {
@@ -424,15 +393,25 @@ struct AIScriptSheet: View {
                     }
                 }
 
+                HStack(spacing: 10) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                    Text("Spelling checked, sentence flow reorganized, and wording made more natural.")
+                        .font(.appCaption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(14)
+                .background(Color.green.opacity(0.10), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+
                 Button {
-                    withAnimation(.snappy) { step = .result }
+                    withAnimation(.snappy) { step = .input }
                 } label: {
-                    Label("Back to Result", systemImage: "checkmark")
+                    Label("Edit Again", systemImage: "pencil")
                         .font(.appHeadline)
                         .frame(maxWidth: .infinity)
                         .frame(height: 52)
                 }
-                .buttonStyle(ToolPrimaryButtonStyle())
+                .buttonStyle(ToolSecondaryButtonStyle())
                 .tint(.creatorViolet)
             }
             .padding(20)

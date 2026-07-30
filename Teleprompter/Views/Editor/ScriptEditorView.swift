@@ -497,16 +497,3 @@ private struct AIPolishSheet: View {
     }
 }
 
-private struct StatPill: View {
-    let icon: String
-    let text: String
-
-    var body: some View {
-        Label(text, systemImage: icon)
-            .font(.appCaptionEmphasis)
-            .foregroundStyle(Color.creatorViolet)
-            .padding(.horizontal, 12)
-            .frame(height: 34)
-            .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-}
