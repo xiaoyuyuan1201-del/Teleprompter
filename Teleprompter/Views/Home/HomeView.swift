@@ -654,12 +654,18 @@ struct AIScriptSheet: View {
     @State private var polishedText = ""
     @State private var selectedStyle: PolishStyle = .conversational
     @State private var previewMode = PreviewMode.original
+    @FocusState private var focusedField: Field?
 
     private enum PreviewMode: String, CaseIterable, Identifiable {
         case original = "Before"
         case polished = "After"
 
         var id: String { rawValue }
+    }
+
+    private enum Field {
+        case title
+        case body
     }
 
     private var currentText: String {
@@ -670,6 +676,8 @@ struct AIScriptSheet: View {
         NavigationStack {
             ZStack {
                 AppBackground()
+                    .contentShape(Rectangle())
+                    .onTapGesture { focusedField = nil }
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
@@ -686,6 +694,7 @@ struct AIScriptSheet: View {
                             .padding(.horizontal, 16)
                             .frame(height: 46)
                             .contentCard(cornerRadius: 16)
+                            .focused($focusedField, equals: .title)
 
                         TextEditor(text: $rawText)
                             .font(.appBody)
@@ -694,6 +703,7 @@ struct AIScriptSheet: View {
                             .frame(minHeight: 180)
                             .padding(12)
                             .contentCard()
+                            .focused($focusedField, equals: .body)
                             .overlay(alignment: .topLeading) {
                                 if rawText.isEmpty {
                                     Text("Paste or write your script here...")
@@ -793,6 +803,7 @@ struct AIScriptSheet: View {
                     }
                     .padding(20)
                 }
+                .scrollDismissesKeyboard(.immediately)
             }
             .navigationTitle("AI Script")
             .navigationBarTitleDisplayMode(.inline)
