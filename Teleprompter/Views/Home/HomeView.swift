@@ -195,26 +195,20 @@ struct HomeView: View {
     }
 
     private var proButton: some View {
-        Button {
-            showsPaywall = true
-        } label: {
-            HStack(spacing: 4) {
-                Image(systemName: "crown.fill")
-                Text("Pro")
-                    .font(.appCaptionEmphasis)
-            }
-            .foregroundStyle(Color.creatorViolet)
-            .padding(.horizontal, 12)
-            .frame(height: 32)
-            .background(Color.creatorViolet.opacity(0.10), in: Capsule(style: .continuous))
+        HStack(spacing: 4) {
+            Image(systemName: "crown.fill")
+            Text("Pro")
+                .font(.appCaptionEmphasis)
         }
-        .buttonStyle(.plain)
+        .foregroundStyle(Color.creatorViolet)
+        .padding(.horizontal, 12)
+        .frame(height: 32)
+        .background(Color.creatorViolet.opacity(0.10), in: Capsule(style: .continuous))
+        .contentShape(Capsule())
         .accessibilityLabel("Teleprompter Pro")
-        .simultaneousGesture(
-            TapGesture(count: 5).onEnded {
-                purchaseManager.setDebugPro(true)
-            }
-        )
+        .onTapGesture(count: 5) {
+            purchaseManager.setDebugPro(true)
+        }
     }
 
     private var proBadge: some View {
@@ -428,7 +422,7 @@ struct HomeView: View {
             } else {
                 HStack(spacing: 16) {
                     Text("My Scripts")
-                        .font(.appTitle)
+                        .font(.appSectionTitle)
                         .foregroundStyle(.primary)
 
                     Spacer()

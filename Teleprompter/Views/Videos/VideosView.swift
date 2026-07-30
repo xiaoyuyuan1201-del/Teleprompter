@@ -159,7 +159,7 @@ struct VideosView: View {
             } else {
                 HStack(spacing: 16) {
                     Text("My Videos")
-                        .font(.appTitle)
+                        .font(.appSectionTitle)
                         .foregroundStyle(.primary)
 
                     Spacer()

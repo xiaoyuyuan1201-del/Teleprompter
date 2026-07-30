@@ -21,6 +21,8 @@ extension Font {
     static let appHero = Font.system(size: 40, weight: .bold)
     /// Screen and section-level titles.
     static let appTitle = Font.system(size: 28, weight: .bold)
+    /// In-content section headers (e.g. "My Scripts", "My Videos").
+    static let appSectionTitle = Font.system(size: 24, weight: .bold)
     /// Primary emphasis: row titles, nav bars, prominent buttons.
     static let appHeadline = Font.system(size: 18, weight: .semibold)
     /// Secondary emphasis: sub-labels, compact buttons.
