@@ -46,6 +46,8 @@ final class CameraManager: NSObject, ObservableObject {
     @Published private(set) var verification: RecordingVerification?
     @Published var silentWarning: String?
     @Published var errorMessage: String?
+    /// Normalized microphone input level (0...1), updated live while the session is running.
+    @Published private(set) var audioLevel: Float = 0
 
     let session = AVCaptureSession()
 
@@ -55,7 +57,10 @@ final class CameraManager: NSObject, ObservableObject {
     }
 
     private let sessionQueue = DispatchQueue(label: "teleprompter.camera.session")
+    private let audioLevelQueue = DispatchQueue(label: "teleprompter.camera.audioLevel")
     private let movieOutput = AVCaptureMovieFileOutput()
+    private let audioLevelOutput = AVCaptureAudioDataOutput()
+    private var lastAudioLevelUpdate: Date = .distantPast
     private var currentPosition: AVCaptureDevice.Position = .front
     private var pendingStopAction: PendingStopAction?
     private var segmentURLs: [URL] = []
@@ -88,6 +93,7 @@ final class CameraManager: NSObject, ObservableObject {
             guard let self, self.session.isRunning else { return }
             self.session.stopRunning()
         }
+        audioLevel = 0
     }
 
     func switchCamera() {
@@ -298,6 +304,11 @@ final class CameraManager: NSObject, ObservableObject {
             session.addOutput(movieOutput)
         }
 
+        if !session.outputs.contains(audioLevelOutput), session.canAddOutput(audioLevelOutput) {
+            audioLevelOutput.setSampleBufferDelegate(self, queue: audioLevelQueue)
+            session.addOutput(audioLevelOutput)
+        }
+
         configureOutputConnection()
         session.commitConfiguration()
     }
@@ -480,6 +491,28 @@ final class CameraManager: NSObject, ObservableObject {
                 self?.silentWarning = message ?? "A camera issue occurred during recording."
             }
         )
+    }
+}
+
+extension CameraManager: AVCaptureAudioDataOutputSampleBufferDelegate {
+    func captureOutput(
+        _ output: AVCaptureOutput,
+        didOutput sampleBuffer: CMSampleBuffer,
+        from connection: AVCaptureConnection
+    ) {
+        guard let channel = connection.audioChannels.first else { return }
+
+        let now = Date()
+        guard now.timeIntervalSince(lastAudioLevelUpdate) > 1.0 / 15.0 else { return }
+        lastAudioLevelUpdate = now
+
+        // averagePowerLevel is in decibels, roughly -160 (silence) to 0 (max).
+        let minDb: Float = -50
+        let normalized = max(0, min(1, (channel.averagePowerLevel - minDb) / -minDb))
+
+        DispatchQueue.main.async { [weak self] in
+            self?.audioLevel = normalized
+        }
     }
 }
 

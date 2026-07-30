@@ -186,6 +186,38 @@ extension AppHeaderRow where Trailing == EmptyView {
     }
 }
 
+/// A tiny live microphone-level indicator: bars that rise with a normalized
+/// (0...1) input level, for confirming audio is actually being picked up.
+struct AudioLevelMeter: View {
+    let level: Float
+    var barCount: Int = 4
+    var tint: Color = .white
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 3) {
+            ForEach(0..<barCount, id: \.self) { index in
+                Capsule()
+                    .fill(tint)
+                    .frame(width: 3, height: barHeight(for: index))
+            }
+        }
+        .frame(height: 16, alignment: .bottom)
+        .animation(.easeOut(duration: 0.1), value: level)
+    }
+
+    private func barHeight(for index: Int) -> CGFloat {
+        let step = Float(index + 1) / Float(barCount)
+        let minHeight: CGFloat = 4
+        let maxHeight: CGFloat = 16
+        guard level > 0 else { return minHeight }
+        if level >= step {
+            return maxHeight
+        }
+        let ratio = CGFloat(level / step)
+        return minHeight + (maxHeight - minHeight) * ratio
+    }
+}
+
 struct SectionEyebrow: View {
     let title: String
 

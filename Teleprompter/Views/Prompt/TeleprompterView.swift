@@ -216,6 +216,19 @@ struct TeleprompterView: View {
 
             Spacer()
 
+            if !camera.microphoneDenied {
+                HStack(spacing: 6) {
+                    Image(systemName: "mic.fill")
+                        .font(.appCaption)
+                    AudioLevelMeter(level: camera.audioLevel)
+                }
+                .foregroundStyle(.white.opacity(0.85))
+                .padding(.horizontal, 10)
+                .frame(height: 40)
+                .glassEffect(.regular, in: Capsule())
+                .accessibilityLabel("Microphone level")
+            }
+
             if camera.isRecording {
                 TimelineView(.periodic(from: .now, by: 1)) { _ in
                     HStack(spacing: 8) {
