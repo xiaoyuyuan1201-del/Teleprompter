@@ -3,36 +3,62 @@ import Foundation
 import FoundationModels
 
 enum PolishStyle: String, CaseIterable, Identifiable {
-    case grammar
-    case conversational
+    case formal
+    case casual
+    case academic
+    case literary
     case concise
+    case humorous
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .grammar: "Grammar"
-        case .conversational: "Natural"
+        case .formal: "Formal"
+        case .casual: "Casual"
+        case .academic: "Academic"
+        case .literary: "Literary"
         case .concise: "Concise"
+        case .humorous: "Humorous"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .formal: "Polished, professional wording for reports and pitches."
+        case .casual: "Relaxed and full of personality — easy to say on camera."
+        case .academic: "Precise, rigorous language suited for research and papers."
+        case .literary: "Rich, evocative phrasing with a literary flair."
+        case .concise: "Tight and to the point — every word earns its place."
+        case .humorous: "Witty and playful, made to bring a smile."
         }
     }
 
     var systemImage: String {
         switch self {
-        case .grammar: "checkmark.seal"
-        case .conversational: "quote.bubble"
-        case .concise: "text.line.last.and.arrowtriangle.forward"
+        case .formal: "briefcase.fill"
+        case .casual: "face.smiling.fill"
+        case .academic: "graduationcap.fill"
+        case .literary: "feather"
+        case .concise: "scissors"
+        case .humorous: "theatermasks.fill"
         }
     }
 
     var instruction: String {
         switch self {
-        case .grammar:
-            "Correct grammar, punctuation, and awkward wording without changing the meaning or tone."
-        case .conversational:
-            "Rewrite the script so it sounds natural when spoken aloud. Keep the meaning and make sentences easy to say on camera."
+        case .formal:
+            "Rewrite in a professional, business-appropriate tone suitable for formal presentations or reports."
+        case .casual:
+            "Rewrite so it sounds relaxed, friendly, and full of personality — natural for casual video content."
+        case .academic:
+            "Rewrite using precise, rigorous academic language suitable for scholarly work."
+        case .literary:
+            "Rewrite with rich, evocative, literary phrasing and vivid imagery."
         case .concise:
             "Make the script shorter and clearer while preserving every important point. Remove repetition and filler."
+        case .humorous:
+            "Rewrite with witty, playful humor while keeping the meaning intact."
         }
     }
 }

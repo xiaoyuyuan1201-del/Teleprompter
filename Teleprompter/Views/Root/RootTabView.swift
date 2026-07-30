@@ -9,7 +9,6 @@ struct RootTabView: View {
     @State private var showsQuickActions = false
     @State private var showsScriptEditor = false
     @State private var editingScript: PromptScript?
-    @State private var freeformScript: PromptScript?
     @State private var showsPaywall = false
     @State private var showsFileImporter = false
     @State private var importError: String?
@@ -124,11 +123,6 @@ struct RootTabView: View {
             .environmentObject(scriptStore)
             .environmentObject(purchaseManager)
         }
-        .fullScreenCover(item: $freeformScript) { script in
-            TeleprompterView(script: script)
-                .environmentObject(purchaseManager)
-                .environmentObject(recordingStore)
-        }
         .sheet(isPresented: $showsAIScript) {
             AIScriptSheet { title, finalText, wasPolished in
                 let script = PromptScript(title: title, body: finalText, isDraft: false, isAIPolished: wasPolished)
@@ -232,7 +226,11 @@ struct RootTabView: View {
             newFolderName = ""
             showsNewFolderAlert = true
         case .recordWithoutScript:
-            freeformScript = PromptScript(title: "", body: "")
+            if purchaseManager.isPro {
+                showsAIScript = true
+            } else {
+                showsPaywall = true
+            }
         case .importFile:
             if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
                 showsFileImporter = true

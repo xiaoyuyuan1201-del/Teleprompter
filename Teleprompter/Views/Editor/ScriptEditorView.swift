@@ -366,7 +366,7 @@ private struct AIPolishSheet: View {
     let originalText: String
     let onApply: (String) -> Void
 
-    @State private var selectedStyle: PolishStyle = .conversational
+    @State private var selectedStyle: PolishStyle = .casual
     @State private var polishedText = ""
     @State private var previewMode = PreviewMode.original
 
@@ -392,8 +392,9 @@ private struct AIPolishSheet: View {
                                 .foregroundStyle(.secondary)
                         }
 
-                        HStack(spacing: 12) {
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                             ForEach(PolishStyle.allCases) { style in
+                                let isSelected = selectedStyle == style
                                 Button {
                                     selectedStyle = style
                                 } label: {
@@ -403,11 +404,11 @@ private struct AIPolishSheet: View {
                                         Text(style.title)
                                             .font(.appCaptionEmphasis)
                                     }
-                                    .foregroundStyle(selectedStyle == style ? Color.white : Color.primary)
+                                    .foregroundStyle(isSelected ? Color.white : Color.primary)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 78)
                                     .background(
-                                        selectedStyle == style ? Color.creatorViolet : Color.appSurface,
+                                        isSelected ? Color.creatorViolet : Color.appSurface,
                                         in: RoundedRectangle(cornerRadius: 16, style: .continuous)
                                     )
                                 }
