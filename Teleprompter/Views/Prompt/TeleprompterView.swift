@@ -66,6 +66,8 @@ struct TeleprompterView: View {
                     Spacer(minLength: 12)
                     promptArea
                     Spacer(minLength: 14)
+                    recordingStatusRow
+                    Spacer(minLength: 10)
                     bottomControls
                 }
                 .padding(.horizontal, 16)
@@ -216,36 +218,6 @@ struct TeleprompterView: View {
 
             Spacer()
 
-            if !camera.microphoneDenied {
-                HStack(spacing: 6) {
-                    Image(systemName: "mic.fill")
-                        .font(.appCaption)
-                    AudioLevelMeter(level: camera.audioLevel)
-                }
-                .foregroundStyle(.white.opacity(0.85))
-                .padding(.horizontal, 10)
-                .frame(height: 40)
-                .glassEffect(.regular, in: Capsule())
-                .accessibilityLabel("Microphone level")
-            }
-
-            if camera.isRecording {
-                TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    HStack(spacing: 8) {
-                        Circle()
-                            .fill(camera.isPaused ? .yellow : .red)
-                            .frame(width: 8, height: 8)
-
-                        Text(camera.isPaused ? "PAUSED" : recordingDuration(camera.elapsedRecordingTime))
-                            .font(.appCaptionEmphasis.monospacedDigit())
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 12)
-                    .frame(height: 40)
-                    .glassEffect(.regular, in: Capsule())
-                }
-            }
-
             PromptGlassButton(
                 icon: "arrow.triangle.2.circlepath.camera.fill",
                 label: "Switch camera",
@@ -337,6 +309,42 @@ struct TeleprompterView: View {
                     }
             )
             .accessibilityLabel("Resize teleprompter area")
+    }
+
+    private var recordingStatusRow: some View {
+        HStack(spacing: 8) {
+            if camera.isRecording {
+                TimelineView(.periodic(from: .now, by: 1)) { _ in
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(camera.isPaused ? .yellow : .red)
+                            .frame(width: 8, height: 8)
+
+                        Text(camera.isPaused ? "PAUSED" : recordingDuration(camera.elapsedRecordingTime))
+                            .font(.appCaptionEmphasis.monospacedDigit())
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .frame(height: 40)
+                    .glassEffect(.regular, in: Capsule())
+                }
+            }
+
+            if !camera.microphoneDenied {
+                HStack(spacing: 6) {
+                    Image(systemName: "mic.fill")
+                        .font(.appCaption)
+                    AudioLevelMeter(level: camera.audioLevel)
+                }
+                .foregroundStyle(.white.opacity(0.85))
+                .padding(.horizontal, 10)
+                .frame(height: 40)
+                .glassEffect(.regular, in: Capsule())
+                .accessibilityLabel("Microphone level")
+            }
+
+            Spacer()
+        }
     }
 
     private var bottomControls: some View {
