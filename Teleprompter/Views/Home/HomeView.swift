@@ -191,16 +191,6 @@ struct HomeView: View {
                     }
                 }
             }
-
-            if scriptStore.scripts.isEmpty {
-                HandDrawnPointerArrow()
-                    .stroke(Color.primary.opacity(0.65), style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
-                    .frame(width: 80, height: 130)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                    .padding(.trailing, 36)
-                    .padding(.bottom, 96)
-                    .allowsHitTesting(false)
-            }
         }
     }
 
@@ -645,7 +635,7 @@ struct QuickActionButton: View {
 
 /// A sketchy, hand-drawn-style curved arrow with a small loop, pointing
 /// toward the bottom-trailing corner (where the tab bar's + button lives).
-private struct HandDrawnPointerArrow: Shape {
+struct HandDrawnPointerArrow: Shape {
     func path(in rect: CGRect) -> Path {
         let w = rect.width
         let h = rect.height

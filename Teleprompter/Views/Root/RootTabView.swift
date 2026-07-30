@@ -15,6 +15,7 @@ struct RootTabView: View {
     @State private var importError: String?
     @State private var showsNewFolderAlert = false
     @State private var newFolderName = ""
+    @State private var showsAIScript = false
 
     private enum AppTab: Hashable {
         case home
@@ -33,7 +34,7 @@ struct RootTabView: View {
         var title: String {
             switch self {
             case .newFolder: "New Folder"
-            case .recordWithoutScript: "Record Without Script"
+            case .recordWithoutScript: "AI Script"
             case .importFile: "Import File"
             case .newScript: "New Script"
             }
@@ -42,7 +43,7 @@ struct RootTabView: View {
         var systemImage: String {
             switch self {
             case .newFolder: "folder.fill"
-            case .recordWithoutScript: "video.fill"
+            case .recordWithoutScript: "sparkles"
             case .importFile: "square.and.arrow.up.fill"
             case .newScript: "pencil.and.scribble"
             }
@@ -71,6 +72,17 @@ struct RootTabView: View {
                     }
             }
             .tint(.creatorViolet)
+
+            if selectedTab == .home && scriptStore.scripts.isEmpty {
+                HandDrawnPointerArrow()
+                    .stroke(Color.primary.opacity(0.65), style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                    .frame(width: 80, height: 130)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .padding(.trailing, 40)
+                    .padding(.bottom, 66)
+                    .allowsHitTesting(false)
+                    .ignoresSafeArea(.container, edges: .bottom)
+            }
 
             HStack {
                 Spacer()
@@ -116,6 +128,12 @@ struct RootTabView: View {
             TeleprompterView(script: script)
                 .environmentObject(purchaseManager)
                 .environmentObject(recordingStore)
+        }
+        .sheet(isPresented: $showsAIScript) {
+            AIScriptSheet { title, finalText, wasPolished in
+                let script = PromptScript(title: title, body: finalText, isDraft: false, isAIPolished: wasPolished)
+                scriptStore.upsert(script)
+            }
         }
         .fullScreenCover(isPresented: $showsPaywall) {
             PaywallView(source: .inApp)
@@ -195,7 +213,7 @@ struct RootTabView: View {
                         Spacer()
                     }
                     .padding(.horizontal, 16)
-                    .frame(height: 64)
+                    .frame(height: 72)
                     .background(Color.appSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
                 .buttonStyle(.plain)
