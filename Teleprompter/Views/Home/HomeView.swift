@@ -70,10 +70,9 @@ struct HomeView: View {
                 .environmentObject(recordingStore)
         }
         .sheet(isPresented: $showsAIScript) {
-            AIScriptSheet { finalText, wasPolished in
-                let script = PromptScript(title: "", body: finalText, isDraft: true, isAIPolished: wasPolished)
+            AIScriptSheet { title, finalText, wasPolished in
+                let script = PromptScript(title: title, body: finalText, isDraft: false, isAIPolished: wasPolished)
                 scriptStore.upsert(script)
-                editorMode = .edit(script)
             }
         }
         .fullScreenCover(isPresented: $showsPaywall) {
@@ -135,6 +134,7 @@ struct HomeView: View {
             Button("Delete", role: .destructive) {
                 if let folderDeleteTarget {
                     scriptStore.deleteFolder(folderDeleteTarget)
+                    recordingStore.clearFolder(folderDeleteTarget.id)
                 }
                 folderDeleteTarget = nil
             }
@@ -647,8 +647,9 @@ struct AIScriptSheet: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var service = AIPolishService()
 
-    let onUse: (String, Bool) -> Void
+    let onUse: (String, String, Bool) -> Void
 
+    @State private var scriptTitle = ""
     @State private var rawText = ""
     @State private var polishedText = ""
     @State private var selectedStyle: PolishStyle = .conversational
@@ -679,6 +680,12 @@ struct AIScriptSheet: View {
                                 .font(.appSecondary)
                                 .foregroundStyle(.secondary)
                         }
+
+                        TextField("Script title", text: $scriptTitle)
+                            .font(.appHeadline)
+                            .padding(.horizontal, 16)
+                            .frame(height: 46)
+                            .contentCard(cornerRadius: 16)
 
                         TextEditor(text: $rawText)
                             .font(.appBody)
@@ -772,10 +779,10 @@ struct AIScriptSheet: View {
 
                         if !rawText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             Button {
-                                onUse(currentText, previewMode == .polished && !polishedText.isEmpty)
+                                onUse(scriptTitle, currentText, previewMode == .polished && !polishedText.isEmpty)
                                 dismiss()
                             } label: {
-                                Label("Use this version", systemImage: "checkmark")
+                                Label("Save as Script", systemImage: "checkmark")
                                     .font(.appHeadline)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 52)

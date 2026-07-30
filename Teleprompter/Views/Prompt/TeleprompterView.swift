@@ -613,7 +613,8 @@ struct TeleprompterView: View {
             let recording = try recordingStore.importRecording(
                 from: url,
                 title: script.displayTitle,
-                verification: camera.verification
+                verification: camera.verification,
+                folderID: script.folderID
             )
             libraryRecordingID = recording.id
         } catch {

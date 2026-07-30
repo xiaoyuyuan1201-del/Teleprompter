@@ -9,6 +9,7 @@ struct RecordedVideo: Identifiable, Codable, Hashable {
     let fileSizeBytes: Int64
     let hasAudio: Bool
     var isFavorite: Bool
+    var folderID: UUID?
 
     init(
         id: UUID = UUID(),
@@ -18,7 +19,8 @@ struct RecordedVideo: Identifiable, Codable, Hashable {
         duration: TimeInterval,
         fileSizeBytes: Int64,
         hasAudio: Bool,
-        isFavorite: Bool = false
+        isFavorite: Bool = false,
+        folderID: UUID? = nil
     ) {
         self.id = id
         self.title = title
@@ -28,10 +30,11 @@ struct RecordedVideo: Identifiable, Codable, Hashable {
         self.fileSizeBytes = fileSizeBytes
         self.hasAudio = hasAudio
         self.isFavorite = isFavorite
+        self.folderID = folderID
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, title, createdAt, fileName, duration, fileSizeBytes, hasAudio, isFavorite
+        case id, title, createdAt, fileName, duration, fileSizeBytes, hasAudio, isFavorite, folderID
     }
 
     init(from decoder: Decoder) throws {
@@ -44,6 +47,7 @@ struct RecordedVideo: Identifiable, Codable, Hashable {
         fileSizeBytes = try container.decodeIfPresent(Int64.self, forKey: .fileSizeBytes) ?? 0
         hasAudio = try container.decodeIfPresent(Bool.self, forKey: .hasAudio) ?? false
         isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
+        folderID = try container.decodeIfPresent(UUID.self, forKey: .folderID)
     }
 
     var durationText: String {

@@ -96,6 +96,7 @@ struct FolderDetailView: View {
         }
         .navigationTitle(currentFolder.displayName)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
@@ -175,6 +176,7 @@ struct FolderDetailView: View {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
                 scriptStore.deleteFolder(currentFolder)
+                recordingStore.clearFolder(currentFolder.id)
                 dismiss()
             }
         } message: {

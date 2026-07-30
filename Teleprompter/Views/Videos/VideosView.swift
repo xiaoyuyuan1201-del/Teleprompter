@@ -6,35 +6,42 @@ import UIKit
 
 struct VideosView: View {
     @EnvironmentObject private var recordingStore: RecordingStore
+    @EnvironmentObject private var scriptStore: ScriptStore
+    @EnvironmentObject private var purchaseManager: PurchaseManager
 
     @State private var selectedRecording: RecordedVideo?
     @State private var renameTarget: RecordedVideo?
     @State private var renameText = ""
     @State private var searchText = ""
     @State private var showsSearchField = false
-    @State private var videoTab: VideoTab = .all
+    @State private var videoTab: VideoTab = .videos
     @State private var sortNewestFirst = true
+    @State private var openedFolder: ScriptFolder?
     @FocusState private var isSearchFieldFocused: Bool
 
     private enum VideoTab: String, CaseIterable, Identifiable {
-        case all
-        case favorites
+        case videos
+        case folders
 
         var id: String { rawValue }
 
         var title: String {
             switch self {
-            case .all: "All"
-            case .favorites: "Favorites"
+            case .videos: "Videos"
+            case .folders: "Folders"
             }
         }
     }
 
+    private var visibleFolders: [ScriptFolder] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let folders = scriptStore.folders.filter { !recordingStore.recordings(in: $0.id).isEmpty }
+        guard !query.isEmpty else { return folders }
+        return folders.filter { $0.displayName.localizedCaseInsensitiveContains(query) }
+    }
+
     private var filteredRecordings: [RecordedVideo] {
-        var items = recordingStore.recordings
-        if videoTab == .favorites {
-            items = items.filter(\.isFavorite)
-        }
+        var items = recordingStore.recordings(in: nil)
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         if !query.isEmpty {
             items = items.filter { $0.title.localizedCaseInsensitiveContains(query) }
@@ -59,21 +66,36 @@ struct VideosView: View {
                                 LazyVStack(alignment: .leading, spacing: 16) {
                                     videoTabsRow
 
-                                    if filteredRecordings.isEmpty {
-                                        noResultsState
-                                    } else {
-                                        ForEach(filteredRecordings) { recording in
-                                            RecordingCard(
-                                                recording: recording,
-                                                url: recordingStore.fileURL(for: recording),
-                                                onOpen: { selectedRecording = recording },
-                                                onRename: {
-                                                    renameText = recording.title
-                                                    renameTarget = recording
-                                                },
-                                                onFavorite: { recordingStore.toggleFavorite(recording) },
-                                                onDelete: { recordingStore.delete(recording) }
-                                            )
+                                    switch videoTab {
+                                    case .videos:
+                                        if filteredRecordings.isEmpty {
+                                            noResultsState
+                                        } else {
+                                            ForEach(filteredRecordings) { recording in
+                                                RecordingCard(
+                                                    recording: recording,
+                                                    url: recordingStore.fileURL(for: recording),
+                                                    onOpen: { selectedRecording = recording },
+                                                    onRename: {
+                                                        renameText = recording.title
+                                                        renameTarget = recording
+                                                    },
+                                                    onFavorite: { recordingStore.toggleFavorite(recording) },
+                                                    onDelete: { recordingStore.delete(recording) }
+                                                )
+                                            }
+                                        }
+                                    case .folders:
+                                        if visibleFolders.isEmpty {
+                                            noResultsState
+                                        } else {
+                                            ForEach(visibleFolders) { folder in
+                                                VideoFolderRow(
+                                                    folder: folder,
+                                                    count: recordingStore.recordings(in: folder.id).count,
+                                                    onOpen: { openedFolder = folder }
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -92,6 +114,12 @@ struct VideosView: View {
                 }
             }
             .hidesSystemNavigationBar()
+            .navigationDestination(item: $openedFolder) { folder in
+                VideoFolderDetailView(folder: folder)
+                    .environmentObject(recordingStore)
+                    .environmentObject(scriptStore)
+                    .environmentObject(purchaseManager)
+            }
         }
         .sheet(item: $selectedRecording) { recording in
             RecordingPlayerView(
@@ -219,21 +247,24 @@ struct VideosView: View {
 
     private var noResultsState: some View {
         let isSearching = !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let itemName = videoTab == .videos ? "videos" : "folders"
 
         return VStack(spacing: 12) {
-            Image(systemName: isSearching ? "eye.slash" : "star")
+            Image(systemName: isSearching ? "eye.slash" : "tray")
                 .font(.appTitle)
                 .foregroundStyle(.secondary)
                 .frame(width: 64, height: 64)
                 .background(Color.appSurface, in: Circle())
 
-            Text(isSearching ? "No Results" : "No favorites yet")
+            Text(isSearching ? "No Results" : "Nothing here yet")
                 .font(.appHeadline)
 
             Text(
                 isSearching
-                    ? "No videos match \"\(searchText)\""
-                    : "Tap the star on a video to favorite it."
+                    ? "No \(itemName) match \"\(searchText)\""
+                    : (videoTab == .videos
+                        ? "Videos you record without a folder will appear here."
+                        : "Record a script that's inside a folder to see it here.")
             )
             .font(.appSecondary)
             .foregroundStyle(.secondary)
@@ -263,6 +294,112 @@ struct VideosView: View {
             }
         }
         .padding(.horizontal, 36)
+    }
+}
+
+private struct VideoFolderRow: View {
+    let folder: ScriptFolder
+    let count: Int
+    let onOpen: () -> Void
+
+    var body: some View {
+        Button(action: onOpen) {
+            HStack(alignment: .center, spacing: 12) {
+                Image(systemName: "folder.fill")
+                    .font(.appSubheadline)
+                    .foregroundStyle(Color.creatorViolet)
+                    .frame(width: 36, height: 36)
+                    .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(folder.displayName)
+                        .font(.appHeadline)
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+
+                    Text("\(count) video\(count == 1 ? "" : "s")")
+                        .font(.appSecondary)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer(minLength: 4)
+
+                Image(systemName: "chevron.right")
+                    .font(.appCaptionEmphasis)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(16)
+            .contentCard()
+            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct VideoFolderDetailView: View {
+    @EnvironmentObject private var recordingStore: RecordingStore
+
+    let folder: ScriptFolder
+
+    @State private var selectedRecording: RecordedVideo?
+    @State private var renameTarget: RecordedVideo?
+    @State private var renameText = ""
+
+    private var recordings: [RecordedVideo] {
+        recordingStore.recordings(in: folder.id)
+    }
+
+    var body: some View {
+        ZStack {
+            AppBackground()
+
+            ScrollView(showsIndicators: false) {
+                LazyVStack(spacing: 12) {
+                    ForEach(recordings) { recording in
+                        RecordingCard(
+                            recording: recording,
+                            url: recordingStore.fileURL(for: recording),
+                            onOpen: { selectedRecording = recording },
+                            onRename: {
+                                renameText = recording.title
+                                renameTarget = recording
+                            },
+                            onFavorite: { recordingStore.toggleFavorite(recording) },
+                            onDelete: { recordingStore.delete(recording) }
+                        )
+                    }
+                }
+                .padding(.horizontal, AppLayout.screenHorizontalPadding)
+                .padding(.top, 8)
+                .padding(.bottom, 36)
+            }
+        }
+        .navigationTitle(folder.displayName)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
+        .sheet(item: $selectedRecording) { recording in
+            RecordingPlayerView(
+                recording: recording,
+                url: recordingStore.fileURL(for: recording)
+            )
+        }
+        .alert("Rename video", isPresented: Binding(
+            get: { renameTarget != nil },
+            set: { if !$0 { renameTarget = nil } }
+        )) {
+            TextField("Video title", text: $renameText)
+            Button("Cancel", role: .cancel) {
+                renameTarget = nil
+            }
+            Button("Rename") {
+                if let renameTarget {
+                    recordingStore.rename(renameTarget, to: renameText)
+                }
+                renameTarget = nil
+            }
+        } message: {
+            Text("Use a name that helps you find this take later.")
+        }
     }
 }
 

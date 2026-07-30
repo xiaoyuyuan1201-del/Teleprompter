@@ -21,7 +21,8 @@ final class RecordingStore: ObservableObject {
     func importRecording(
         from sourceURL: URL,
         title: String,
-        verification: RecordingVerification?
+        verification: RecordingVerification?,
+        folderID: UUID? = nil
     ) throws -> RecordedVideo {
         createDirectoryIfNeeded()
 
@@ -44,12 +45,28 @@ final class RecordingStore: ObservableObject {
             fileName: fileName,
             duration: verification?.duration ?? 0,
             fileSizeBytes: verification?.fileSizeBytes ?? storedFileSize,
-            hasAudio: verification?.hasAudio ?? false
+            hasAudio: verification?.hasAudio ?? false,
+            folderID: folderID
         )
 
         recordings.insert(recording, at: 0)
         sortAndSave()
         return recording
+    }
+
+    func recordings(in folderID: UUID?) -> [RecordedVideo] {
+        recordings.filter { $0.folderID == folderID }
+    }
+
+    /// Clears the folder tag from any recordings pointing at a folder that
+    /// was just deleted on the scripts side (folders are owned by ScriptStore).
+    func clearFolder(_ folderID: UUID) {
+        var didChange = false
+        for index in recordings.indices where recordings[index].folderID == folderID {
+            recordings[index].folderID = nil
+            didChange = true
+        }
+        if didChange { save() }
     }
 
     func rename(_ recording: RecordedVideo, to title: String) {
