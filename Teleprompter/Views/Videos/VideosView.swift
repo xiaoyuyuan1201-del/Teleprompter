@@ -48,7 +48,7 @@ struct VideosView: View {
                 AppBackground()
 
                 VStack(spacing: 0) {
-                    AppHeaderRow(title: "Videos")
+                    videosTopBar
 
                     if recordingStore.recordings.isEmpty {
                         emptyState
@@ -57,7 +57,7 @@ struct VideosView: View {
                         ScrollViewReader { proxy in
                             ScrollView(showsIndicators: false) {
                                 LazyVStack(alignment: .leading, spacing: 16) {
-                                    videosHeader
+                                    videoTabsRow
 
                                     if filteredRecordings.isEmpty {
                                         noResultsState
@@ -118,8 +118,8 @@ struct VideosView: View {
         }
     }
 
-    private var videosHeader: some View {
-        VStack(alignment: .leading, spacing: 12) {
+    private var videosTopBar: some View {
+        Group {
             if showsSearchField {
                 HStack(spacing: 12) {
                     HStack(spacing: 8) {
@@ -156,63 +156,63 @@ struct VideosView: View {
                     .font(.appHeadline)
                     .foregroundStyle(Color.creatorViolet)
                 }
+                .padding(.horizontal, AppLayout.screenHorizontalPadding)
+                .padding(.vertical, 8)
             } else {
-                HStack(spacing: 16) {
-                    Text("My Videos")
-                        .font(.appSectionTitle)
-                        .foregroundStyle(.primary)
-
-                    Spacer()
-
-                    Button {
-                        withAnimation(.snappy) {
-                            showsSearchField = true
-                        }
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                            .font(.appHeadline)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Menu {
+                AppHeaderRow(title: "Videos") {
+                    HStack(spacing: 16) {
                         Button {
-                            sortNewestFirst = true
+                            withAnimation(.snappy) {
+                                showsSearchField = true
+                            }
                         } label: {
-                            Label("Newest First", systemImage: "arrow.down")
+                            Image(systemName: "magnifyingglass")
+                                .font(.appHeadline)
+                                .foregroundStyle(.secondary)
                         }
-                        Button {
-                            sortNewestFirst = false
+
+                        Menu {
+                            Button {
+                                sortNewestFirst = true
+                            } label: {
+                                Label("Newest First", systemImage: "arrow.down")
+                            }
+                            Button {
+                                sortNewestFirst = false
+                            } label: {
+                                Label("Oldest First", systemImage: "arrow.up")
+                            }
                         } label: {
-                            Label("Oldest First", systemImage: "arrow.up")
+                            Image(systemName: "line.3.horizontal.decrease")
+                                .font(.appHeadline)
+                                .foregroundStyle(.secondary)
                         }
-                    } label: {
-                        Image(systemName: "line.3.horizontal.decrease")
-                            .font(.appHeadline)
-                            .foregroundStyle(.secondary)
+                        .accessibilityLabel("Sort")
                     }
-                    .accessibilityLabel("Sort")
                 }
             }
+        }
+    }
 
-            HStack(spacing: 8) {
-                ForEach(VideoTab.allCases) { tab in
-                    Button {
-                        withAnimation(.snappy) {
-                            videoTab = tab
-                        }
-                    } label: {
-                        Text(tab.title)
-                            .font(.appSubheadline)
-                            .foregroundStyle(videoTab == tab ? .white : .primary)
-                            .padding(.horizontal, 20)
-                            .frame(height: 36)
-                            .background(
-                                videoTab == tab ? Color.creatorViolet : Color.appSurface,
-                                in: Capsule()
-                            )
+    private var videoTabsRow: some View {
+        HStack(spacing: 8) {
+            ForEach(VideoTab.allCases) { tab in
+                Button {
+                    withAnimation(.snappy) {
+                        videoTab = tab
                     }
-                    .buttonStyle(.plain)
+                } label: {
+                    Text(tab.title)
+                        .font(.appSubheadline)
+                        .foregroundStyle(videoTab == tab ? .white : .primary)
+                        .padding(.horizontal, 20)
+                        .frame(height: 36)
+                        .background(
+                            videoTab == tab ? Color.creatorViolet : Color.appSurface,
+                            in: Capsule()
+                        )
                 }
+                .buttonStyle(.plain)
             }
         }
     }
