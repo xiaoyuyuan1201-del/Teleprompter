@@ -66,9 +66,10 @@ struct TeleprompterView: View {
                     Spacer(minLength: 12)
                     promptArea
                     Spacer(minLength: 14)
-                    recordingStatusRow
-                    Spacer(minLength: 10)
-                    bottomControls
+                    VStack(spacing: 8) {
+                        recordingStatusRow
+                        bottomControls
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
