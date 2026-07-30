@@ -191,6 +191,16 @@ struct HomeView: View {
                     }
                 }
             }
+
+            if scriptStore.scripts.isEmpty {
+                HandDrawnPointerArrow()
+                    .stroke(Color.primary.opacity(0.65), style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                    .frame(width: 80, height: 130)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .padding(.trailing, 36)
+                    .padding(.bottom, 96)
+                    .allowsHitTesting(false)
+            }
         }
     }
 
@@ -542,32 +552,22 @@ struct HomeView: View {
     }
 
     private var emptyState: some View {
-        HStack(alignment: .top, spacing: 12) {
+        VStack(spacing: 16) {
             Image(systemName: "doc.text")
-                .font(.appHeadline)
-                .foregroundStyle(Color.creatorViolet)
-                .frame(width: 38, height: 38)
-                .background(Color.creatorViolet.opacity(0.10), in: RoundedRectangle(cornerRadius: 16))
+                .font(.system(size: 56, weight: .light))
+                .foregroundStyle(.tertiary)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text("No scripts")
+            VStack(spacing: 4) {
+                Text("No Scripts Yet")
                     .font(.appHeadline)
-                Text("Create or import a script to begin recording.")
+                Text("Tap + to create your first script")
                     .font(.appSecondary)
                     .foregroundStyle(.secondary)
             }
-
-            Spacer()
-
-            Button {
-                importScript()
-            } label: {
-                Label("Import", systemImage: "square.and.arrow.down")
-            }
-            .buttonStyle(ToolSecondaryButtonStyle(height: 32, horizontalPadding: 10))
         }
-        .padding(16)
-        .contentCard()
+        .frame(maxWidth: .infinity)
+        .padding(.top, 60)
+        .padding(.bottom, 20)
     }
 
     private var latestUsableScript: PromptScript? {
@@ -643,6 +643,45 @@ struct QuickActionButton: View {
     }
 }
 
+/// A sketchy, hand-drawn-style curved arrow with a small loop, pointing
+/// toward the bottom-trailing corner (where the tab bar's + button lives).
+private struct HandDrawnPointerArrow: Shape {
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width
+        let h = rect.height
+        var path = Path()
+
+        path.move(to: CGPoint(x: w * 0.58, y: 0))
+        path.addCurve(
+            to: CGPoint(x: w * 0.30, y: h * 0.30),
+            control1: CGPoint(x: w * 0.80, y: h * 0.06),
+            control2: CGPoint(x: w * 0.58, y: h * 0.16)
+        )
+        path.addCurve(
+            to: CGPoint(x: w * 0.72, y: h * 0.34),
+            control1: CGPoint(x: w * 0.06, y: h * 0.44),
+            control2: CGPoint(x: w * 0.92, y: h * 0.46)
+        )
+        path.addCurve(
+            to: CGPoint(x: w * 0.38, y: h * 0.20),
+            control1: CGPoint(x: w * 0.58, y: h * 0.22),
+            control2: CGPoint(x: w * 0.48, y: h * 0.14)
+        )
+        path.addCurve(
+            to: CGPoint(x: w * 0.92, y: h * 0.92),
+            control1: CGPoint(x: w * 0.55, y: h * 0.42),
+            control2: CGPoint(x: w * 0.76, y: h * 0.62)
+        )
+
+        let tip = CGPoint(x: w * 0.92, y: h * 0.92)
+        path.move(to: CGPoint(x: tip.x - w * 0.24, y: tip.y - h * 0.04))
+        path.addLine(to: tip)
+        path.addLine(to: CGPoint(x: tip.x - w * 0.06, y: tip.y - h * 0.26))
+
+        return path
+    }
+}
+
 struct AIScriptSheet: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var service = AIPolishService()
@@ -654,6 +693,8 @@ struct AIScriptSheet: View {
     @State private var polishedText = ""
     @State private var selectedStyle: PolishStyle = .conversational
     @State private var previewMode = PreviewMode.original
+    @State private var hasUnsavedChanges = false
+    @State private var showsUnsavedChangesAlert = false
     @FocusState private var focusedField: Field?
 
     private enum PreviewMode: String, CaseIterable, Identifiable {
@@ -670,6 +711,106 @@ struct AIScriptSheet: View {
 
     private var currentText: String {
         previewMode == .polished && !polishedText.isEmpty ? polishedText : rawText
+    }
+
+    private var canSave: Bool {
+        !rawText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func requestClose() {
+        if hasUnsavedChanges {
+            showsUnsavedChangesAlert = true
+        } else {
+            dismiss()
+        }
+    }
+
+    private func saveScript() {
+        guard canSave else { return }
+        onUse(scriptTitle, currentText, previewMode == .polished && !polishedText.isEmpty)
+        dismiss()
+    }
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .cancellationAction) {
+            Button("Close") { requestClose() }
+        }
+
+        ToolbarItem(placement: .confirmationAction) {
+            Button("Save") { saveScript() }
+                .fontWeight(.semibold)
+                .disabled(!canSave)
+        }
+    }
+
+    private var scriptBodyEditor: some View {
+        TextEditor(text: $rawText)
+            .font(.appBody)
+            .lineSpacing(4)
+            .scrollContentBackground(.hidden)
+            .frame(minHeight: 180)
+            .padding(12)
+            .contentCard()
+            .focused($focusedField, equals: .body)
+            .overlay(alignment: .topLeading) {
+                if rawText.isEmpty {
+                    Text("Paste or write your script here...")
+                        .font(.appBody)
+                        .foregroundStyle(.tertiary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 20)
+                        .allowsHitTesting(false)
+                }
+            }
+    }
+
+    private var polishButton: some View {
+        Button {
+            Task {
+                if let result = await service.polish(rawText, style: selectedStyle) {
+                    polishedText = result
+                    previewMode = .polished
+                }
+            }
+        } label: {
+            VioletGlassButtonLabel(
+                title: service.isProcessing ? "Polishing..." : "Polish with AI",
+                systemImage: service.isProcessing ? nil : "sparkles"
+            )
+            .overlay(alignment: .leading) {
+                if service.isProcessing {
+                    ProgressView()
+                        .tint(.white)
+                        .padding(.leading, 20)
+                }
+            }
+        }
+        .buttonStyle(ToolPrimaryButtonStyle())
+        .tint(.creatorViolet)
+        .disabled(rawText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || service.isProcessing)
+    }
+
+    @ViewBuilder
+    private var previewSection: some View {
+        if !polishedText.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Picker("Preview", selection: $previewMode) {
+                    ForEach(PreviewMode.allCases) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                Text(currentText)
+                    .font(.appBody)
+                    .lineSpacing(4)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, minHeight: 160, alignment: .topLeading)
+                    .padding(16)
+                    .contentCard()
+            }
+        }
     }
 
     var body: some View {
@@ -696,71 +837,11 @@ struct AIScriptSheet: View {
                             .contentCard(cornerRadius: 16)
                             .focused($focusedField, equals: .title)
 
-                        TextEditor(text: $rawText)
-                            .font(.appBody)
-                            .lineSpacing(4)
-                            .scrollContentBackground(.hidden)
-                            .frame(minHeight: 180)
-                            .padding(12)
-                            .contentCard()
-                            .focused($focusedField, equals: .body)
-                            .overlay(alignment: .topLeading) {
-                                if rawText.isEmpty {
-                                    Text("Paste or write your script here...")
-                                        .font(.appBody)
-                                        .foregroundStyle(.tertiary)
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 20)
-                                        .allowsHitTesting(false)
-                                }
-                            }
+                        scriptBodyEditor
 
-                        HStack(spacing: 12) {
-                            ForEach(PolishStyle.allCases) { style in
-                                Button {
-                                    selectedStyle = style
-                                } label: {
-                                    VStack(spacing: 8) {
-                                        Image(systemName: style.systemImage)
-                                            .font(.appHeadline)
-                                        Text(style.title)
-                                            .font(.appCaptionEmphasis)
-                                    }
-                                    .foregroundStyle(selectedStyle == style ? Color.white : Color.primary)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 78)
-                                    .background(
-                                        selectedStyle == style ? Color.creatorViolet : Color.appSurface,
-                                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
+                        PolishStylePicker(selectedStyle: $selectedStyle)
 
-                        Button {
-                            Task {
-                                if let result = await service.polish(rawText, style: selectedStyle) {
-                                    polishedText = result
-                                    previewMode = .polished
-                                }
-                            }
-                        } label: {
-                            VioletGlassButtonLabel(
-                                title: service.isProcessing ? "Polishing..." : "Polish with AI",
-                                systemImage: service.isProcessing ? nil : "sparkles"
-                            )
-                            .overlay(alignment: .leading) {
-                                if service.isProcessing {
-                                    ProgressView()
-                                        .tint(.white)
-                                        .padding(.leading, 20)
-                                }
-                            }
-                        }
-                        .buttonStyle(ToolPrimaryButtonStyle())
-                        .tint(.creatorViolet)
-                        .disabled(rawText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || service.isProcessing)
+                        polishButton
 
                         if let error = service.errorMessage {
                             Text(error)
@@ -768,38 +849,7 @@ struct AIScriptSheet: View {
                                 .foregroundStyle(.orange)
                         }
 
-                        if !polishedText.isEmpty {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Picker("Preview", selection: $previewMode) {
-                                    ForEach(PreviewMode.allCases) { mode in
-                                        Text(mode.rawValue).tag(mode)
-                                    }
-                                }
-                                .pickerStyle(.segmented)
-
-                                Text(currentText)
-                                    .font(.appBody)
-                                    .lineSpacing(4)
-                                    .textSelection(.enabled)
-                                    .frame(maxWidth: .infinity, minHeight: 160, alignment: .topLeading)
-                                    .padding(16)
-                                    .contentCard()
-                            }
-                        }
-
-                        if !rawText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            Button {
-                                onUse(scriptTitle, currentText, previewMode == .polished && !polishedText.isEmpty)
-                                dismiss()
-                            } label: {
-                                Label("Save as Script", systemImage: "checkmark")
-                                    .font(.appHeadline)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 52)
-                            }
-                            .buttonStyle(ToolSecondaryButtonStyle())
-                            .tint(.creatorViolet)
-                        }
+                        previewSection
                     }
                     .padding(20)
                 }
@@ -807,10 +857,46 @@ struct AIScriptSheet: View {
             }
             .navigationTitle("AI Script")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
+            .toolbar { toolbarContent }
+            .onChange(of: scriptTitle) { _, _ in hasUnsavedChanges = true }
+            .onChange(of: rawText) { _, _ in hasUnsavedChanges = true }
+            .onChange(of: polishedText) { _, _ in hasUnsavedChanges = true }
+            .interactiveDismissDisabled(hasUnsavedChanges)
+            .alert("Discard changes?", isPresented: $showsUnsavedChangesAlert) {
+                Button("Discard", role: .destructive) { dismiss() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("You haven't saved your changes yet.")
+            }
+        }
+    }
+}
+
+private struct PolishStylePicker: View {
+    @Binding var selectedStyle: PolishStyle
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ForEach(PolishStyle.allCases) { style in
+                let isSelected = selectedStyle == style
+                Button {
+                    selectedStyle = style
+                } label: {
+                    VStack(spacing: 8) {
+                        Image(systemName: style.systemImage)
+                            .font(.appHeadline)
+                        Text(style.title)
+                            .font(.appCaptionEmphasis)
+                    }
+                    .foregroundStyle(isSelected ? Color.white : Color.primary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 78)
+                    .background(
+                        isSelected ? Color.creatorViolet : Color.appSurface,
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    )
                 }
+                .buttonStyle(.plain)
             }
         }
     }
