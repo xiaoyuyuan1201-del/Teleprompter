@@ -26,6 +26,12 @@ final class PurchaseManager: ObservableObject {
         updatesTask?.cancel()
     }
 
+    /// Test-only override that flips Pro status without a real purchase or
+    /// StoreKit entitlement. Wired to a hidden multi-tap gesture on Home.
+    func setDebugPro(_ value: Bool) {
+        isPro = value
+    }
+
     func product(for plan: SubscriptionPlan) -> Product? {
         products.first { $0.id == plan.productID }
     }

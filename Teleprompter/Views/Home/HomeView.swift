@@ -166,7 +166,9 @@ struct HomeView: View {
 
             VStack(spacing: 0) {
                 AppHeaderRow(title: "Teleprompter", onTitleTap: { hasCompletedOnboarding = false }) {
-                    if !purchaseManager.isPro {
+                    if purchaseManager.isPro {
+                        proBadge
+                    } else {
                         proButton
                     }
                 }
@@ -208,6 +210,28 @@ struct HomeView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Teleprompter Pro")
+        .simultaneousGesture(
+            TapGesture(count: 5).onEnded {
+                purchaseManager.setDebugPro(true)
+            }
+        )
+    }
+
+    private var proBadge: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "crown.fill")
+            Text("Pro")
+                .font(.appCaptionEmphasis)
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 12)
+        .frame(height: 32)
+        .background(Color.creatorViolet, in: Capsule(style: .continuous))
+        .contentShape(Capsule())
+        .accessibilityLabel("Teleprompter Pro member")
+        .onTapGesture(count: 5) {
+            purchaseManager.setDebugPro(false)
+        }
     }
 
     private var quickStartCard: some View {

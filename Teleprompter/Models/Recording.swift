@@ -8,6 +8,7 @@ struct RecordedVideo: Identifiable, Codable, Hashable {
     let duration: TimeInterval
     let fileSizeBytes: Int64
     let hasAudio: Bool
+    var isFavorite: Bool
 
     init(
         id: UUID = UUID(),
@@ -16,7 +17,8 @@ struct RecordedVideo: Identifiable, Codable, Hashable {
         fileName: String,
         duration: TimeInterval,
         fileSizeBytes: Int64,
-        hasAudio: Bool
+        hasAudio: Bool,
+        isFavorite: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -25,6 +27,23 @@ struct RecordedVideo: Identifiable, Codable, Hashable {
         self.duration = duration
         self.fileSizeBytes = fileSizeBytes
         self.hasAudio = hasAudio
+        self.isFavorite = isFavorite
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, createdAt, fileName, duration, fileSizeBytes, hasAudio, isFavorite
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? .now
+        fileName = try container.decodeIfPresent(String.self, forKey: .fileName) ?? ""
+        duration = try container.decodeIfPresent(TimeInterval.self, forKey: .duration) ?? 0
+        fileSizeBytes = try container.decodeIfPresent(Int64.self, forKey: .fileSizeBytes) ?? 0
+        hasAudio = try container.decodeIfPresent(Bool.self, forKey: .hasAudio) ?? false
+        isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
     }
 
     var durationText: String {

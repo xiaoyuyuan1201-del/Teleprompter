@@ -60,6 +60,12 @@ final class RecordingStore: ObservableObject {
         sortAndSave()
     }
 
+    func toggleFavorite(_ recording: RecordedVideo) {
+        guard let index = recordings.firstIndex(where: { $0.id == recording.id }) else { return }
+        recordings[index].isFavorite.toggle()
+        save()
+    }
+
     func delete(_ recording: RecordedVideo) {
         let url = fileURL(for: recording)
         try? fileManager.removeItem(at: url)

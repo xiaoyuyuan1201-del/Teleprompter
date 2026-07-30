@@ -10,6 +10,37 @@ struct VideosView: View {
     @State private var selectedRecording: RecordedVideo?
     @State private var renameTarget: RecordedVideo?
     @State private var renameText = ""
+    @State private var searchText = ""
+    @State private var showsSearchField = false
+    @State private var videoTab: VideoTab = .all
+    @State private var sortNewestFirst = true
+    @FocusState private var isSearchFieldFocused: Bool
+
+    private enum VideoTab: String, CaseIterable, Identifiable {
+        case all
+        case favorites
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .all: "All"
+            case .favorites: "Favorites"
+            }
+        }
+    }
+
+    private var filteredRecordings: [RecordedVideo] {
+        var items = recordingStore.recordings
+        if videoTab == .favorites {
+            items = items.filter(\.isFavorite)
+        }
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !query.isEmpty {
+            items = items.filter { $0.title.localizedCaseInsensitiveContains(query) }
+        }
+        return sortNewestFirst ? items : items.reversed()
+    }
 
     var body: some View {
         NavigationStack {
@@ -23,26 +54,39 @@ struct VideosView: View {
                         emptyState
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
-                        ScrollView(showsIndicators: false) {
-                            LazyVStack(spacing: 16) {
-                                summaryHeader
+                        ScrollViewReader { proxy in
+                            ScrollView(showsIndicators: false) {
+                                LazyVStack(alignment: .leading, spacing: 16) {
+                                    videosHeader
 
-                                ForEach(recordingStore.recordings) { recording in
-                                    RecordingCard(
-                                        recording: recording,
-                                        url: recordingStore.fileURL(for: recording),
-                                        onOpen: { selectedRecording = recording },
-                                        onRename: {
-                                            renameText = recording.title
-                                            renameTarget = recording
-                                        },
-                                        onDelete: { recordingStore.delete(recording) }
-                                    )
+                                    if filteredRecordings.isEmpty {
+                                        noResultsState
+                                    } else {
+                                        ForEach(filteredRecordings) { recording in
+                                            RecordingCard(
+                                                recording: recording,
+                                                url: recordingStore.fileURL(for: recording),
+                                                onOpen: { selectedRecording = recording },
+                                                onRename: {
+                                                    renameText = recording.title
+                                                    renameTarget = recording
+                                                },
+                                                onFavorite: { recordingStore.toggleFavorite(recording) },
+                                                onDelete: { recordingStore.delete(recording) }
+                                            )
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, AppLayout.screenHorizontalPadding)
+                                .padding(.top, 8)
+                                .padding(.bottom, 36)
+                            }
+                            .onChange(of: isSearchFieldFocused) { _, isFocused in
+                                guard isFocused else { return }
+                                withAnimation {
+                                    proxy.scrollTo("videoSearchField", anchor: .top)
                                 }
                             }
-                            .padding(.horizontal, AppLayout.screenHorizontalPadding)
-                            .padding(.top, 8)
-                            .padding(.bottom, 36)
                         }
                     }
                 }
@@ -74,26 +118,129 @@ struct VideosView: View {
         }
     }
 
-    private var summaryHeader: some View {
-        HStack(spacing: 16) {
-            Image(systemName: "play.rectangle.on.rectangle.fill")
-                .font(.appHeadline)
-                .foregroundStyle(Color.creatorViolet)
-                .frame(width: 50, height: 50)
-                .background(Color.creatorViolet.opacity(0.11), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    private var videosHeader: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if showsSearchField {
+                HStack(spacing: 12) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(.secondary)
+                        TextField("Search videos", text: $searchText)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .focused($isSearchFieldFocused)
+                            .onAppear { isSearchFieldFocused = true }
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Your recordings")
+                        if !searchText.isEmpty {
+                            Button {
+                                searchText = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .frame(height: 46)
+                    .contentCard(cornerRadius: 16)
+                    .id("videoSearchField")
+
+                    Button("Cancel") {
+                        withAnimation(.snappy) {
+                            showsSearchField = false
+                            searchText = ""
+                            isSearchFieldFocused = false
+                        }
+                    }
                     .font(.appHeadline)
-                Text("\(recordingStore.recordings.count) saved in Teleprompter")
-                    .font(.appCaption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.creatorViolet)
+                }
+            } else {
+                HStack(spacing: 16) {
+                    Text("My Videos")
+                        .font(.appTitle)
+                        .foregroundStyle(.primary)
+
+                    Spacer()
+
+                    Button {
+                        withAnimation(.snappy) {
+                            showsSearchField = true
+                        }
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                            .font(.appHeadline)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Menu {
+                        Button {
+                            sortNewestFirst = true
+                        } label: {
+                            Label("Newest First", systemImage: "arrow.down")
+                        }
+                        Button {
+                            sortNewestFirst = false
+                        } label: {
+                            Label("Oldest First", systemImage: "arrow.up")
+                        }
+                    } label: {
+                        Image(systemName: "line.3.horizontal.decrease")
+                            .font(.appHeadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityLabel("Sort")
+                }
             }
 
-            Spacer()
+            HStack(spacing: 8) {
+                ForEach(VideoTab.allCases) { tab in
+                    Button {
+                        withAnimation(.snappy) {
+                            videoTab = tab
+                        }
+                    } label: {
+                        Text(tab.title)
+                            .font(.appSubheadline)
+                            .foregroundStyle(videoTab == tab ? .white : .primary)
+                            .padding(.horizontal, 20)
+                            .frame(height: 36)
+                            .background(
+                                videoTab == tab ? Color.creatorViolet : Color.appSurface,
+                                in: Capsule()
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
-        .padding(16)
-        .contentCard()
+    }
+
+    private var noResultsState: some View {
+        let isSearching = !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
+        return VStack(spacing: 12) {
+            Image(systemName: isSearching ? "eye.slash" : "star")
+                .font(.appTitle)
+                .foregroundStyle(.secondary)
+                .frame(width: 64, height: 64)
+                .background(Color.appSurface, in: Circle())
+
+            Text(isSearching ? "No Results" : "No favorites yet")
+                .font(.appHeadline)
+
+            Text(
+                isSearching
+                    ? "No videos match \"\(searchText)\""
+                    : "Tap the star on a video to favorite it."
+            )
+            .font(.appSecondary)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 48)
     }
 
     private var emptyState: some View {
@@ -124,6 +271,7 @@ private struct RecordingCard: View {
     let url: URL
     let onOpen: () -> Void
     let onRename: () -> Void
+    let onFavorite: () -> Void
     let onDelete: () -> Void
 
     @State private var showsShare = false
@@ -137,10 +285,18 @@ private struct RecordingCard: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(recording.title)
-                            .font(.appHeadline)
-                            .foregroundStyle(.primary)
-                            .lineLimit(2)
+                        HStack(spacing: 6) {
+                            Text(recording.title)
+                                .font(.appHeadline)
+                                .foregroundStyle(.primary)
+                                .lineLimit(2)
+
+                            if recording.isFavorite {
+                                Image(systemName: "star.fill")
+                                    .font(.appCaption)
+                                    .foregroundStyle(Color.creatorViolet)
+                            }
+                        }
 
                         Text(recording.createdAt.formatted(date: .abbreviated, time: .shortened))
                             .font(.appCaption)
@@ -165,6 +321,12 @@ private struct RecordingCard: View {
             .buttonStyle(.plain)
 
             Menu {
+                Button(action: onFavorite) {
+                    Label(
+                        recording.isFavorite ? "Remove Favorite" : "Favorite",
+                        systemImage: recording.isFavorite ? "star.slash" : "star"
+                    )
+                }
                 Button(action: onRename) {
                     Label("Rename", systemImage: "pencil")
                 }
