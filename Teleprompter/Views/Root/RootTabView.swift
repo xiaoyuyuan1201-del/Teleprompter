@@ -15,6 +15,7 @@ struct RootTabView: View {
     @State private var showsNewFolderAlert = false
     @State private var newFolderName = ""
     @State private var showsAIScript = false
+    @State private var freeformScript: PromptScript?
 
     private enum AppTab: Hashable {
         case home
@@ -23,8 +24,9 @@ struct RootTabView: View {
     }
 
     private enum QuickAction: String, CaseIterable, Identifiable {
+        case record
         case newFolder
-        case recordWithoutScript
+        case aiScript
         case importFile
         case newScript
 
@@ -32,8 +34,9 @@ struct RootTabView: View {
 
         var title: String {
             switch self {
+            case .record: "Record Without Script"
             case .newFolder: "New Folder"
-            case .recordWithoutScript: "AI Script"
+            case .aiScript: "AI Script"
             case .importFile: "Import File"
             case .newScript: "New Script"
             }
@@ -41,8 +44,9 @@ struct RootTabView: View {
 
         var systemImage: String {
             switch self {
+            case .record: "video.fill"
             case .newFolder: "folder.fill"
-            case .recordWithoutScript: "sparkles"
+            case .aiScript: "sparkles"
             case .importFile: "square.and.arrow.up.fill"
             case .newScript: "pencil.and.scribble"
             }
@@ -128,6 +132,11 @@ struct RootTabView: View {
                 let script = PromptScript(title: title, body: finalText, isDraft: false, isAIPolished: wasPolished)
                 scriptStore.upsert(script)
             }
+        }
+        .fullScreenCover(item: $freeformScript) { script in
+            TeleprompterView(script: script)
+                .environmentObject(purchaseManager)
+                .environmentObject(recordingStore)
         }
         .fullScreenCover(isPresented: $showsPaywall) {
             PaywallView(source: .inApp)
@@ -222,10 +231,12 @@ struct RootTabView: View {
         }
 
         switch action {
+        case .record:
+            freeformScript = PromptScript(title: "", body: "")
         case .newFolder:
             newFolderName = ""
             showsNewFolderAlert = true
-        case .recordWithoutScript:
+        case .aiScript:
             if purchaseManager.isPro {
                 showsAIScript = true
             } else {

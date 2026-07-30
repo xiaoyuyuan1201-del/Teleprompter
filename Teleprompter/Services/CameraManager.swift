@@ -61,7 +61,7 @@ final class CameraManager: NSObject, ObservableObject {
     private let movieOutput = AVCaptureMovieFileOutput()
     private let audioLevelOutput = AVCaptureAudioDataOutput()
     private var lastAudioLevelUpdate: Date = .distantPast
-    private var currentPosition: AVCaptureDevice.Position = .front
+    private var currentPosition: AVCaptureDevice.Position = CameraManager.loadDefaultPosition()
     private var pendingStopAction: PendingStopAction?
     private var segmentURLs: [URL] = []
     private var recordingStartedAt: Date?
@@ -76,6 +76,14 @@ final class CameraManager: NSObject, ObservableObject {
 
     deinit {
         observers.forEach { NotificationCenter.default.removeObserver($0) }
+    }
+
+    static func loadDefaultPosition() -> AVCaptureDevice.Position {
+        UserDefaults.standard.string(forKey: "defaultCameraPosition") == "back" ? .back : .front
+    }
+
+    static func loadDefaultPreset() -> AVCaptureSession.Preset {
+        UserDefaults.standard.string(forKey: "defaultRecordingQuality") == "standard" ? .hd1280x720 : .hd1920x1080
     }
 
     var elapsedRecordingTime: TimeInterval {
@@ -276,7 +284,10 @@ final class CameraManager: NSObject, ObservableObject {
 
     private func configureSession(resetInputs: Bool) {
         session.beginConfiguration()
-        if session.canSetSessionPreset(.hd1920x1080) {
+        let preferredPreset = Self.loadDefaultPreset()
+        if session.canSetSessionPreset(preferredPreset) {
+            session.sessionPreset = preferredPreset
+        } else if session.canSetSessionPreset(.hd1920x1080) {
             session.sessionPreset = .hd1920x1080
         } else {
             session.sessionPreset = .high

@@ -144,8 +144,6 @@ struct PromptingSettingsView: View {
                 }
                 .disabled(!purchaseManager.isPro)
                 .foregroundStyle(purchaseManager.isPro ? .primary : .secondary)
-
-                LabeledContent("Recording quality", value: "1080p")
             } header: {
                 Text("Layout")
             } footer: {

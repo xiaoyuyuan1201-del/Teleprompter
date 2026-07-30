@@ -228,6 +228,12 @@ struct PaywallView: View {
             }
             .font(.appCaptionEmphasis)
             .foregroundStyle(Color.creatorViolet)
+
+            Button("Not Now") {
+                close()
+            }
+            .font(.appCaptionEmphasis)
+            .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
