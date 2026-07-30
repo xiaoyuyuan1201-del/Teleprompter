@@ -18,7 +18,11 @@ struct HomeView: View {
     @State private var folderRenameText = ""
     @State private var folderDeleteTarget: ScriptFolder?
     @State private var searchText = ""
+    @State private var showsSearchField = false
+    @State private var libraryTab: LibraryTab = .scripts
     @State private var openedFolder: ScriptFolder?
+    @FocusState private var isSearchFieldFocused: Bool
+    private let searchFieldScrollID = "homeSearchField"
 
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = true
 
@@ -159,14 +163,22 @@ struct HomeView: View {
                     }
                 }
 
-                ScrollView(showsIndicators: false) {
-                    LazyVStack(alignment: .leading, spacing: 32) {
-                        quickStartCard
-                        libraryList
+                ScrollViewReader { proxy in
+                    ScrollView(showsIndicators: false) {
+                        LazyVStack(alignment: .leading, spacing: 32) {
+                            quickStartCard
+                            libraryList
+                        }
+                        .padding(.horizontal, AppLayout.screenHorizontalPadding)
+                        .padding(.top, 8)
+                        .padding(.bottom, 32)
                     }
-                    .padding(.horizontal, AppLayout.screenHorizontalPadding)
-                    .padding(.top, 8)
-                    .padding(.bottom, 32)
+                    .onChange(of: isSearchFieldFocused) { _, isFocused in
+                        guard isFocused else { return }
+                        withAnimation {
+                            proxy.scrollTo(searchFieldScrollID, anchor: .top)
+                        }
+                    }
                 }
             }
         }
@@ -269,6 +281,20 @@ struct HomeView: View {
         }
     }
 
+    private enum LibraryTab: String, CaseIterable, Identifiable {
+        case scripts
+        case folders
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .scripts: "Scripts"
+            case .folders: "Folders"
+            }
+        }
+    }
+
     private var quickActionsRow: some View {
         HStack(spacing: 12) {
             QuickActionButton(title: "Import", systemImage: "doc.text", action: importScript)
@@ -284,108 +310,166 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 16) {
             quickActionsRow
 
-            searchBar
+            libraryHeader
+
+            if showsSearchField {
+                searchField
+            }
 
             if scriptStore.scripts.isEmpty {
                 emptyState
-            } else if filteredScripts.isEmpty && visibleFolders.isEmpty {
-                emptyFilterState
             } else {
-                Text("My Scripts")
-                    .font(.appHeadline)
-
-                LazyVStack(spacing: 12) {
-                    ForEach(visibleFolders) { folder in
-                        FolderRow(
-                            folder: folder,
-                            count: scriptStore.scripts(in: folder.id).count,
-                            onOpen: { openedFolder = folder },
-                            onRename: {
-                                folderRenameText = folder.displayName
-                                folderRenameTarget = folder
-                            },
-                            onDelete: { folderDeleteTarget = folder }
-                        )
+                switch libraryTab {
+                case .scripts:
+                    if filteredScripts.isEmpty {
+                        emptyFilterState
+                    } else {
+                        LazyVStack(spacing: 12) {
+                            ForEach(filteredScripts) { script in
+                                ScriptRow(
+                                    script: script,
+                                    folders: scriptStore.folders,
+                                    onEdit: { editorMode = .edit(script) },
+                                    onPrompt: { activePrompt = script },
+                                    onFavorite: { scriptStore.toggleFavorite(script) },
+                                    onRename: {
+                                        renameText = script.displayTitle
+                                        renameTarget = script
+                                    },
+                                    onDuplicate: {
+                                        if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
+                                            scriptStore.duplicate(script)
+                                        } else {
+                                            showsPaywall = true
+                                        }
+                                    },
+                                    onMove: { folderID in
+                                        scriptStore.move(script, toFolder: folderID)
+                                    },
+                                    onDelete: { scriptStore.delete(script) }
+                                )
+                            }
+                        }
                     }
-
-                    ForEach(filteredScripts) { script in
-                        ScriptRow(
-                            script: script,
-                            folders: scriptStore.folders,
-                            onEdit: { editorMode = .edit(script) },
-                            onPrompt: { activePrompt = script },
-                            onFavorite: { scriptStore.toggleFavorite(script) },
-                            onRename: {
-                                renameText = script.displayTitle
-                                renameTarget = script
-                            },
-                            onDuplicate: {
-                                if scriptStore.canCreateScript(isPro: purchaseManager.isPro) {
-                                    scriptStore.duplicate(script)
-                                } else {
-                                    showsPaywall = true
-                                }
-                            },
-                            onMove: { folderID in
-                                scriptStore.move(script, toFolder: folderID)
-                            },
-                            onDelete: { scriptStore.delete(script) }
-                        )
+                case .folders:
+                    if visibleFolders.isEmpty {
+                        emptyFilterState
+                    } else {
+                        LazyVStack(spacing: 12) {
+                            ForEach(visibleFolders) { folder in
+                                FolderRow(
+                                    folder: folder,
+                                    count: scriptStore.scripts(in: folder.id).count,
+                                    onOpen: { openedFolder = folder },
+                                    onRename: {
+                                        folderRenameText = folder.displayName
+                                        folderRenameTarget = folder
+                                    },
+                                    onDelete: { folderDeleteTarget = folder }
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    private var searchBar: some View {
-        HStack(spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.secondary)
-                TextField("Search scripts", text: $searchText)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
+    private var libraryHeader: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 16) {
+                Text("My Scripts")
+                    .font(.appTitle)
+                    .foregroundStyle(.primary)
 
-                if !searchText.isEmpty {
+                Spacer()
+
+                Button {
+                    withAnimation(.snappy) {
+                        showsSearchField.toggle()
+                        if !showsSearchField {
+                            searchText = ""
+                            isSearchFieldFocused = false
+                        }
+                    }
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                        .font(.appHeadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                Menu {
+                    Section("Sort") {
+                        ForEach(ScriptSortOption.allCases) { option in
+                            Button {
+                                scriptStore.sortOption = option
+                            } label: {
+                                Label(option.title, systemImage: option.systemImage)
+                            }
+                        }
+                    }
+
                     Button {
-                        searchText = ""
+                        newFolderName = ""
+                        showsNewFolderAlert = true
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.tertiary)
+                        Label("New Folder", systemImage: "folder.badge.plus")
+                    }
+                } label: {
+                    Image(systemName: "line.3.horizontal.decrease")
+                        .font(.appHeadline)
+                        .foregroundStyle(.secondary)
+                }
+                .accessibilityLabel("Sort and filter")
+            }
+
+            HStack(spacing: 8) {
+                ForEach(LibraryTab.allCases) { tab in
+                    Button {
+                        withAnimation(.snappy) {
+                            libraryTab = tab
+                        }
+                    } label: {
+                        Text(tab.title)
+                            .font(.appSubheadline)
+                            .foregroundStyle(libraryTab == tab ? .white : .primary)
+                            .padding(.horizontal, 20)
+                            .frame(height: 36)
+                            .background(
+                                libraryTab == tab ? Color.creatorViolet : Color.appSurface,
+                                in: Capsule()
+                            )
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 16)
-            .frame(height: 46)
-            .contentCard(cornerRadius: 16)
-
-            Menu {
-                Section("Sort") {
-                    ForEach(ScriptSortOption.allCases) { option in
-                        Button {
-                            scriptStore.sortOption = option
-                        } label: {
-                            Label(option.title, systemImage: option.systemImage)
-                        }
-                    }
-                }
-
-                Button {
-                    newFolderName = ""
-                    showsNewFolderAlert = true
-                } label: {
-                    Label("New Folder", systemImage: "folder.badge.plus")
-                }
-            } label: {
-                Image(systemName: "line.3.horizontal.decrease")
-                    .font(.appSubheadline)
-                    .foregroundStyle(Color.creatorViolet)
-                    .frame(width: 46, height: 46)
-                    .contentCard(cornerRadius: 16)
-            }
-            .accessibilityLabel("Sort and filter")
         }
+    }
+
+    private var searchField: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField("Search scripts", text: $searchText)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .focused($isSearchFieldFocused)
+                .onAppear { isSearchFieldFocused = true }
+
+            if !searchText.isEmpty {
+                Button {
+                    searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.tertiary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 16)
+        .frame(height: 46)
+        .contentCard(cornerRadius: 16)
+        .id(searchFieldScrollID)
     }
 
     private var emptyFilterState: some View {
