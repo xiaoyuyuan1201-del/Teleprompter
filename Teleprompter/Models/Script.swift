@@ -10,6 +10,7 @@ struct PromptScript: Identifiable, Codable, Hashable {
     var isDraft: Bool
     var sourceFileName: String?
     var folderID: UUID?
+    var isAIPolished: Bool
 
     init(
         id: UUID = UUID(),
@@ -20,7 +21,8 @@ struct PromptScript: Identifiable, Codable, Hashable {
         isFavorite: Bool = false,
         isDraft: Bool = false,
         sourceFileName: String? = nil,
-        folderID: UUID? = nil
+        folderID: UUID? = nil,
+        isAIPolished: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -31,6 +33,7 @@ struct PromptScript: Identifiable, Codable, Hashable {
         self.isDraft = isDraft
         self.sourceFileName = sourceFileName
         self.folderID = folderID
+        self.isAIPolished = isAIPolished
     }
 
     var displayTitle: String {
@@ -58,6 +61,7 @@ struct PromptScript: Identifiable, Codable, Hashable {
         case isDraft
         case sourceFileName
         case folderID
+        case isAIPolished
     }
 
     init(from decoder: Decoder) throws {
@@ -71,6 +75,7 @@ struct PromptScript: Identifiable, Codable, Hashable {
         isDraft = try container.decodeIfPresent(Bool.self, forKey: .isDraft) ?? false
         sourceFileName = try container.decodeIfPresent(String.self, forKey: .sourceFileName)
         folderID = try container.decodeIfPresent(UUID.self, forKey: .folderID)
+        isAIPolished = try container.decodeIfPresent(Bool.self, forKey: .isAIPolished) ?? false
     }
 }
 

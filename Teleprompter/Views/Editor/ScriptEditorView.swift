@@ -19,6 +19,7 @@ struct ScriptEditorView: View {
     @State private var showsPaywall = false
     @State private var showsFileImporter = false
     @State private var showsAIPolish = false
+    @State private var isAIPolished: Bool
     @State private var importError: String?
     @State private var autosaveTask: Task<Void, Never>?
     @State private var autosaveLabel = ""
@@ -39,6 +40,7 @@ struct ScriptEditorView: View {
         _title = State(initialValue: script?.title ?? "")
         _bodyText = State(initialValue: script?.body ?? "")
         _sourceFileName = State(initialValue: script?.sourceFileName)
+        _isAIPolished = State(initialValue: script?.isAIPolished ?? false)
     }
 
     var body: some View {
@@ -108,6 +110,7 @@ struct ScriptEditorView: View {
         .sheet(isPresented: $showsAIPolish) {
             AIPolishSheet(originalText: bodyText) { polished in
                 bodyText = polished
+                isAIPolished = true
                 focusedField = .body
             }
         }
@@ -278,7 +281,8 @@ struct ScriptEditorView: View {
             isFavorite: existingScript?.isFavorite ?? false,
             isDraft: true,
             sourceFileName: sourceFileName,
-            folderID: folderID
+            folderID: folderID,
+            isAIPolished: isAIPolished
         )
     }
 

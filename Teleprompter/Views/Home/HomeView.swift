@@ -70,8 +70,8 @@ struct HomeView: View {
                 .environmentObject(recordingStore)
         }
         .sheet(isPresented: $showsAIScript) {
-            AIScriptSheet { finalText in
-                let script = PromptScript(title: "", body: finalText, isDraft: true)
+            AIScriptSheet { finalText, wasPolished in
+                let script = PromptScript(title: "", body: finalText, isDraft: true, isAIPolished: wasPolished)
                 scriptStore.upsert(script)
                 editorMode = .edit(script)
             }
@@ -647,7 +647,7 @@ struct AIScriptSheet: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var service = AIPolishService()
 
-    let onUse: (String) -> Void
+    let onUse: (String, Bool) -> Void
 
     @State private var rawText = ""
     @State private var polishedText = ""
@@ -772,7 +772,7 @@ struct AIScriptSheet: View {
 
                         if !rawText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             Button {
-                                onUse(currentText)
+                                onUse(currentText, previewMode == .polished && !polishedText.isEmpty)
                                 dismiss()
                             } label: {
                                 Label("Use this version", systemImage: "checkmark")
@@ -816,7 +816,7 @@ struct ScriptRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "text.alignleft")
+                Image(systemName: script.isAIPolished ? "sparkles" : "text.alignleft")
                     .font(.appSubheadline)
                     .foregroundStyle(Color.creatorViolet)
                     .frame(width: 36, height: 36)
